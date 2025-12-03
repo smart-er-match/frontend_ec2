@@ -87,4 +87,4 @@
 
 ## 기타
 
-### [개발일지](frontend_ec2\개발일지)
+<h3><a href="https://github.com/smart-er-match/frontend_ec2/tree/master/%EA%B0%9C%EB%B0%9C%EC%9D%BC%EC%A7%80">개발 일지</a></h3>
