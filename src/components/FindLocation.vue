@@ -163,7 +163,6 @@ const openAddressSearch = () => {
 }
 
 
-// 네이버 지도 주소 => 위/경도 api
 async function getCoordsFromAddress(address) {
   const query = encodeURIComponent(address)
 
