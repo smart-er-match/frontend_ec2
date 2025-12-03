@@ -1,0 +1,11 @@
+Model Information:
+* title:	Mannequin_ model
+* source:	https://sketchfab.com/3d-models/mannequin--model-59460931b9cb43f98c97991300c920fb
+* author:	zveoxic (https://sketchfab.com/zveoxic)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Mannequin_ model" (https://sketchfab.com/3d-models/mannequin--model-59460931b9cb43f98c97991300c920fb) by zveoxic (https://sketchfab.com/zveoxic) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
