@@ -7,7 +7,7 @@
     >
       뒤로가기
     </router-link>
-    <h1 class="text-center "> 병위 위치 찾기 </h1>
+    <h1 class="text-center text-3xl"> 병위 위치 찾기 </h1>
     <FindLocation  @updateLocation="handleLocation"/>
 
     <div>
@@ -23,13 +23,14 @@ import FindLocation from '../../components/FindLocation.vue';
 import { ref } from 'vue'
 import { API_BASE_URL } from '../../config';
 import { useRouter } from 'vue-router';
+import api from '../../components/api'
 
 const lat = ref('')
 const lng = ref('')
 const address = ref('')
 const distance = ref('')
 const user = ref(JSON.parse(localStorage.getItem("user") || "{}"))._rawValue
-const access = localStorage.getItem("access_token")
+const access_token = localStorage.getItem("access_token")
 
 const handleLocation = (info) => {
   lat.value = info.lat
@@ -41,12 +42,10 @@ const handleLocation = (info) => {
 
 const router = useRouter()
 
-console.log(user)
-
 const findhospital = async () =>{
 
     try{
-    const res = await axios.post(`${API_BASE_URL}hospitals/user/location/`,{
+     await api.post(`hospitals/user/location/`,{
         useremail : user.email,
         sign_kind : user.sign_kind,
         latitude : lat.value,
@@ -55,7 +54,7 @@ const findhospital = async () =>{
         radius : distance.value
      },{
           headers: {
-            Authorization: `Bearer ${access}`,
+            Authorization: `Bearer ${access_token}`,
           },})
         router.push('/generalsymptoms')
     }

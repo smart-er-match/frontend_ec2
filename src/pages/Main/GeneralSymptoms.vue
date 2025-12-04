@@ -2,7 +2,7 @@
   
   <div class="text-center">
     <h1 class="text-3xl">증상 선택하기</h1>
-    <p class="text-xs">(입력을 안해도 무방하지만 자세한 응급실 찾기를 위해 증상 입력 바랍니다.)</p>
+    <p class="text-xs">(증상 설명은 안적어도 무방하지만 자세한 응급실 찾기를 위해 증상 입력 바랍니다.)</p>
   </div>
   <div ref="canvasContainer" class="mt-3 three-container"></div>
   <div 
@@ -20,6 +20,7 @@
   </div>
 
     <div>
+      <p class="text-red-500 text-sm" v-if="errorMsg">{{ errorMsg }}</p>
     <button @click="findhospital" class=" mt-5 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500">
       병원 찾기
     </button>
@@ -30,30 +31,30 @@
 import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
-import { API_BASE_URL } from '../../config'
-import axios from 'axios'
 import { useRouter } from 'vue-router'
+import api from '../../components/api'
 
-
+const access = localStorage.getItem("access_token")
 const router = useRouter()
+const errorMsg = ref('')
 
 const findhospital = async () => {
-  const mergedSymptoms = Object.entries(SymptomDescription.value).map(
-    ([key, value]) => `${key}: ${value}`
-  )
-  console.log(SymptomDescription.value)
+  const mergedSymptoms = bodyPartLabels
+    .filter(v => symptoms.value.includes(v.name))   // 선택된 부위만
+    .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
+  
   try{
-    const res = await axios.post(`${API_BASE_URL}hospitals/user/location/`,{
-      symptoms : mergedSymptoms
+    const res = await api.post(`hospitals/general/symptom/`,{
+      symptom : mergedSymptoms
      },{
           headers: {
             Authorization: `Bearer ${access}`,
           },})
+        localStorage.setItem('hospital_data', JSON.stringify(res.data))
         router.push('/hospitallist')
     }
     catch (error){
-      console.log(mergedSymptoms)
-        console.error(error)
+      errorMsg.value="아픈곳을 선택해주세요"
     }
     
 }
@@ -308,6 +309,7 @@ const makeHeatbox = () => {
 const onClickHitbox = (event) => {
   if (!renderer || !camera) return
 
+  errorMsg.value = ""
   const rect = renderer.domElement.getBoundingClientRect()
 
   // 화면 좌표 → NDC(-1 ~ 1)

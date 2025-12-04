@@ -3,6 +3,7 @@ import axios from 'axios'
 import { ref } from 'vue'
 import { API_BASE_URL } from '../../config'
 import { useRouter } from 'vue-router';
+import api from '../../components/api'
 
 const router = useRouter()
 const selectedCert = ref(null)
@@ -46,7 +47,7 @@ const handleLogin = async () => {
 
   if(agree1.value && agree2.value && agree3.value){
     try {
-      const res = await axios.post(`${API_BASE_URL}accounts/paramedic/apply/`,{
+      const res = await api.post(`${API_BASE_URL}accounts/paramedic/apply/`,{
         LOGINOPTION: selectedCert.value,
         JUMIN: juminHead.value + juminTail.value,
         DSNM: name.value,
