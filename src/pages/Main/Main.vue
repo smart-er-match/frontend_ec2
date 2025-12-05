@@ -1,8 +1,8 @@
 <script setup>
 
 import { ref, computed } from 'vue'
-import LogOut from '../../components/LogOut.vue'
 import { useRouter } from 'vue-router'
+import LogOut from '../Auth/LogOut.vue'
 
 
 const user = JSON.parse(localStorage.getItem("user") || "{}")

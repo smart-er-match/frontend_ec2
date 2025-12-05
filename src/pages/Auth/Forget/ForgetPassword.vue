@@ -53,7 +53,7 @@ const submitChangePassword = () => {
   // 여기에 실제 서버 요청 추가
   console.log("비밀번호 변경 요청:", {
     currentPassword: currentPassword.value,
-    newPassword: newPassword.value,
+    newPassword: newPassword.value, 
   });
 };
 </script>

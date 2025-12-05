@@ -12,7 +12,7 @@ const logout = () => {
 
   delete axios.defaults.headers.common['Authorization']
 
-  // 3. 로그인 화면으로 이동
+  // 3. 로그인 화면으로 이동 
   router.push('/login')
 }
 

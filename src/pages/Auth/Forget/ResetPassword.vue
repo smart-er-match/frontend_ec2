@@ -2,7 +2,7 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import axios from "axios";
-import { API_BASE_URL } from "../../config";
+import { API_BASE_URL } from "../../../config";
 
 const router = useRouter();
 
@@ -15,6 +15,7 @@ const codeError = ref("");
 const isCodeSent = ref(false);      // 메세지 전송했는지
 const isVerifying = ref(false);     // 인증 중 로딩
 const message = ref("");
+
 
 // 이메일 유효성 체크 (간단 버전)
 const validateEmail = () => {

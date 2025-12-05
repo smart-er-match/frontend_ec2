@@ -19,11 +19,10 @@
 
 <script setup>
 import axios from 'axios';
-import FindLocation from '../../components/FindLocation.vue';
 import { ref } from 'vue'
-import { API_BASE_URL } from '../../config';
 import { useRouter } from 'vue-router';
-import api from '../../components/api'
+import api from '../../../components/api'
+import FindLocation from './FindLocation.vue';
 
 const lat = ref('')
 const lng = ref('')

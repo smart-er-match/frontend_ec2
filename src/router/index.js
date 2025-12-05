@@ -4,16 +4,17 @@ import Home from "../pages/Home.vue";
 import Login from "../pages/Auth/Login.vue";
 import Signup from '../pages/Auth/Signup.vue';
 import Main from '../pages/Main/Main.vue';
-import ForgetPassword from '../pages/Auth/ForgetPassword.vue';
-import KakaoCallback from '../components/KakaoCallback.vue';
-import NaverCallback from '../components/NaverCallback.vue';
-import NotAuthenticated from '../pages/NotAuthenticated.vue';
-import ResetPassword from '../pages/Auth/ResetPassword.vue';
 import License from '../pages/Auth/License.vue';
-import FindLocation from '../components/FindLocation.vue';
-import GeneralFindMap from '../pages/Main/GeneralFindMap.vue';
-import GeneralSymptoms from '../pages/Main/GeneralSymptoms.vue';
 import HospitalList from '../pages/Main/HospitalList.vue';
+import NaverCallback from '../pages/Auth/Oauth/NaverCallback.vue';
+import KakaoCallback from '../pages/Auth/Oauth/KakaoCallback.vue';
+import FindLocation from '../pages/Main/Location/FindLocation.vue';
+import GeneralFindMap from '../pages/Main/Location/GeneralFindMap.vue';
+import GeneralSymptoms from '../pages/Main/Symptoms/GeneralSymptoms.vue';
+import ResetPassword from '../pages/Auth/Forget/ResetPassword.vue';
+import NotAuthenticated from '../pages/etc/NotAuthenticated.vue';
+import ForgetPassword from '../pages/Auth/Forget/ForgetPassword.vue';
+
 
 
 const routes = [

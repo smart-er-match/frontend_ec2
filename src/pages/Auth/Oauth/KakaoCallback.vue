@@ -2,7 +2,7 @@
 import { onMounted } from 'vue' 
 import { useRoute, useRouter } from 'vue-router'
 import axios from 'axios'
-import { API_BASE_URL } from '../config'
+import { API_BASE_URL } from '../../../config'
 
 const route = useRoute()
 const router = useRouter()

@@ -32,7 +32,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { useRouter } from 'vue-router'
-import api from '../../components/api'
+import api from '../../../components/api'
 
 const access = localStorage.getItem("access_token")
 const router = useRouter()
