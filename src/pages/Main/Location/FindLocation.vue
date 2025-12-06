@@ -47,16 +47,23 @@ let map = null
 let marker = null
 const emit = defineEmits(['updateLocation'])
 
-const CLIENT_ID = import.meta.env.VITE_NAVER_MAP_CLIENT_ID
-const CLIENT_SECRET = import.meta.env.VITE_NAVER_MAP_CLIENT_SECRET
 
-watch(distance, (val) => {
+
+const syncLocationToParent = () => {
+  if (myLat.value === '-' || myLng.value === '-') return  // 아직 값 없으면 패스
+
   emit('updateLocation', {
     lat: myLat.value,
     lng: myLng.value,
     address: myAddress.value,
-    distance: val
+    distance: distance.value,
   })
+}
+
+
+
+watch(distance, () => {
+  syncLocationToParent ()
 })
 
 // 접속 하자마자 위치 가져오는 로직
@@ -82,19 +89,20 @@ onMounted(() => {
   
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(
-      (pos) => {
+      async (pos) => {
         const { latitude, longitude } = pos.coords
 
         myLat.value = latitude.toFixed(6)
         myLng.value = longitude.toFixed(6)
 
-        getAddressFromCoords(myLat.value, myLng.value)
+        await getAddressFromCoords(myLat.value, myLng.value)
         const myPos = new window.naver.maps.LatLng(latitude, longitude)
 
         // 지도/마커 업데이트
         map.setCenter(myPos)
         marker.setPosition(myPos)
 
+        syncLocationToParent()
       },
       (err) => {
         console.error(err)
@@ -127,14 +135,6 @@ async function getAddressFromCoords(lat, lng) {
   myAddress.value =
     `${region.area1.name} ${region.area2.name} ${region.area3.name} ` +
     `${land?.number1 || ''} ${land?.number2 ? '-' + land.number2 : ''}`
-
-  emit('updateLocation', {
-    lat: myLat.value,
-    lng: myLng.value,
-    address: myAddress.value,
-    distance: distance.value
-  })
-
 }
 
 const openAddressSearch = () => {
@@ -151,20 +151,18 @@ const openAddressSearch = () => {
       map.setCenter(myPos)
       marker.setPosition(myPos)
 
-      // 필요하면 부모에게 새 주소도 보냄
-      emit('updateLocation', {
-        lat: coords.lat,
-        lng: coords.lng,
-        address: myAddress.value,
-        distance: distance.value
-      })
+      myLat.value = coords.lat
+      myLng.value = coords.lng
+
+      syncLocationToParent()
     },
   }).open()
 }
 
 
 async function getCoordsFromAddress(address) {
-  const query = encodeURIComponent(address)
+  const clean = normalizeAddress(address)
+  const query = encodeURIComponent(clean)
 
   const res = await fetch(
     `/naver/map-geocode/v2/geocode?query=${query}`
@@ -172,7 +170,7 @@ async function getCoordsFromAddress(address) {
 
   const data = await res.json()
 
-  if (data.addresses.length === 0) {
+  if (!data.addresses || data.addresses.length === 0) {
     console.error("좌표를 찾을 수 없습니다.")
     return null
   }
@@ -184,5 +182,12 @@ async function getCoordsFromAddress(address) {
   }
 }
 
+function normalizeAddress(address) {
+  return address
+    .replace(/지하/g, "")     // 지하만 제거, 숫자는 남김
+    .replace(/지상/g, "")
+    .replace(/\s+/g, " ")     // 공백 정리
+    .trim()
+}
 </script>
 <style scoped></style>

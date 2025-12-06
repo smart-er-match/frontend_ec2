@@ -7,7 +7,7 @@
     >
       뒤로가기
     </router-link>
-    <h1 class="text-center text-3xl"> 병위 위치 찾기 </h1>
+    <h1 class="text-center text-3xl"> 병원 위치 찾기 </h1>
     <FindLocation  @updateLocation="handleLocation"/>
 
     <div>
@@ -18,7 +18,6 @@
 </template>
 
 <script setup>
-import axios from 'axios';
 import { ref } from 'vue'
 import { useRouter } from 'vue-router';
 import api from '../../../components/api'
@@ -36,13 +35,15 @@ const handleLocation = (info) => {
   lng.value = info.lng
   address.value = info.address
   distance.value = info.distance
-
 }
 
 const router = useRouter()
 
 const findhospital = async () =>{
 
+    console.log("백으로 넘어간 lat:", lat.value)
+    console.log("백으로 넘어간 lng:", lng.value)
+    console.log("백으로 넘어간 주소:", address.value)
     try{
      await api.post(`hospitals/user/location/`,{
         useremail : user.email,

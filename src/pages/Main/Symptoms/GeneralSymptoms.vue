@@ -43,6 +43,8 @@ const findhospital = async () => {
     .filter(v => symptoms.value.includes(v.name))   // 선택된 부위만
     .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
   
+
+  console.log(mergedSymptoms)
   try{
     const res = await api.post(`hospitals/general/symptom/`,{
       symptom : mergedSymptoms

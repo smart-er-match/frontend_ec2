@@ -47,7 +47,7 @@ const handleLogin = async () => {
 
   if(agree1.value && agree2.value && agree3.value){
     try {
-      const res = await api.post(`${API_BASE_URL}accounts/paramedic/apply/`,{
+      const res = await api.post(`accounts/paramedic/apply/`,{
         LOGINOPTION: selectedCert.value,
         JUMIN: juminHead.value + juminTail.value,
         DSNM: name.value,
