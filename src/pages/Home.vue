@@ -1,53 +1,116 @@
-<script setup>
-import { Swiper, SwiperSlide } from 'swiper/vue'
-import 'swiper/css'
-import 'swiper/css/navigation'
-import 'swiper/css/pagination'
 
-import { Navigation, Pagination } from 'swiper/modules'
-import MainLayout from '../layouts/MainLayout.vue'
-const modules = [Navigation, Pagination]
 
-</script>
+
+
 
 
 <template>
-    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-      <img class="mx-auto h-30 w-auto dark:hidden" src="../assets/main_logo.png" alt="Your Company" />
-      <img class="mx-auto h-30 w-auto not-dark:hidden" src="../assets/main_logo.png" alt="Your Company" />
+  <div class="min-h-screen grid grid-cols-1 md:grid-cols-2">
+    <!-- 왼쪽 영역 -->
+    <div class="flex flex-col justify-center px-8 lg:px-24 bg-slate-100">
+      <!-- 메인 타이틀 -->
+      <div class="text-center mb-10">
+        <p class="text-2xl lg:text-3xl font-semibold text-slate-800">
+          Smart 응급실 추천 서비스
+        </p>
+        <p class="mt-2 text-lg lg:text-xl text-slate-600">
+          실시간 응급실 정보를 간편하게 조회하세요!
+        </p>
+      </div>
+
+      <Login/>
+
+      <!-- 설명서 다운로드 -->
+      <!-- <div class="mt-6 text-center text-sm text-slate-500">
+        내 손안의 응급실 사용설명서
+        <button class="ml-1 font-semibold underline underline-offset-4">
+          다운로드
+        </button>
+      </div> -->
+
+      <!-- 구분선 -->
+      <!-- <div class="mt-6 flex items-center justify-center">
+        <div class="h-px w-24 bg-slate-200"></div>
+      </div> -->
+
+      <!-- 서브 버튼 -->
+      <!-- <button
+        class="mt-8 w-full max-w-xl mx-auto flex items-center justify-between
+               rounded-xl border border-slate-200 bg-white px-6 py-4
+               shadow-sm hover:shadow-md transition"
+      >
+        <div class="flex items-center gap-3">
+          <span class="text-xl">➕</span>
+          <span class="text-sm lg:text-base text-slate-800">
+            실시간 응급의료 자원정보 상세조회
+            <span class="ml-1 text-xs text-slate-500">
+              (PC 환경 사용 권장)
+            </span>
+          </span>
+        </div>
+        <span class="text-slate-400 text-xl">
+          →
+        </span>
+      </button> -->
     </div>
-     <div class="mt-5 text-center">
-     <h1 class="mb-4">응급실 추천 시스템에 오신걸 환영합니다.</h1>
 
-        <Swiper
-        :modules="modules"
-        navigation
-        pagination
-        class="w-full max-w-xl mx-auto"
-        >
-        <SwiperSlide>
-            <img src="../assets/guide/image1.png" alt="설명서1" class="w-full rounded-md" />
-        </SwiperSlide>
+    <!-- 오른쪽 영역 (이미지 자리, 지금은 비워둠) -->
+     <div
+    class="hidden md:block relative w-full h-full overflow-hidden"
+  >
+    <!-- 이미지 -->
+    <transition name="fade" mode="out-in">
+      <div
+        :key="currentImage"
+        class="absolute inset-0 bg-cover bg-center duration-700"
+        :style="`background-image: url(${images[currentImage]})`"
+      ></div>
+    </transition>
 
-        <SwiperSlide>
-            <img src="../assets/guide/image2.png" alt="설명서2" class="w-full rounded-md" />
-        </SwiperSlide>
+    <div class="absolute inset-0 bg-black/60"></div>
 
-        <SwiperSlide>
-            <img src="../assets/guide/image3.png" alt="설명서3" class="w-full rounded-md" />
-        </SwiperSlide>
-        </Swiper>
-    </div>
-    <div class="text-blue-500 text-center"> 지금 바로 시작하세요 </div>
-    <a href="/login">
-    <button
-      class="mt-5 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-    >
-      시작하기
-    </button>
-    </a>
+    <div class="absolute inset-0 flex flex-col justify-center items-center text-white px-6">
+    <div class="w-80 h-px bg-white/40 mb-6"></div>
+    <h1 class="text-3xl font-bold mb-3">응급 상황에서 가장 빠르게</h1>
+    <p class="text-lg opacity-90">Smart 응급실 추천 서비스가 도와드립니다.</p>
+    <div class="w-80 h-px bg-white/40 mt-6"></div>
+  </div>
+  </div>
+  </div>
 </template>
 
+<script setup>
+import Login from '../pages/Auth/Login.vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+
+import img1 from '../assets/guide/응급실.jpg'
+import img2 from '../assets/guide/응급실-구급차.jpg'
+import img3 from '../assets/guide/구급차.webp'
+
+const images = [img1, img2, img3]
+const currentImage = ref(0)
+let intervalId = null
+
+onMounted(() => {
+  intervalId = setInterval(() => {
+    currentImage.value = (currentImage.value + 1) % images.length
+  }, 10000) // 4초마다 변경
+})
+
+onBeforeUnmount(() => {
+  clearInterval(intervalId)
+})
+
+</script>
+
 <style scoped>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.8s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 
 </style>

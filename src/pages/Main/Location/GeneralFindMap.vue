@@ -56,7 +56,7 @@ const findhospital = async () =>{
           headers: {
             Authorization: `Bearer ${access_token}`,
           },})
-        router.push('/generalsymptoms')
+        router.push({ name:"generalsymptoms"})
     }
     catch (error){
         console.error(error)

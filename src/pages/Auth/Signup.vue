@@ -55,7 +55,7 @@ const handleSignup = async () => {
       gender: gender.value,
       email: email.value
     })
-    router.push('/login')
+    router.push('/')
   }catch (err){
     errorMsg.value = '회원가입 실패'
     console.error(err)
@@ -95,6 +95,7 @@ const password2End = () =>{
 </script>
 
 <template>
+  <div>
     <h2 class="text-center text-2xl font-bold tracking-tight text-gray-900 mb-8">
       회원가입
     </h2>
@@ -272,12 +273,13 @@ const password2End = () =>{
     <p class="mt-6 text-center text-xs text-gray-500">
       이미 회원이신가요?
       <router-link
-        to="/login"
+        to="/"
         class="font-semibold text-indigo-600 hover:text-indigo-500"
       >
         로그인 하러가기
       </router-link>
     </p>
+    </div>
 </template>
 
 <style scoped>

@@ -53,7 +53,7 @@ const findhospital = async () => {
             Authorization: `Bearer ${access}`,
           },})
         localStorage.setItem('hospital_data', JSON.stringify(res.data))
-        router.push('/hospitallist')
+        router.push({ name: 'hospitallist' })
     }
     catch (error){
       errorMsg.value="아픈곳을 선택해주세요"

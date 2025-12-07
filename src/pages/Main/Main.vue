@@ -12,7 +12,7 @@ const roleMessage = computed(() => user.role ? '의료진' : '일반인')
 const router = useRouter()
 
 const generalClick = () => {
-  router.push('/generalFindMap')
+  router.push( {name: 'generalfindmap'})
 
 }
 
@@ -54,7 +54,12 @@ const generalClick = () => {
 
   </div>
   <div>
-      <a href="/license" class="block text-center text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500">응급 요원 자격 받기</a>
+      <router-link 
+        :to="{ name: 'license'}"
+        class="block text-center text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
+      >
+      응급 요원 자격 받기
+      </router-link>
   </div>
 
   <div class="mt-3">

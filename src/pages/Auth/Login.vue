@@ -22,7 +22,7 @@ const handleLogin = async () => {
       localStorage.setItem('refresh_token', res.data.refresh)
       localStorage.setItem('user', JSON.stringify(res.data.user)) 
       
-      router.push('/main')
+      router.push({ name:'main'})
     } else if (res.data.error_type === 'undefined_email') {
       errorMsg.value = '아이디가 없습니다.'
     } else if (res.data.error_type === 'wrong_password') {
@@ -75,13 +75,8 @@ const naverLogin = () => {
 </script>
 
 <template>
-    <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-      <img class="mx-auto h-30 w-auto dark:hidden" src="../../assets/main_logo.png" alt="Your Company" />
-      <img class="mx-auto h-30 w-auto not-dark:hidden" src="../../assets/main_logo.png" alt="Your Company" />
-      <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 ">로그인 바람</h2>
-    </div>
 
-    <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+    <div class=" sm:mx-auto sm:w-full sm:max-w-sm">
       <form @submit.prevent="handleLogin" class="space-y-6">
         <div>
           <label for="email" class="block text-sm/6 font-medium text-gray-900">Email address</label>
@@ -109,7 +104,13 @@ const naverLogin = () => {
           <div class="flex items-center justify-between">
             <label for="password" class="block text-sm/6 font-medium text-gray-900">Password</label>
             <div class="text-sm">
-              <a href='/resetpassword' class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">Forgot password?</a>
+              <router-link 
+                :to="{ name: 'resetpassword' }" 
+                class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+                > 
+                Forgot password?
+              </router-link>
+              
             </div>
           </div>
           <div class="mt-2">
@@ -184,7 +185,7 @@ const naverLogin = () => {
         회원이 아니신가요?
       </p>  
         <router-link
-          to="/signup"
+          :to="{ name: 'signup' }"
           class="block text-center text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
         >
           회원가입 하러 가기
