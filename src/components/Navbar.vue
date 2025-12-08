@@ -4,9 +4,12 @@
       <div class="flex h-16 items-center justify-between">
         <!-- 왼쪽 로고 + 제목 -->
         <div class="flex items-center gap-2">
-          <span class="font-semibold tracking-tight">
+          <router-link 
+          :to="{ name: 'main'}"
+          class="font-semibold tracking-tight">
             Smart ER Match
-          </span>
+          
+          </router-link>
         </div>
 
         <!-- 메뉴: 항상 보이게 (hidden md:flex → flex 로 변경) -->
