@@ -20,8 +20,6 @@ const generalClick = () => {
 
 <template>
   <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-    <img class="mx-auto h-30 w-auto dark:hidden" src="../../assets/main_logo.png" alt="Your Company" />
-    <img class="mx-auto h-30 w-auto not-dark:hidden" src="../../assets/main_logo.png" alt="Your Company" />
     <h1 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 dark:text-white">환영합니다! {{ user.name }} 님</h1>
     <p class="text-center">({{ roleMessage }})</p>
     <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 dark:text-white">당신의 용도는?</h2>
@@ -31,7 +29,7 @@ const generalClick = () => {
     <!-- 의료진으로 시작 -->
     <button
       v-if="user.role === true"
-      class="w-50 h-56 bg-gray-200 flex items-center justify-center text-center font-semibold text-gray-900 hover:bg-gray-300 transition"
+      class="w-1/2 h-56 bg-gray-200 flex items-center justify-center text-center font-semibold text-gray-900 hover:bg-gray-300 transition"
     >
       <span class="leading-tight">
         의료진이에요
@@ -42,7 +40,7 @@ const generalClick = () => {
     <button
       :class="{
         'w-full': user.role !== true,
-        'w-50': user.role === true
+        'w-1/2': user.role === true
       }"
       @click="generalClick"
       class="h-56 bg-gray-200 flex items-center justify-center text-center font-semibold text-gray-900 hover:bg-gray-300 transition"

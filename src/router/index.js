@@ -12,9 +12,10 @@ import GeneralFindMap from '../pages/Main/Location/GeneralFindMap.vue';
 import GeneralSymptoms from '../pages/Main/Symptoms/GeneralSymptoms.vue';
 import ResetPassword from '../pages/Auth/Forget/ResetPassword.vue';
 import NotAuthenticated from '../pages/etc/NotAuthenticated.vue';
-import ForgetPassword from '../pages/Auth/Forget/ForgetPassword.vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import AuthLayout from '../layouts/AuthLayout.vue';
+import Mypage from '../pages/Auth/MyPage/Mypage.vue';
+import FindAuth from '../pages/Auth/Forget/FindAuth.vue';
 
 
 
@@ -30,13 +31,9 @@ const routes = [
         { path: 'resetpassword', name: 'resetpassword', component: ResetPassword},
         { path: 'notauthenticated', name: 'notauthenticated', component: NotAuthenticated},
         { path: 'license', name: 'license', component: License},
-        { path: 'forgetpassword', name: 'forgetpassword', component: ForgetPassword,
-          beforeEnter: (to, from, next) => {
-          if (from.name === 'resetPassword') {
-              next()
-          } else {
-              next({ name: 'notauthenticated' })
-          }}}]
+        { path: 'findauth', name: 'findauth', component: FindAuth},
+
+    ]
     },
     
     // 메인기능
@@ -49,6 +46,7 @@ const routes = [
         { path: 'generalfindmap', name: 'generalfindmap', component: GeneralFindMap},
         { path: 'generalsymptoms', name: 'generalsymptoms', component: GeneralSymptoms},
         { path: 'hospitallist', name: 'hospitallist', component: HospitalList},
+        { path: 'mypage', name: 'mypage', component: Mypage},
       ]
     },
 

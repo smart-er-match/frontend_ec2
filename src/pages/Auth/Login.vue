@@ -105,10 +105,10 @@ const naverLogin = () => {
             <label for="password" class="block text-sm/6 font-medium text-gray-900">Password</label>
             <div class="text-sm">
               <router-link 
-                :to="{ name: 'resetpassword' }" 
+                :to="{ name: 'findauth' }" 
                 class="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
                 > 
-                Forgot password?
+                아이디/비번 찾기
               </router-link>
               
             </div>

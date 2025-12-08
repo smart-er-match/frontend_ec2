@@ -40,10 +40,6 @@ const handleLocation = (info) => {
 const router = useRouter()
 
 const findhospital = async () =>{
-
-    console.log("백으로 넘어간 lat:", lat.value)
-    console.log("백으로 넘어간 lng:", lng.value)
-    console.log("백으로 넘어간 주소:", address.value)
     try{
      await api.post(`hospitals/user/location/`,{
         useremail : user.email,

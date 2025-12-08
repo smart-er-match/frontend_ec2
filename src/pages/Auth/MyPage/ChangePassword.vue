@@ -6,6 +6,17 @@
 
     <form @submit.prevent="submitPassword" class="space-y-5">
 
+      <!-- 현재 비밀번호 -->
+      <div>
+        <label class="block text-sm font-medium mb-1">현재 비밀번호</label>
+        <input 
+          v-model="currentPassword"
+          type="password"
+          class="w-full border rounded-md px-3 py-2 text-gray-900 dark:bg-gray-700 dark:text-white"
+          placeholder="현재 비밀번호를 입력하세요"
+        />
+      </div>
+
       <!-- 새 비밀번호 -->
       <div>
         <label class="block text-sm font-medium mb-1">새 비밀번호</label>
@@ -64,6 +75,7 @@ const newPasswordConfirm = ref('')
 // 변경하기 클릭 → 부모로 데이터 전달
 const submitPassword = () => {
   emit('submit-password', {
+    current_password: currentPassword.value,
     new_password: newPassword.value,
     new_password_confirm: newPasswordConfirm.value,
   })
