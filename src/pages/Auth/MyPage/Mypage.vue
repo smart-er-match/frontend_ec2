@@ -39,14 +39,19 @@
       <!-- 전화번호 -->
       <div class="flex justify-between border-b pb-2 items-center">
         <span class="font-semibold">전화번호</span>
+
         <span v-if="!isEdit">{{ formatPhone(form.phone_number) }}</span>
-        <input 
-          v-else 
+
+        <input
+          v-else
           v-model="form.phone_number"
           type="tel"
+          @input="onPhoneInput"
+          maxlength="11"
           class="border rounded px-2 py-1 text-sm text-gray-900"
         />
       </div>
+
 
     <div class="flex justify-between border-b pb-2 items-center">
         <span class="font-semibold">성별</span>
@@ -136,8 +141,6 @@ import ChangePassword from './ChangePassword.vue'
 
 const storedUser = JSON.parse(localStorage.getItem("user"))
 
-console.log(storedUser)
-
 const form = reactive({
   name: storedUser?.name || '',
   birth_date: storedUser?.birth_date || '',
@@ -145,6 +148,20 @@ const form = reactive({
   gender: storedUser?.gender || '',
   sign_kind: storedUser?.sign_kind || ''
 })
+
+const onPhoneInput = (e) => {
+  // 숫자만 남기기
+  let onlyNums = e.target.value.replace(/\D/g, '')
+
+  // 11자리로 제한
+  if (onlyNums.length > 11) {
+    onlyNums = onlyNums.slice(0, 11)
+  }
+
+  // form 에 반영
+  form.phone_number = onlyNums
+}
+
 
 const isEdit = ref(false)
 const isChangePasswordEdit = ref(false)
@@ -206,7 +223,7 @@ const onClickEditOrSave = async () => {
     )
 
     // 서버 응답 기반으로 localStorage 업데이트
-    localStorage.setItem("user", JSON.stringify(res.data))
+    localStorage.setItem("user", JSON.stringify(res.data.user))
 
     alert('회원 정보가 저장되었습니다.')
     isEdit.value = false

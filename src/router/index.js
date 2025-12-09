@@ -4,7 +4,6 @@ import Home from "../pages/Home.vue";
 import Signup from '../pages/Auth/Signup.vue';
 import Main from '../pages/Main/Main.vue';
 import License from '../pages/Auth/License.vue';
-import HospitalList from '../pages/Main/HospitalList.vue';
 import NaverCallback from '../pages/Auth/Oauth/NaverCallback.vue';
 import KakaoCallback from '../pages/Auth/Oauth/KakaoCallback.vue';
 import FindLocation from '../pages/Main/Location/FindLocation.vue';
@@ -16,6 +15,7 @@ import MainLayout from '../layouts/MainLayout.vue';
 import AuthLayout from '../layouts/AuthLayout.vue';
 import Mypage from '../pages/Auth/MyPage/Mypage.vue';
 import FindAuth from '../pages/Auth/Forget/FindAuth.vue';
+import HospitalList from '../pages/Main/HospitalList/HospitalList.vue';
 
 
 

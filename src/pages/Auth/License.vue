@@ -18,7 +18,10 @@ const agree3 = ref(false)
 const errorMsg = ref('')
 const agreeAll = ref(false);
 const access = localStorage.getItem('access_token')
+const user_data = JSON.parse(localStorage.getItem('user'))
 
+
+console.log(user_data)
 const toggleAll = () => {
   agree1.value = agreeAll.value;
   agree2.value = agreeAll.value;
@@ -60,6 +63,8 @@ const handleLogin = async () => {
             // 'Content-Type': 'application/json',
           },})
 
+      const res_data = res.data
+      console.log(res_data)
       localStorage.setItem('role', res.data.result)
       const storedUser = JSON.parse(localStorage.getItem('user') || '{}')
       storedUser.role = res.data.result   // 또는 true/false에 맞게

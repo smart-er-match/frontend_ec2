@@ -38,6 +38,7 @@
     <p class="font-bold text-gray-900">{{ value.name }}</p>
     <p class="text-gray-700 text-sm">전화번호 : {{ value.phone }}</p>
     <p class="text-gray-700 text-sm">주소 : {{ value.address }}</p>
+    <p class="text-gray-700 text-sm">거리 : {{ value.distance }}km</p>
   </div>
 </div>
 
@@ -66,5 +67,7 @@ const hospital_data = raw ? JSON.parse(raw) : null
 const hospital_distance = hospital_data?.sorted_by_distance || []
 const hospital_score = hospital_data?.sorted_by_score || []
 
+console.log(hospital_distance)
+console.log(hospital_score)
 
 </script>
