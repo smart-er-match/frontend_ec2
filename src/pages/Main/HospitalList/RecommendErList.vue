@@ -39,7 +39,19 @@
     <p class="text-gray-700 text-sm">전화번호 : {{ value.phone }}</p>
     <p class="text-gray-700 text-sm">주소 : {{ value.address }}</p>
     <p class="text-gray-700 text-sm">거리 : {{ value.distance }}km</p>
+    <a
+      @click="userClickData(value.name)"
+      :href="`https://map.naver.com/p/search/${encodeURIComponent(value.name)}?c=15.00,0,0,0,dh`"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-sm text-blue-600 underline hover:text-blue-800"
+    >
+      병원 확인
+    </a>
+
   </div>
+
+  <div v-if="hospital_distance.length === 0">조회된 병원이 없습니다.</div>
 </div>
 
 <div v-show="selected === 'score'" class="mt-4">
@@ -52,22 +64,48 @@
     <p class="font-bold text-gray-900">{{ value.name }}</p>
     <p class="text-gray-700 text-sm">전화번호 : {{ value.phone }}</p>
     <p class="text-gray-700 text-sm">주소 : {{ value.address }}</p>
+    <p class="text-gray-700 text-sm">AI 추천 점수: {{ value.score }}</p>
+    <a
+      @click="userClickData(value.name)"
+      :href="`https://map.naver.com/p/search/${encodeURIComponent(value.name)}?c=15.00,0,0,0,dh`"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="text-sm text-blue-600 underline hover:text-blue-800"
+    >
+      병원 확인
+    </a>
   </div>
+    <div v-if="hospital_distance.length === 0">조회된 병원이 없습니다.</div>
 </div>
 </template>
 
 <script setup>
 import { ref } from 'vue'
+import api from '../../../components/api'
 
 const selected = ref('distance')
 
 const raw = localStorage.getItem('hospital_data')
 const hospital_data = raw ? JSON.parse(raw) : null
+const user_data = JSON.parse(localStorage.getItem('user'))
+const symptom = JSON.parse(localStorage.getItem('symptom'))
 
 const hospital_distance = hospital_data?.sorted_by_distance || []
 const hospital_score = hospital_data?.sorted_by_score || []
 
-console.log(hospital_distance)
-console.log(hospital_score)
+const userClickData = async (hospitalname) => {
+  console.log("data 전송")
+   try{
+    const res = await api.post(`hospitals/userclick/`,{
+      username: user_data.name,
+      usersighkind: user_data.sigh_kind,
+      hospitalname: hospitalname,
+     })
+      console.log("성공")
+    }
+    catch (error){
+      console.error(error)
+    }
+}
 
 </script>

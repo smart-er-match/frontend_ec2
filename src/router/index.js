@@ -15,7 +15,8 @@ import MainLayout from '../layouts/MainLayout.vue';
 import AuthLayout from '../layouts/AuthLayout.vue';
 import Mypage from '../pages/Auth/MyPage/Mypage.vue';
 import FindAuth from '../pages/Auth/Forget/FindAuth.vue';
-import HospitalList from '../pages/Main/HospitalList/HospitalList.vue';
+import RecommendErList from '../pages/Main/HospitalList/RecommendErList.vue';
+import ERList from '../pages/Main/HospitalList/ERList.vue';
 
 
 
@@ -30,9 +31,8 @@ const routes = [
         { path: 'signup', name: 'signup', component: Signup},
         { path: 'resetpassword', name: 'resetpassword', component: ResetPassword},
         { path: 'notauthenticated', name: 'notauthenticated', component: NotAuthenticated},
-        { path: 'license', name: 'license', component: License},
         { path: 'findauth', name: 'findauth', component: FindAuth},
-
+        { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotAuthenticated },
     ]
     },
     
@@ -42,10 +42,12 @@ const routes = [
       component: MainLayout,
       children: [
         { path: '', name: 'main', component: Main, meta: {requiresAuth: true} },
+        { path: 'license', name: 'license', component: License},
         { path: 'findlocations', name: 'findlocations', component: FindLocation},
         { path: 'generalfindmap', name: 'generalfindmap', component: GeneralFindMap},
         { path: 'generalsymptoms', name: 'generalsymptoms', component: GeneralSymptoms},
-        { path: 'hospitallist', name: 'hospitallist', component: HospitalList},
+        { path: 'recommenderlist', name: 'recommenderlist', component: RecommendErList},
+        { path: 'erlist', name: 'erlist', component: ERList},
         { path: 'mypage', name: 'mypage', component: Mypage},
       ]
     },
@@ -61,11 +63,6 @@ const routes = [
         name: 'NaverCallback',
         component: NaverCallback ,
         }, 
-    {
-        path: '/:pathMatch(.*)*',
-        name: 'NotFound',
-        component: NotAuthenticated,
-  },
     
 ]
 
@@ -81,7 +78,7 @@ if (to.meta.requiresAuth && !token) {
   return next({ name: 'notauthenticated' }) 
 }
 
-const authPages = ['login', 'signup']
+const authPages = ['home', 'signup']
 if (token && authPages.includes(to.name)) {
   return next({ name: 'main' })
 }

@@ -1,5 +1,10 @@
 <template>
-  
+      <router-link
+      :to="{ name: 'generalfindmap' }"
+      class="block text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
+    >
+      뒤로가기
+    </router-link>
   <div class="text-center">
     <h1 class="text-3xl">증상 선택하기</h1>
     <p class="text-xs">(증상 설명은 안적어도 무방하지만 자세한 응급실 찾기를 위해 증상 입력 바랍니다.)</p>
@@ -44,7 +49,6 @@ const findhospital = async () => {
     .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
   
 
-  console.log(mergedSymptoms)
   try{
     const res = await api.post(`hospitals/general/symptom/`,{
       symptom : mergedSymptoms
@@ -52,8 +56,9 @@ const findhospital = async () => {
           headers: {
             Authorization: `Bearer ${access}`,
           },})
+        localStorage.setItem('symptom', JSON.stringify(mergedSymptoms))
         localStorage.setItem('hospital_data', JSON.stringify(res.data))
-        router.push({ name: 'hospitallist' })
+        router.push({ name: 'recommenderlist' })
     }
     catch (error){
       errorMsg.value="아픈곳을 선택해주세요"

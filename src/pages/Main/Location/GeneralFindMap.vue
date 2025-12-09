@@ -2,7 +2,7 @@
 
 <template>
     <router-link
-      to="/main"
+      :to="{ name: 'main' }"
       class="block text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
     >
       뒤로가기

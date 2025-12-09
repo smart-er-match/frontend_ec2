@@ -34,7 +34,7 @@
 const navigation = [
   { label: 'Main', name: 'main' },
   { label: 'Mypage', name: 'mypage' },
-  { label: '병원리스트', name: 'hospitallist' },
+  { label: 'ER List', name: 'erlist' },
 ]
 </script>
 

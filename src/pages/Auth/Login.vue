@@ -64,9 +64,6 @@ const naverLogin = () => {
     `&redirect_uri=${redirectUri}` +
     `&state=${state}`
 
-  // 디버깅용
-  console.log('NAVER URL:', url)
-
   window.location.href = url
 }
 

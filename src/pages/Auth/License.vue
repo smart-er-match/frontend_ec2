@@ -84,6 +84,7 @@ const handleLogin = async () => {
 </script>
 
 <template>
+  <div class="mt-5">
     <router-link
       :to="{name : 'main'}"
       class="block text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
@@ -232,13 +233,13 @@ const handleLogin = async () => {
       <!-- 인증 요청 버튼 -->
       <button
         type="submit"
-        class="mt-1 w-full bg-blue-600 text-white p-3 rounded-md font-semibold hover:bg-blue-500"
+        class="mt-1 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500"
       >
         인증 요청
       </button>
       </div>
     </form>
-
+</div>
 </template>
 
 <style scoped>
