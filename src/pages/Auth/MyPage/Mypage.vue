@@ -1,16 +1,10 @@
 <template>
-  <div class="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg dark:bg-gray-800">
-    <router-link
-      :to="{ name: 'main'}"
-      class="block text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
-    >
-      홈으로 돌아가기
-    </router-link>
-    <h1 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white text-center">
+  <div class="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <h1 class="text-2xl font-bold mb-6 text-gray-900 text-center">
       My Page
     </h1>
 
-    <div class="space-y-4 text-gray-700 dark:text-gray-200">
+    <div class="space-y-4 text-gray-700">
 
       <!-- 이름 -->
       <div class="flex justify-between border-b pb-2 items-center">
@@ -100,15 +94,15 @@
         <button
           @click="onClickEditOrSave"
           class="flex-1 bg-indigo-600 text-white font-semibold py-2 rounded-md 
-                 hover:bg-indigo-500 transition dark:bg-indigo-500 dark:hover:bg-indigo-400">
+                 hover:bg-indigo-500 transition ">
           {{ isEdit ? '저장' : '회원 정보 수정' }}
         </button>
 
         <button
           v-if="isEdit"
           @click="onCancel"
-          class="w-24 border border-gray-300 text-gray-700 dark:text-gray-200 font-semibold py-2 rounded-md 
-                 hover:bg-gray-100 dark:hover:bg-gray-700 transition">
+          class="w-24 border border-gray-300 text-gray-700 font-semibold py-2 rounded-md 
+                 hover:bg-gray-100 transition">
           취소
         </button>
       </div>
@@ -125,7 +119,7 @@
           @click="openChangePassword"
           v-if="!isChangePasswordEdit && form.sign_kind === 1"
           class="flex-1 bg-indigo-600 text-white font-semibold py-2 rounded-md 
-                 hover:bg-indigo-500 transition dark:bg-indigo-500 dark:hover:bg-indigo-400">
+                 hover:bg-indigo-500 transition">
          비밀번호 변경
         </button>
       </div>

@@ -87,8 +87,7 @@ let isDragging = false
 
 let camera = null
 let zoomSpeed = 0.5
-let geo
-
+let lastX = 0
 
 // 부위 클릭용
 let raycaster = new THREE.Raycaster()
@@ -208,6 +207,53 @@ const handleMouseUp = () => {
   isDragging = false
 }
 
+
+const handlePointerDown = (e) => {
+  isDragging = true
+  // 눌렀을 때도 바로 반응하게
+  handleMouseMove(e)
+}
+
+const handlePointerMove = (e) => {
+  if (!isDragging) return
+  handleMouseMove(e)
+}
+
+const handlePointerUp = () => {
+  isDragging = false
+
+}
+
+const handleTouchStart = (e) => {
+  isDragging = true
+  if (e.touches.length > 0) {
+    const touch = e.touches[0]
+    const fakeEvent = {
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+    }
+    handleMouseMove(fakeEvent)
+  }
+}
+
+const handleTouchMove = (e) => {
+  if (!isDragging) return
+  if (e.touches.length > 0) {
+    e.preventDefault() // 화면 스크롤 방지
+    const touch = e.touches[0]
+    const fakeEvent = {
+      clientX: touch.clientX,
+      clientY: touch.clientY,
+    }
+    handleMouseMove(fakeEvent)
+  }
+}
+
+const handleTouchEnd = () => {
+  isDragging = false
+}
+
+
 onMounted(() => {
 
   const width = canvasContainer.value.clientWidth 
@@ -255,6 +301,12 @@ onMounted(() => {
     dom.addEventListener('mousemove', handleMouseMove)
     window.addEventListener('mouseup', handleMouseUp)
     dom.addEventListener('click', onClickHitbox)
+
+    dom.style.touchAction = 'none' // 모바일에서 드래그 시 스크롤 방지
+
+    dom.addEventListener('pointerdown', handlePointerDown)
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp)
   },
   undefined,
   (error) => {
@@ -289,7 +341,13 @@ onBeforeUnmount(() => {
     dom.removeEventListener('click', onClickHitbox)
   }
   window.removeEventListener('mouseup', handleMouseUp)
-})
+
+  if (dom) {
+  dom.removeEventListener('pointerdown', handlePointerDown)
+  }
+  window.removeEventListener('pointermove', handlePointerMove)
+  window.removeEventListener('pointerup', handlePointerUp)
+  })
 
 
 // 히트박스 만들기
