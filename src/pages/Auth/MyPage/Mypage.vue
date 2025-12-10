@@ -18,6 +18,14 @@
         />
       </div>
 
+      <div class="flex justify-between border-b pb-2 items-center">
+      <span class="font-semibold">로그인 계정</span>
+
+      <span class="text-right">
+        {{ login_data }} <br>
+        <span class="text-sm text-gray-500">{{ login_data1 }}</span>
+      </span>
+    </div>
       <!-- 생년월일 -->
       <div class="flex justify-between border-b pb-2 items-center">
         <span class="font-semibold">생년월일</span>
@@ -141,8 +149,23 @@ const form = reactive({
   phone_number: storedUser?.phone_number || '',
   gender: storedUser?.gender || '',
   sign_kind: storedUser?.sign_kind || '',
-  role: storedUser?.role || ''
+  role: storedUser?.role || '',
+  username: storedUser?.username || '',
+  email: storedUser?.email || '',
 })
+console.log(storedUser)
+
+const login_data =
+  form.sign_kind === 1 ? form.username :
+  form.sign_kind === 2 ? form.email :
+  form.sign_kind === 3 ? form.email :
+  '알 수 없음';
+
+  const login_data1 =
+  form.sign_kind === 1 ? "이메일로 로그인하였습니다" :
+  form.sign_kind === 2 ? "카카오로 로그인하였습니다." :
+  form.sign_kind === 3 ? "네이버로 로그인하였습니다" :
+  '알 수 없음';
 
 const onPhoneInput = (e) => {
   // 숫자만 남기기
