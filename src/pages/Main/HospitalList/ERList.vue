@@ -26,7 +26,8 @@
 
     <!-- 카드 영역: 높이 고정 + 10개만 -->
 
-    <div class="h-[900px] grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-max">
+    <div class="h-[900px] grid grid-cols-2 gap-3 auto-rows-max">
+
 
       <div
         v-for="item in paginatedList"
