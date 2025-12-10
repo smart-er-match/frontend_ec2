@@ -95,6 +95,9 @@ onMounted(() => {
         myLat.value = latitude.toFixed(6)
         myLng.value = longitude.toFixed(6)
 
+        console.log(myLat.value)
+        console.log(myLng.value)
+
         await getAddressFromCoords(myLat.value, myLng.value)
         const myPos = new window.naver.maps.LatLng(latitude, longitude)
 
@@ -124,10 +127,24 @@ async function getAddressFromCoords(lat, lng) {
     `&orders=roadaddr` +
     `&output=json`
 
+
   const res = await fetch(url)   // 헤더 없음
+
+  
+  if (!res.ok) {
+    console.error('reverse geocode 요청 실패', res.status)
+    myAddress.value = '주소를 불러오지 못했습니다.'
+    return
+  }
 
   const data = await res.json()
 
+    if (data.results.length === 0) {
+    console.error('reverse geocode 결과 없음', data);
+    myAddress.value = '주소를 찾을 수 없습니다.';
+    return;
+  }
+  
   const result = data.results[0]
   const region = result.region
   const land = result.land

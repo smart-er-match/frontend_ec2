@@ -1,4 +1,5 @@
 <template>
+  <LoadingSpinner v-if="isLoading" />
       <router-link
       :to="{ name: 'generalfindmap' }"
       class="block text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
@@ -38,10 +39,12 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { useRouter } from 'vue-router'
 import api from '../../../components/api'
+import LoadingSpinner from '../../../components/LoadingSpinner.vue'
 
 const access = localStorage.getItem("access_token")
 const router = useRouter()
 const errorMsg = ref('')
+const isLoading = ref(false)
 
 const findhospital = async () => {
   const mergedSymptoms = bodyPartLabels
@@ -50,6 +53,7 @@ const findhospital = async () => {
   
 
   try{
+    isLoading.value = true
     const res = await api.post(`hospitals/general/symptom/`,{
       symptom : mergedSymptoms
      },{
@@ -62,6 +66,8 @@ const findhospital = async () => {
     }
     catch (error){
       errorMsg.value="아픈곳을 선택해주세요"
+    }finally{
+      isLoading.value = false
     }
     
 }
