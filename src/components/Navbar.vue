@@ -21,7 +21,7 @@
           {{ value.label }}
 
           </router-link>
-
+            <LogOut/>
         </div>
       </div>
     </div>
@@ -29,12 +29,14 @@
 </template>
 
 <script setup>
+import LogOut from '../pages/Auth/LogOut.vue';
+
 
 
 const navigation = [
-  { label: 'Main', name: 'main' },
-  { label: 'Mypage', name: 'mypage' },
-  { label: 'ER List', name: 'erlist' },
+  { label: '홈', name: 'main' },
+  { label: '내 정보', name: 'mypage' },
+  { label: '응급실 찾기', name: 'erlist' },
 ]
 </script>
 

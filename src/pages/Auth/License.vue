@@ -18,10 +18,7 @@ const agree3 = ref(false)
 const errorMsg = ref('')
 const agreeAll = ref(false);
 const access = localStorage.getItem('access_token')
-const user_data = JSON.parse(localStorage.getItem('user'))
 
-
-console.log(user_data)
 const toggleAll = () => {
   agree1.value = agreeAll.value;
   agree2.value = agreeAll.value;
@@ -85,12 +82,6 @@ const handleLogin = async () => {
 
 <template>
   <div class="mt-5">
-    <router-link
-      :to="{name : 'main'}"
-      class="block text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
-    >
-      뒤로가기
-    </router-link>
   <form @submit.prevent="handleLogin" class="space-y-6">
     <!-- ===== 왼쪽: 민간 인증서 선택 ===== -->
     <div class="bg-white p-6 border rounded-lg">

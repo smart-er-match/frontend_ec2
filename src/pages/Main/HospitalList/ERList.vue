@@ -41,7 +41,7 @@
         <p class="text-sm text-gray-700">
           📞 {{ item.emergency_phone }}
         </p>
-        <p class="text-sm text-gray-700 truncate">
+        <p class="text-sm text-gray-700">
         📍 {{ item.address }}
         </p>
       </div>

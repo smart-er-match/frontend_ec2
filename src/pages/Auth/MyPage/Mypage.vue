@@ -8,8 +8,8 @@
 
       <!-- 이름 -->
       <div class="flex justify-between border-b pb-2 items-center">
-        <span class="font-semibold">이름</span>
-        <span v-if="!isEdit">{{ form.name }}</span>
+        <span class="font-semibold">이름(자격)</span>
+        <span v-if="!isEdit">{{ form.name }}({{ form.role ? '의료진' : '일반인' }})</span>
         <input 
           v-else 
           v-model="form.name"
@@ -140,7 +140,8 @@ const form = reactive({
   birth_date: storedUser?.birth_date || '',
   phone_number: storedUser?.phone_number || '',
   gender: storedUser?.gender || '',
-  sign_kind: storedUser?.sign_kind || ''
+  sign_kind: storedUser?.sign_kind || '',
+  role: storedUser?.role || ''
 })
 
 const onPhoneInput = (e) => {

@@ -17,6 +17,7 @@ import Mypage from '../pages/Auth/MyPage/Mypage.vue';
 import FindAuth from '../pages/Auth/Forget/FindAuth.vue';
 import RecommendErList from '../pages/Main/HospitalList/RecommendErList.vue';
 import ERList from '../pages/Main/HospitalList/ERList.vue';
+import LogOut from '../pages/Auth/LogOut.vue';
 
 
 
@@ -33,6 +34,7 @@ const routes = [
         { path: 'notauthenticated', name: 'notauthenticated', component: NotAuthenticated},
         { path: 'findauth', name: 'findauth', component: FindAuth},
         { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotAuthenticated },
+        { path: 'logout', name: 'logout', component: LogOut },
     ]
     },
     

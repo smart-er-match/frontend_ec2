@@ -46,7 +46,7 @@
       rel="noopener noreferrer"
       class="text-sm text-blue-600 underline hover:text-blue-800"
     >
-      병원 확인
+      병원 위치 확인
     </a>
 
   </div>
@@ -72,7 +72,7 @@
       rel="noopener noreferrer"
       class="text-sm text-blue-600 underline hover:text-blue-800"
     >
-      병원 확인
+      병원 위치 확인
     </a>
   </div>
     <div v-if="hospital_distance.length === 0">조회된 병원이 없습니다.</div>

@@ -20,9 +20,7 @@ const generalClick = () => {
 
 <template>
   <div class="sm:mx-auto sm:w-full sm:max-w-sm">
-    <h1 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 ">환영합니다! {{ user.name }} 님</h1>
-    <p class="text-center">({{ roleMessage }})</p>
-    <h2 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 ">당신의 용도는?</h2>
+    <h1 class="mt-10 text-center text-2xl/9 font-bold tracking-tight text-gray-900 ">환영합니다! {{ user.name }} 님<br> 당신의 용도는?</h1>
   </div>
 
   <div class="flex gap-6 mb-8 mt-12">
@@ -60,9 +58,6 @@ const generalClick = () => {
       </router-link>
   </div>
 
-  <div class="mt-3">
-    <LogOut/>
-  </div>
 
 
 </template>

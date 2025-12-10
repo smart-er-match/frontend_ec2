@@ -1,14 +1,14 @@
 <template>
-  <div class="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg dark:bg-gray-800">
-    <h1 class="text-2xl font-bold mb-6 text-center text-gray-900 dark:text-white">
+  <div class="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
+    <h1 class="text-2xl font-bold mb-6 text-center text-gray-900">
       계정 찾기
     </h1>
     <!-- 이메일(아이디) 찾기 -->
-    <section class="space-y-4 text-gray-700 dark:text-gray-200 border-b pb-6">
+    <section class="space-y-4 text-gray-700 border-b pb-6">
 
     <h2 class="text-xl font-semibold">이메일 찾기</h2>
-    <p class="text-sm text-gray-500 dark:text-gray-400">
-        가입 시 입력한 이름과 생년월일로 이메일(아이디)을 찾아드려요.
+    <p class="text-sm text-gray-500">
+        가입 시 입력한 이름과 생년월일로 <br> 이메일을 찾아드려요.
     </p>
 
     <form @submit.prevent="onFindEmail" class="space-y-4">
@@ -19,7 +19,7 @@
             v-model="findEmailForm.name"
             type="text"
             required
-            class="w-full border rounded-md px-3 py-2 text-gray-900 dark:bg-gray-700 dark:text-white"
+            class="w-full border rounded-md px-3 py-2 text-gray-900"
             placeholder="이름을 입력하세요"
         />
         </div>
@@ -30,31 +30,31 @@
             v-model="findEmailForm.birth_date"
             type="date"
             required
-            class="w-full border rounded-md px-3 py-2 text-gray-900 dark:bg-gray-700 dark:text-white"
+            class="w-full border rounded-md px-3 py-2 text-gray-900"
         />
         </div>
 
         <button
         type="submit"
         class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-md
-                hover:bg-indigo-500 transition dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                hover:bg-indigo-500 transition"
         >
-        아이디(이메일) 찾기
+        아이디 찾기
         </button>
 
     </form>
 
     <!-- 결과 출력 -->
-    <p v-if="foundEmail" class="mt-3 text-center text-green-600 dark:text-green-500 font-semibold">
+    <p v-if="foundEmail" class="mt-3 text-center text-green-600 font-semibold">
         찾은 이메일: {{ foundEmail }}
     </p>
     </section>
 
 
     <!-- 비밀번호 찾기 -->
-    <section class="space-y-4 text-gray-700 dark:text-gray-200 mt-6">
+    <section class="space-y-4 text-gray-700 mt-6">
       <h2 class="text-xl font-semibold">비밀번호 찾기</h2>
-      <p class="text-sm text-gray-500 dark:text-gray-400">
+      <p class="text-sm text-gray-500">
         이메일과 생년월일을 입력 후, 인증번호 확인을 완료하면 <br>비밀번호를 변경할 수 있습니다.
       </p>
 
@@ -63,7 +63,7 @@
         <input
           v-model="findPasswordForm.email"
           type="email"
-          class="w-full border rounded-md px-3 py-2 text-gray-900 dark:bg-gray-700 dark:text-white"
+          class="w-full border rounded-md px-3 py-2 text-gray-900"
           placeholder="example@domain.com"
         />
       </div>
@@ -73,7 +73,7 @@
         <input
           v-model="findPasswordForm.birth_date"
           type="date"
-          class="w-full border rounded-md px-3 py-2 text-gray-900 dark:bg-gray-700 dark:text-white"
+          class="w-full border rounded-md px-3 py-2 text-gray-900"
         />
       </div>
 
@@ -83,14 +83,14 @@
           <input
             v-model="findPasswordForm.code"
             type="text"
-            class="flex-1 border rounded-md px-3 py-2 text-gray-900 dark:bg-gray-700 dark:text-white"
+            class="flex-1 border rounded-md px-3 py-2 text-gray-900"
             placeholder="인증번호를 입력하세요"
           />
           <button
             type="button"
             @click="onSendCode"
             class="whitespace-nowrap px-3 py-2 border rounded-md text-sm font-semibold
-                   text-indigo-600 border-indigo-600 hover:bg-indigo-50 dark:text-indigo-300 dark:border-indigo-300 dark:hover:bg-gray-700"
+                   text-indigo-600 border-indigo-600 hover:bg-indigo-50"
           >
             인증번호 전송
           </button>
@@ -100,7 +100,7 @@
           type="button"
           @click="onVerifyCode"
           class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-md
-                 hover:bg-indigo-500 transition dark:bg-indigo-500 dark:hover:bg-indigo-400"
+                 hover:bg-indigo-500 transition"
         >
           인증번호 확인
         </button>
@@ -108,7 +108,7 @@
         남은 시간: {{ timerText }}
         </p>
 
-        <p v-if="isVerified" class="mt-3 text-center text-green-600 dark:text-green-500 font-semibold">
+        <p v-if="isVerified" class="mt-3 text-center text-green-600 font-semibold">
             인증이 완료되었습니다.
         </p>
       </div>
