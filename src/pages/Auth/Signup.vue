@@ -107,7 +107,7 @@ const password2End = () =>{
     password2Error.value = "비번이 안맞습니다."
   }
 }
-
+const today = new Date().toISOString().split('T')[0]
 </script>
 
 <template>
@@ -248,6 +248,7 @@ const password2End = () =>{
       <input
           v-model="birth_date"
           type="date"
+          :max="today"
           autocomplete="bday"
           required
           class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"

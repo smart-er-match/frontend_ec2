@@ -178,7 +178,7 @@ const naverLogin = () => {
       </button>
 
 
-      <p class="mt-10 text-center text-sm/6 text-gray-500 dark:text-gray-400">
+      <p class="mt-10 text-center text-sm/6 text-gray-900">
         회원이 아니신가요?
       </p>  
         <router-link

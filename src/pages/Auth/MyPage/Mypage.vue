@@ -6,7 +6,7 @@
 
     <div class="space-y-4 text-gray-700">
 
-      <!-- 이름 -->3
+      <!-- 이름 -->
       <div class="flex justify-between border-b pb-2 items-center">
         <span class="font-semibold">이름(자격)</span>
         <span v-if="!isEdit">{{ form.name }}({{ form.role ? '의료진' : '일반인' }})</span>
