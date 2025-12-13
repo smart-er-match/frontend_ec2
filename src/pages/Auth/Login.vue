@@ -138,44 +138,53 @@ const naverLogin = () => {
       </form>
 
 
-
-      <button 
-        @click="kakaoLogin"
-        class="mt-1 w-full relative bg-[#FEE500] rounded-md px-4 py-2 flex justify-center items-center"
+    <button 
+      @click="kakaoLogin"
+      class="mt-1 w-full relative
+            bg-[#FEE500]
+            hover:bg-[#FDDC00]
+            active:bg-[#F5CF00]
+            transition-colors duration-150
+            rounded-md px-4 py-2
+            flex justify-center items-center"
+    >
+      <!-- 아이콘 -->
+      <svg 
+        class="absolute left-6"
+        width="24" height="24" viewBox="0 0 24 24" fill="#000000"
       >
-        <!-- 아이콘: 왼쪽 고정 배치 -->
-        
-        <svg 
-          class="absolute left-6"
-          width="24" height="24" viewBox="0 0 24 24" fill="#000000"
-        >
-          <path d="M12 2C6.48 2 2 5.58 2 10c0 2.54 1.64 4.79 4.11 6.24L5 22l5.17-3.02c.58.1 1.18.16 
-                  1.83.16 5.52 0 10-3.58 10-8s-4.48-9-10-9z"/>
-        </svg>
+        <path d="M12 2C6.48 2 2 5.58 2 10c0 2.54 1.64 4.79 4.11 6.24L5 22l5.17-3.02c.58.1 1.18.16 
+                1.83.16 5.52 0 10-3.58 10-8s-4.48-9-10-9z"/>
+      </svg>
 
-        <!-- 중앙 텍스트 -->
-        <span class="w-full text-black font-medium text-sm font-semibold">
-          카카오 로그인
-        </span>
-      </button>
+      <span class="w-full text-black text-sm font-semibold">
+        카카오 로그인
+      </span>
+    </button>
 
-      <button 
-        @click="naverLogin"
-        class="mt-1 w-full relative bg-[#03C75A] rounded-md px-4 py-2 flex justify-center items-center"
+    <button 
+      @click="naverLogin"
+      class="mt-1 w-full relative
+            bg-[#03C75A]
+            hover:bg-[#02B350]
+            active:bg-[#029E47]
+            transition-colors duration-150
+            rounded-md px-4 py-2
+            flex justify-center items-center"
+    >
+      <!-- 네이버 아이콘 -->
+      <svg 
+        class="absolute left-6"
+        width="22" height="22" viewBox="0 0 24 24" fill="white"
       >
-        <!-- 네이버 로고 아이콘 (N 로고) -->
-        <svg 
-          class="absolute left-6"
-          width="22" height="22" viewBox="0 0 24 24" fill="white"
-        >
-          <path d="M4 4h5.4l4.6 6.4V4H20v16h-5.4l-4.6-6.4V20H4V4z"/>
-        </svg>
+        <path d="M4 4h5.4l4.6 6.4V4H20v16h-5.4l-4.6-6.4V20H4V4z"/>
+      </svg>
 
-        <!-- 중앙 텍스트 -->
-        <span class="w-full text-white font-medium text-sm">
-          네이버 로그인
-        </span>
-      </button>
+      <span class="w-full text-white text-sm font-medium">
+        네이버 로그인
+      </span>
+    </button>
+
 
 
       <p class="mt-10 text-center text-sm/6 text-gray-900">

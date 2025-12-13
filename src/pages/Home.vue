@@ -1,37 +1,55 @@
 <template>
-  <nav class="fixed top-0 left-0 w-full z-50 h-16 bg-black/30 backdrop-blur text-white">
-    <Navbar />
-  </nav>
-
-  <!-- 강제이동 모드: snap 제거 -->
   <main
     ref="scroller"
-    class="mt-16 h-[calc(100vh-4rem)] overflow-hidden scroll-smooth"
+    class="h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory"
   >
-    <section ref="s0" class="page">
+    <!-- sticky navbar -->
+    <nav class="sticky top-0 z-50 h-16 bg-black/30 backdrop-blur text-white">
+      <Navbar />
+    </nav>
+
+    <!-- sections (nav 가림 보정: scroll-mt-16) -->
+    <section ref="s0" class="page snap-start scroll-mt-16">
       <Home1 />
     </section>
 
-    <section ref="s1" class="page">
+    <section ref="s1" class="page snap-start scroll-mt-16">
       <Home2 />
     </section>
 
-    <section ref="s2" class="page">
+    <section ref="s2" class="page snap-start scroll-mt-16">
       <Home3 />
     </section>
   </main>
 
   <!-- 왼쪽 인디케이터 -->
-  <div class="fixed left-8 top-1/2 -translate-y-1/2 z-[60] flex flex-col items-center gap-3 text-white/80">
-    <div class="text-xs font-semibold tabular-nums">{{ String(index + 1).padStart(2, '0') }}</div>
-    <button
-      v-for="(n, i) in 3"
-      :key="i"
-      class="h-2 w-2 rounded-full transition"
-      :class="i === index ? 'bg-white' : 'bg-white/30 hover:bg-white/60'"
-      @click="go(i)"
-      aria-label="go section"
-    ></button>
+  <div
+    class="fixed left-6 top-1/2 -translate-y-1/2 z-[60]
+           flex flex-col items-center gap-4
+           px-4 py-5
+           rounded-full
+           bg-black/50 backdrop-blur
+           shadow-lg
+           text-white"
+  >
+    <div class="text-xs font-semibold tabular-nums opacity-90">
+      {{ String(index + 1).padStart(2, '0') }}
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <button
+        v-for="(_, i) in 3"
+        :key="i"
+        class="h-2.5 w-2.5 rounded-full transition-all duration-200"
+        :class="i === index ? 'bg-white scale-125' : 'bg-white/40 hover:bg-white/70'"
+        @click="go(i)"
+        aria-label="go section"
+      ></button>
+    </div>
+
+    <div class="text-xs font-semibold tabular-nums opacity-60">
+      {{ String(3).padStart(2, '0') }}
+    </div>
   </div>
 </template>
 
@@ -49,25 +67,21 @@ const index = ref(0)
 
 let locked = false
 let io = null
-
-const pageH = () => scroller.value?.clientHeight || 0
+let resizeTimer = null
 
 const go = (next) => {
-  if (!scroller.value) return
   const clamped = Math.max(0, Math.min(sections.value.length - 1, next))
   index.value = clamped
 
-  scroller.value.scrollTo({
-    top: clamped * pageH(), // ✅ 딱 페이지 높이로 이동(한틱 밀림 방지)
-    behavior: 'smooth',
-  })
+  const target = sections.value[clamped]
+  if (!target) return
+  target.scrollIntoView({ behavior: 'smooth', block: 'start' })
 }
 
 const onWheel = (e) => {
   e.preventDefault()
-
   if (locked) return
-  if (Math.abs(e.deltaY) < 8) return // 트랙패드 미세 움직임 컷
+  if (Math.abs(e.deltaY) < 8) return
 
   locked = true
   setTimeout(() => (locked = false), 600)
@@ -76,23 +90,21 @@ const onWheel = (e) => {
   else go(index.value - 1)
 }
 
+const onResize = () => {
+  clearTimeout(resizeTimer)
+  resizeTimer = setTimeout(() => {
+    const target = sections.value[index.value]
+    if (!target) return
+    target.scrollIntoView({ behavior: 'auto', block: 'start' })
+  }, 100)
+}
+
 onMounted(() => {
   sections.value = Array.from(scroller.value?.querySelectorAll('section.page') || [])
 
-  // main 안에서만 휠 강제 이동
   scroller.value?.addEventListener('wheel', onWheel, { passive: false })
-  sections.value.forEach((sec, i) => {
-      console.log(
-        `section ${i}`,
-        {
-          offsetHeight: sec.offsetHeight,
-          scrollHeight: sec.scrollHeight,
-          clientHeight: sec.clientHeight,
-          offsetTop: sec.offsetTop,
-        }
-      )
-    })
-  // 인덱스 자동 갱신(스크롤바 드래그/키보드 이동도 반영)
+  window.addEventListener('resize', onResize)
+
   io = new IntersectionObserver(
     (entries) => {
       const visible = entries
@@ -102,7 +114,7 @@ onMounted(() => {
       const i = sections.value.indexOf(visible.target)
       if (i !== -1) index.value = i
     },
-    { root: scroller.value, threshold: [0.6] }
+    { root: scroller.value, threshold: [0.55, 0.6, 0.7] }
   )
 
   sections.value.forEach(sec => io.observe(sec))
@@ -110,20 +122,21 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   scroller.value?.removeEventListener('wheel', onWheel)
+  window.removeEventListener('resize', onResize)
   if (io) io.disconnect()
 })
 </script>
 
 <style scoped>
+/* ✅ 높이 계산 꼬임(100vh-4rem 등) 방지: 섹션은 그냥 100vh */
 .page {
-  height: calc(100vh - 4rem); /* nav(64px) 제외 */
-  overflow: hidden;          /* 내부가 커도 다음 섹션 밀지 않게 */
+  height: calc(100vh - 4rem); 
+  width: 100%;
 }
 
-/* Home1/Home2/Home3 최상단이 min-h-screen이어도 섹션 안에 꽉 차게 강제 */
+/* Home 컴포넌트가 min-h-screen을 가지고 있어도 섹션에 맞게 */
 .page > :deep(*) {
-  height: 100%;
+  width: 100%;
   min-height: 100%;
 }
-
 </style>

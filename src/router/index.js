@@ -80,7 +80,7 @@ if (to.meta.requiresAuth && !token) {
   return next({ name: 'notauthenticated' }) 
 }
 
-const authPages = ['home', 'signup']
+const authPages = ['signup']
 if (token && authPages.includes(to.name)) {
   return next({ name: 'main' })
 }

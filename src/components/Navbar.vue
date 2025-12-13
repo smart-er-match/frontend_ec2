@@ -5,7 +5,7 @@
         <!-- 왼쪽 로고 + 제목 -->
         <div class="flex items-center gap-2">
           <router-link 
-          :to="{ name: 'main'}"
+          :to="{ name: 'home'}"
           class="font-semibold tracking-tight">
             Smart ER Match
           
@@ -34,7 +34,7 @@ import LogOut from '../pages/Auth/LogOut.vue';
 
 
 const navigation = [
-  { label: '홈', name: 'main' },
+  { label: '메인', name: 'main' },
   { label: '내 정보', name: 'mypage' },
   { label: '응급실 찾기', name: 'erlist' },
 ]
