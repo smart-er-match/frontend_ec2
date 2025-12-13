@@ -19,6 +19,7 @@ import Mypage from '../pages/Auth/MyPage/Mypage.vue';
 import FindAuth from '../pages/Auth/Forget/FindAuth.vue';
 import RecommendErList from '../pages/Main/HospitalList/RecommendErList.vue';
 import ERList from '../pages/Main/HospitalList/ERList.vue';
+import GoogleCallback from '../pages/Auth/Oauth/GoogleCallback.vue';
 
 
 
@@ -55,7 +56,6 @@ const routes = [
       ]
     },
 
-
     {
         path: '/auth/kakao/callback',
         name: 'KakaoCallback',
@@ -66,8 +66,12 @@ const routes = [
         name: 'NaverCallback',
         component: NaverCallback ,
         }, 
-    
-]
+    {
+        path: '/auth/google/callback',
+        name: 'google-callback',
+        component: GoogleCallback,
+      }
+    ]
 
 const router = createRouter({
     history: createWebHistory(),

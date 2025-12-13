@@ -80,6 +80,11 @@ export const useAuthStore = defineStore('auth', {
     return { ok: true }
   },
 
+    async googleCallback(code) {
+      const res = await api.post('accounts/social/google/', { code })
+      this.setAuth(res.data.access, res.data.refresh, res.data.user)
+      return { ok: true }
+    }
 
   },
 })

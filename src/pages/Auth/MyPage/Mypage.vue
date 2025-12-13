@@ -159,12 +159,14 @@ const login_data =
   form.sign_kind === 1 ? form.username :
   form.sign_kind === 2 ? form.email :
   form.sign_kind === 3 ? form.email :
+  form.sign_kind === 4 ? form.email :
   '알 수 없음';
 
   const login_data1 =
   form.sign_kind === 1 ? "이메일로 로그인하였습니다" :
   form.sign_kind === 2 ? "카카오로 로그인하였습니다." :
   form.sign_kind === 3 ? "네이버로 로그인하였습니다" :
+  form.sign_kind === 4 ? "구글로 로그인하였습니다" :
   '알 수 없음';
 
 const onPhoneInput = (e) => {

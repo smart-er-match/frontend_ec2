@@ -52,7 +52,6 @@ const naverLogin = () => {
   const clientId = import.meta.env.VITE_NAVER_CLIENT_ID
   const redirectUri = encodeURIComponent(import.meta.env.VITE_NAVER_REDIRECT_URI)
 
-  // CSRF용도
   const state = Math.random().toString(36).substring(2) + Date.now().toString(36)
 
   const url =
@@ -65,7 +64,19 @@ const naverLogin = () => {
   window.location.href = url
 }
 
+const googleLogin = () => {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  const redirectUri = encodeURIComponent(import.meta.env.VITE_GOOGLE_REDIRECT_URI)
 
+  const url =
+    'https://accounts.google.com/o/oauth2/v2/auth' +
+    `?client_id=${clientId}` +
+    `&redirect_uri=${redirectUri}` +
+    `&response_type=code` +
+    `&scope=profile email`
+
+  window.location.href = url
+}
 
 </script>
 
@@ -183,6 +194,39 @@ const naverLogin = () => {
       </span>
     </button>
 
+
+      <button 
+        @click="googleLogin"
+        class="mt-1 w-full relative
+              bg-white
+              border border-gray-300
+              rounded-md px-4 py-2
+              flex justify-center items-center
+              transition-all duration-150
+              hover:bg-gray-50
+              hover:border-gray-400
+              hover:shadow-sm
+              active:bg-gray-100
+              focus:outline-none
+              focus:ring-2 focus:ring-blue-500/40"
+      >
+        <!-- Google G 아이콘 -->
+        <svg
+          class="absolute left-6"
+          width="22"
+          height="22"
+          viewBox="0 0 48 48"
+        >
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.02 1.53 7.4 2.81l5.45-5.45C33.56 3.86 29.2 2 24 2 14.9 2 7.1 7.36 3.5 15.17l6.36 4.94C11.6 13.06 17.3 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.5 24c0-1.64-.15-3.21-.43-4.73H24v9.03h12.7c-.55 2.97-2.2 5.49-4.7 7.18l7.2 5.6C43.73 37.1 46.5 31.1 46.5 24z"/>
+          <path fill="#FBBC05" d="M9.86 28.11A14.6 14.6 0 0 1 9.1 24c0-1.43.25-2.82.7-4.11l-6.36-4.94A23.93 23.93 0 0 0 2 24c0 3.86.92 7.5 2.54 10.71l5.32-4.6z"/>
+          <path fill="#34A853" d="M24 46c6.2 0 11.4-2.05 15.2-5.6l-7.2-5.6c-2 1.34-4.56 2.14-8 2.14-6.7 0-12.4-3.56-14.14-8.6l-5.32 4.6C7.1 40.64 14.9 46 24 46z"/>
+        </svg>
+
+        <span class="w-full text-gray-700 text-sm font-medium">
+          Google 로그인
+        </span>
+      </button>
 
 
       <p class="mt-10 text-center text-sm/6 text-gray-900">
