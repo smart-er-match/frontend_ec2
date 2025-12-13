@@ -51,6 +51,7 @@ const routes = [
         { path: 'generalfindmap', name: 'generalfindmap', component: GeneralFindMap},
         { path: 'generalsymptoms', name: 'generalsymptoms', component: GeneralSymptoms},
         { path: 'recommenderlist', name: 'recommenderlist', component: RecommendErList},
+      
         { path: 'erlist', name: 'erlist', component: ERList, meta: {requiresAuth: true} },
         { path: 'mypage', name: 'mypage', component: Mypage},
       ]

@@ -111,12 +111,6 @@ const today = new Date().toISOString().split('T')[0]
 </script>
 
 <template>
-      <router-link 
-      :to="{ name: 'home'}"
-      class="block text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
-    >
-    뒤로 가기
-    </router-link>
   <div>
     <h2 class="text-center text-2xl font-bold tracking-tight text-gray-900 mb-8">
       회원가입
