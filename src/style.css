@@ -1,6 +1,30 @@
 @import "tailwindcss";
 
+/* ✅ 기본 리셋 + 모바일 안정화 */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
 body {
-    background-color: whitesmoke;
-    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  margin: 0; /* ✅ 기본 margin 제거 */
+  background: whitesmoke;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI",
+               Roboto, "Noto Sans KR", Arial, sans-serif;
+  overflow-x: hidden; /* ✅ 가로 스크롤로 깨지는 현상 방지 */
+}
+
+/* ✅ 이미지/비디오가 컨테이너 밖으로 튀는 것 방지 */
+img, video, canvas, svg {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ✅ iOS에서 텍스트 자동 확대 때문에 레이아웃 깨질 때 */
+input, textarea, select, button {
+  font: inherit;
 }
