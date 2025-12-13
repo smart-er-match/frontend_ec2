@@ -85,7 +85,7 @@ api.interceptors.response.use(
       // refresh 실패 → 완전 로그아웃 처리
       localStorage.removeItem('access_token');
       localStorage.removeItem('refresh_token');
-      router.push('/login');
+      router.push({name: 'home'});
 
       return Promise.reject(refreshError);
     }

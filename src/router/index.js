@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
+
 
 import Home from "../pages/Home.vue";
 import Signup from '../pages/Auth/Signup.vue';
@@ -17,7 +19,7 @@ import Mypage from '../pages/Auth/MyPage/Mypage.vue';
 import FindAuth from '../pages/Auth/Forget/FindAuth.vue';
 import RecommendErList from '../pages/Main/HospitalList/RecommendErList.vue';
 import ERList from '../pages/Main/HospitalList/ERList.vue';
-import LogOut from '../pages/Auth/LogOut.vue';
+
 
 
 
@@ -34,7 +36,6 @@ const routes = [
         { path: 'notauthenticated', name: 'notauthenticated', component: NotAuthenticated},
         { path: 'findauth', name: 'findauth', component: FindAuth},
         { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotAuthenticated },
-        { path: 'logout', name: 'logout', component: LogOut },
     ]
     },
     
@@ -49,7 +50,7 @@ const routes = [
         { path: 'generalfindmap', name: 'generalfindmap', component: GeneralFindMap},
         { path: 'generalsymptoms', name: 'generalsymptoms', component: GeneralSymptoms},
         { path: 'recommenderlist', name: 'recommenderlist', component: RecommendErList},
-        { path: 'erlist', name: 'erlist', component: ERList},
+        { path: 'erlist', name: 'erlist', component: ERList, meta: {requiresAuth: true} },
         { path: 'mypage', name: 'mypage', component: Mypage},
       ]
     },
@@ -73,19 +74,14 @@ const router = createRouter({
     routes,
 })
 
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('access_token')
+router.beforeEach((to) => {
+  const auth = useAuthStore()
+  auth.hydrate() // 새로고침 대비(이미 다른 곳에서 1회 하면 제거 가능)
 
-if (to.meta.requiresAuth && !token) {
-  return next({ name: 'notauthenticated' }) 
-}
-
-const authPages = ['signup']
-if (token && authPages.includes(to.name)) {
-  return next({ name: 'main' })
-}
-  
-  next() // 통과
+  if (to.meta.requiresAuth && !auth.isLoggedIn) {
+    return { name: 'home' } // 또는 login 페이지
+  }
 })
+
 
 export default router

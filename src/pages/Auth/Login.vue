@@ -1,8 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
-import { API_BASE_URL } from '../../config'
+import { useAuthStore } from '@/stores/auth'   // 또는 '../../stores/auth'
 
 const router = useRouter()
 
@@ -11,26 +10,25 @@ const password = ref('')
 const errorMsg = ref('')
 
 
+const auth = useAuthStore()
+
 const handleLogin = async () => {
   try {
-    const res = await axios.post(`${API_BASE_URL}accounts/login/`,{
-      username: useremail.value,
-      password: password.value,
-    })
-    if (res.data.error_type === ''){
-      localStorage.setItem('access_token', res.data.access)
-      localStorage.setItem('refresh_token', res.data.refresh)
-      localStorage.setItem('user', JSON.stringify(res.data.user)) 
-      
-      router.push({ name:'main'})
-    } else if (res.data.error_type === 'undefined_email') {
+    const result = await auth.login(useremail.value, password.value)
+
+    if (result.ok) {
+      router.push({ name: 'main' })
+      return
+    }
+
+    if (result.error_type === 'undefined_email') {
       errorMsg.value = '아이디가 없습니다.'
-    } else if (res.data.error_type === 'wrong_password') {
+    } else if (result.error_type === 'wrong_password') {
       errorMsg.value = '비밀번호가 틀렸습니다.'
-    } else (errorMsg.value = '예외')
-
-
-  }catch (err){
+    } else {
+      errorMsg.value = '예외'
+    }
+  } catch (err) {
     errorMsg.value = '통신 실패'
     console.error(err)
   }

@@ -61,17 +61,17 @@
          rounded-xl shadow-xl p-8"
 >
     <div 
-    v-if="access_token"
+    v-if="auth.isLoggedIn"
     class="text-center"
     >
      <h1 class="text-3xl font-bold">
-      {{ user.name }}님 <br>로그인 하신것을 환영합니다
+      {{ auth.user.name }}님 <br>로그인 하신것을 환영합니다
     </h1>
 
-    <button
+    <!-- <button
       @click="movetoMain"
       class="mt-5 mx-auto flex w-[300px] justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-    >응급실 조회하기</button>
+    >응급실 조회하기</button> -->
     </div>
 
     <div v-else>
@@ -96,6 +96,7 @@ import img1 from '../../assets/guide/응급실.jpg'
 import img2 from '../../assets/guide/응급실-구급차.jpg'
 import img3 from '../../assets/guide/구급차.webp'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../../stores/auth'
 
 const images = [img1, img2, img3]
 const currentImage = ref(0)
@@ -113,10 +114,8 @@ onMounted(() => {
   }, 10000) // 4초마다 변경
 })
 
-const access_token = localStorage.getItem("access_token")
-const user = ref(JSON.parse(localStorage.getItem("user") || "{}"))._rawValue
-
-
+const auth = useAuthStore()
+auth.hydrate() // 새로고침/직접진입 대비(필요 없으면 빼도 됨)
 
 
 onBeforeUnmount(() => {
