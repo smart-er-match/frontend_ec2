@@ -11,7 +11,7 @@ const roleMessage = computed(() => user.role ? '의료진' : '일반인')
 const router = useRouter()
 
 const generalClick = () => {
-  router.push( {name: 'generalfindmap'})
+  router.push( {name: 'generalsymptoms'})
 
 }
 
