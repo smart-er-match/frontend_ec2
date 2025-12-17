@@ -1,23 +1,16 @@
-
-
-
-
 <template>
-  <div>
-    <Navbar/>
-    <div class="min-h-screen flex justify-center items-center bg-slate-100">
-    <div class="w-full max-w-5xl px-4 w-full">
+  <div class="min-h-screen bg-slate-100">
+    <Navbar />
+
+    <!-- Navbar 아래부터 시작 -->
+    <main class="max-w-5xl mx-auto px-4 py-8">
       <div class="bg-white rounded-xl shadow-md p-8">
         <router-view />
       </div>
-    </div>
-  </div>
+    </main>
   </div>
 </template>
 
 <script setup>
-import Navbar from '../components/Navbar.vue'
-
+import Navbar from "../components/Navbar.vue";
 </script>
-
-<style scoped></style>

@@ -7,7 +7,6 @@
       <div class="mt-3 w-72 border rounded-lg p-3 bg-white">
         <h3 class="font-semibold text-gray-800 mb-2">반경 설정</h3>
 
-        <!-- stepIndex: 0 ~ presets.length-1 -->
         <input
           type="range"
           v-model.number="stepIndex"
@@ -31,17 +30,17 @@
         주소 검색
       </button>
 
-       <button
-          v-if="!locationStore.hasLocation"
-          @click="askLocation"
-          class="mt-3 rounded-md border border-gray-300 bg-gray-100
-                px-3 py-1.5 text-sm font-semibold text-gray-700
-                shadow-sm hover:bg-gray-200 hover:text-gray-900
-                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400
-                disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          현재 위치 동의하기
-        </button>
+      <button
+        v-if="!locationStore.hasLocation"
+        @click="askLocation"
+        class="mt-3 rounded-md border border-gray-300 bg-gray-100
+              px-3 py-1.5 text-sm font-semibold text-gray-700
+              shadow-sm hover:bg-gray-200 hover:text-gray-900
+              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400
+              disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        현재 위치 동의하기
+      </button>
     </div>
 
     <div class="mt-5" ref="mapDiv" style="width: 100%; height: 400px"></div>
@@ -69,7 +68,6 @@ import { useLocationStore } from '@/stores/location'
 import GetLocation from '../../../components/getLocation.vue'
 
 const locationStore = useLocationStore()
-const emit = defineEmits(['updateLocation'])
 
 const mapDiv = ref(null)
 let map = null
@@ -81,11 +79,10 @@ const myLng = ref('-')
 const myAddress = ref('')
 
 // ✅ 반경 프리셋(네이버 줌 기준)
-// 필요하면 km/zoom 값 더 튜닝하면 됨
 const radiusPresets = [
-  { km: 5,  zoom: 15 }, // 🔥 제일 가까움
-  { km: 10,  zoom: 14 },
-  { km: 25,  zoom: 13 },
+  { km: 5,  zoom: 15 },
+  { km: 10, zoom: 14 },
+  { km: 25, zoom: 13 },
   { km: 40, zoom: 12 },
   { km: 50, zoom: 11 },
 ]
@@ -94,26 +91,16 @@ const askLocation = () => {
   getLoc.value?.requestLocation()
 }
 
-// ✅ 슬라이더는 "단계 index"
-const stepIndex = ref(2) // 기본 10km(인덱스 2)
+// ✅ 슬라이더 단계 index
+const stepIndex = ref(2)
 
 // 현재 선택된 반경/줌
 const currentRadius = computed(() => radiusPresets[stepIndex.value])
 
-const syncLocationToParent = () => {
-  if (myLat.value === '-' || myLng.value === '-') return
-  emit('updateLocation', {
-    lat: myLat.value,
-    lng: myLng.value,
-    address: myAddress.value,
-    distance: currentRadius.value.km,
-  })
-}
-
-// ✅ 단계가 바뀌면: store distance 갱신 + 지도 줌 갱신 + emit
+// ✅ 단계 변경 시: store distance 갱신 + 지도 줌 갱신
 watch(stepIndex, () => {
-  // Pinia에 distance 저장(선택)
-  if (locationStore.setDistance) {
+  // store에 distance 저장
+  if (typeof locationStore.setDistance === 'function') {
     locationStore.setDistance(currentRadius.value.km)
   } else {
     locationStore.distance = currentRadius.value.km
@@ -122,39 +109,36 @@ watch(stepIndex, () => {
   if (map) {
     map.setZoom(currentRadius.value.zoom, true)
   }
-
-  syncLocationToParent()
 })
+
+// ✅ store의 lat/lng 변경되면 지도/마커/주소 갱신
 watch(
   () => [locationStore.lat, locationStore.lng],
   async ([lat, lng]) => {
     if (!lat || !lng) return
-    if (!map || !marker) return // 지도 초기화 전이면 스킵
+    if (!map || !marker) return
 
-    // 1) 화면 표시용 lat/lng 업데이트
     myLat.value = Number(lat).toFixed(6)
     myLng.value = Number(lng).toFixed(6)
 
-    // 2) 지도/마커 이동 (주소보다 먼저 해도 됨)
     const pos = new window.naver.maps.LatLng(lat, lng)
     map.setCenter(pos)
     map.setZoom(currentRadius.value.zoom, true)
     marker.setPosition(pos)
 
-    // 3) 주소 역지오코딩
     await getAddressFromCoords(myLat.value, myLng.value)
 
-    // 4) store에 주소까지 저장 (무한루프 방지: 주소가 바뀔 때만)
+    // 주소가 달라졌을 때만 store 갱신(루프 방지)
     if (locationStore.address !== myAddress.value) {
-      locationStore.setLocation({ lat, lng, address: myAddress.value })
+      locationStore.setLocation({
+        lat,
+        lng,
+        address: myAddress.value,
+      })
     }
-
-    // 5) 부모로 emit
-    syncLocationToParent()
   },
-  { immediate: false } // 지도 생성 전에 immediate 돌면 map=null이라 의미 없음
+  { immediate: false }
 )
-
 
 onMounted(async () => {
   if (!window.naver || !window.naver.maps) {
@@ -162,7 +146,7 @@ onMounted(async () => {
     return
   }
 
-  // ✅ store에 distance가 있으면 그에 맞는 stepIndex로 맞춰줌(선택)
+  // ✅ store distance가 있으면 stepIndex 동기화(선택)
   const savedKm = Number(locationStore.distance)
   if (!Number.isNaN(savedKm)) {
     const idx = radiusPresets.findIndex(p => p.km === savedKm)
@@ -191,8 +175,6 @@ onMounted(async () => {
     myLat.value = Number(locationStore.lat).toFixed(6)
     myLng.value = Number(locationStore.lng).toFixed(6)
     myAddress.value = locationStore.address || ''
-
-    syncLocationToParent()
     return
   }
 
@@ -211,19 +193,23 @@ onMounted(async () => {
 
       await getAddressFromCoords(myLat.value, myLng.value)
 
-      // Pinia 저장
       locationStore.setLocation({
         lat: latitude,
         lng: longitude,
         address: myAddress.value,
       })
 
+      // distance도 같이 store에 저장(선택)
+      if (typeof locationStore.setDistance === 'function') {
+        locationStore.setDistance(currentRadius.value.km)
+      } else {
+        locationStore.distance = currentRadius.value.km
+      }
+
       const myPos = new window.naver.maps.LatLng(latitude, longitude)
       map.setCenter(myPos)
       map.setZoom(currentRadius.value.zoom, true)
       marker.setPosition(myPos)
-
-      syncLocationToParent()
     },
     (err) => {
       console.error(err)
@@ -293,14 +279,19 @@ const openAddressSearch = () => {
       myLat.value = Number(coords.lat).toFixed(6)
       myLng.value = Number(coords.lng).toFixed(6)
 
-      // ✅ Pinia에도 저장 (주소검색으로 위치 바꾼 경우)
+      // ✅ Pinia 저장
       locationStore.setLocation({
         lat: coords.lat,
         lng: coords.lng,
         address: addr,
       })
 
-      syncLocationToParent()
+      // distance도 같이 store에 저장(선택)
+      if (typeof locationStore.setDistance === 'function') {
+        locationStore.setDistance(currentRadius.value.km)
+      } else {
+        locationStore.distance = currentRadius.value.km
+      }
     },
   }).open()
 }

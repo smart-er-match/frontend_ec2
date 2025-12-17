@@ -51,7 +51,7 @@ export const useAuthStore = defineStore('auth', {
 
     // ✅ 로그인 로직을 store로 이동
     async login(username, password) {
-      const res = await api.post(`${API_BASE_URL}accounts/login/`, {
+      const res = await api.post(`accounts/login/`, {
         username,
         password,
       })

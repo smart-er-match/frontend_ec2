@@ -1,7 +1,7 @@
 <template>
   <LoadingSpinner v-if="isLoading" />
   <router-link
-    :to="{ name: 'generalfindmap' }"
+    :to="{ name: 'main' }"
     class="block text-sm/6 font-semibold text-indigo-600 hover:text-indigo-500"
   >
     뒤로가기
@@ -50,10 +50,12 @@ import { useRouter } from 'vue-router'
 import api from '../../../components/api'
 import LoadingSpinner from '../../../components/LoadingSpinner.vue'
 
-const access = localStorage.getItem('access_token')
 const router = useRouter()
 const errorMsg = ref('')
 const isLoading = ref(false)
+
+import { useLocationStore } from "@/stores/location";
+const locationStore = useLocationStore();
 
 const findhospital = async () => {
   const mergedSymptoms = bodyPartLabels
@@ -65,18 +67,18 @@ const findhospital = async () => {
     const res = await api.post(
       `hospitals/general/symptom/`,
       {
-        symptom: mergedSymptoms
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${access}`
-        }
+        symptom: mergedSymptoms,
+        latitude: Number(locationStore.lat),
+        longitude: Number(locationStore.lng),
       }
     )
     localStorage.setItem('symptom', JSON.stringify(mergedSymptoms))
     localStorage.setItem('hospital_data', JSON.stringify(res.data))
     router.push({ name: 'recommenderlist' })
   } catch (error) {
+     console.log("status", error.response?.status);
+    console.log("data", error.response?.data);
+    console.log("sent", { symptom: mergedSymptoms /*, latitude, longitude */ });
     errorMsg.value = '아픈곳을 선택해주세요'
   } finally {
     isLoading.value = false
