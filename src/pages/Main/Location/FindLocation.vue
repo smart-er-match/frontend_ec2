@@ -174,8 +174,6 @@ onMounted(async () => {
 
     myLat.value = Number(locationStore.lat).toFixed(6)
     myLng.value = Number(locationStore.lng).toFixed(6)
-    myAddress.value = locationStore.address || ''
-    return
   }
 
   // ✅ 2) 없으면 geolocation

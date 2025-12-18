@@ -1,6 +1,8 @@
 <template>
   <GetLocation
   ref="getLoc"
+    @success="(p) => console.log('loc success', p)"
+  @error="(m) => console.log('loc error', m)"
 />
   <main
     ref="scroller"
@@ -67,9 +69,10 @@ let resizeTimer = null
 
 const getLoc = ref(null)
 
-  const askLocation = () => {
-  getLoc.value?.requestLocation()
-  }
+const askLocation = () => {
+  console.log('[Home] askLocation called, getLoc =', getLoc.value)
+getLoc.value?.requestLocation()
+}
 
 const go = (next) => {
   const clamped = Math.max(0, Math.min(sections.value.length - 1, next))
@@ -99,6 +102,7 @@ const onResize = () => {
 }
 
 onMounted(async () => {
+  console.log('[Home] mounted, getLoc =', getLoc.value)
   askLocation()
   // ✅ (A) 스크롤/섹션 초기화는 항상
   sections.value = Array.from(scroller.value?.querySelectorAll('section.page') || [])

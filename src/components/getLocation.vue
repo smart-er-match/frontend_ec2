@@ -21,7 +21,11 @@ const requestLocation = () => {
       if (err.code === 3) message = '위치 요청 시간이 초과되었습니다.'
       emit('error', message)
     },
-    { enableHighAccuracy: true, timeout: 10000 }
+     {
+    enableHighAccuracy: false,
+    timeout: 10000,
+    maximumAge: 60000,
+  }
   )
 }
 

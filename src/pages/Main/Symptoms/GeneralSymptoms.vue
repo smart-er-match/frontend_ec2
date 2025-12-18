@@ -62,6 +62,8 @@ const findhospital = async () => {
     .filter(v => symptoms.value.includes(v.name)) // 선택된 부위만
     .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
 
+    console.log(locationStore.lng)
+    console.log(locationStore.lat)
   try {
     isLoading.value = true
     const res = await api.post(
@@ -76,7 +78,7 @@ const findhospital = async () => {
     localStorage.setItem('hospital_data', JSON.stringify(res.data))
     router.push({ name: 'recommenderlist' })
   } catch (error) {
-     console.log("status", error.response?.status);
+    console.log("status", error.response?.status);
     console.log("data", error.response?.data);
     console.log("sent", { symptom: mergedSymptoms /*, latitude, longitude */ });
     errorMsg.value = '아픈곳을 선택해주세요'
