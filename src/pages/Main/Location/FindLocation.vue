@@ -1,5 +1,5 @@
 <template>
-  <GetLocation ref="getLoc" />
+  <GetLocation ref="getLoc" @error="onLocError"/>
 
   <div class="text-center">
     <div class="flex justify-center items-center gap-4">
@@ -29,18 +29,6 @@
       >
         주소 검색
       </button>
-
-      <button
-        v-if="!locationStore.hasLocation"
-        @click="askLocation"
-        class="mt-3 rounded-md border border-gray-300 bg-gray-100
-              px-3 py-1.5 text-sm font-semibold text-gray-700
-              shadow-sm hover:bg-gray-200 hover:text-gray-900
-              focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-400
-              disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        현재 위치 동의하기
-      </button>
     </div>
 
     <div class="mt-5" ref="mapDiv" style="width: 100%; height: 400px"></div>
@@ -63,11 +51,18 @@
 </template>
 
 <script setup>
-import { onMounted, ref, watch, computed } from 'vue'
+import { onMounted, ref, watch, computed, nextTick } from 'vue'
 import { useLocationStore } from '@/stores/location'
 import GetLocation from '../../../components/getLocation.vue'
 
 const locationStore = useLocationStore()
+
+
+const onLocError = (msg) => {
+  console.log('[loc error]', msg)
+  window.alert(msg)   // ✅ 무조건 전역 alert
+}
+
 
 const mapDiv = ref(null)
 let map = null
@@ -141,6 +136,10 @@ watch(
 )
 
 onMounted(async () => {
+
+  await nextTick()            // ref 연결 보장
+  getLoc.value?.requestLocation()
+
   if (!window.naver || !window.naver.maps) {
     console.error('네이버 지도 스크립트가 로드되지 않았습니다.')
     return
@@ -175,46 +174,6 @@ onMounted(async () => {
     myLat.value = Number(locationStore.lat).toFixed(6)
     myLng.value = Number(locationStore.lng).toFixed(6)
   }
-
-  // ✅ 2) 없으면 geolocation
-  if (!navigator.geolocation) {
-    alert('이 브라우저에서는 위치 정보를 지원하지 않습니다.')
-    return
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      const { latitude, longitude } = pos.coords
-
-      myLat.value = latitude.toFixed(6)
-      myLng.value = longitude.toFixed(6)
-
-      await getAddressFromCoords(myLat.value, myLng.value)
-
-      locationStore.setLocation({
-        lat: latitude,
-        lng: longitude,
-        address: myAddress.value,
-      })
-
-      // distance도 같이 store에 저장(선택)
-      if (typeof locationStore.setDistance === 'function') {
-        locationStore.setDistance(currentRadius.value.km)
-      } else {
-        locationStore.distance = currentRadius.value.km
-      }
-
-      const myPos = new window.naver.maps.LatLng(latitude, longitude)
-      map.setCenter(myPos)
-      map.setZoom(currentRadius.value.zoom, true)
-      marker.setPosition(myPos)
-    },
-    (err) => {
-      console.error(err)
-      alert('위치 권한을 허용해야 현재 위치를 표시할 수 있습니다.')
-    },
-    { enableHighAccuracy: true, timeout: 10000 }
-  )
 })
 
 async function getAddressFromCoords(lat, lng) {

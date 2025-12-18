@@ -57,6 +57,7 @@ const isLoading = ref(false)
 import { useLocationStore } from "@/stores/location";
 const locationStore = useLocationStore();
 
+
 const findhospital = async () => {
   const mergedSymptoms = bodyPartLabels
     .filter(v => symptoms.value.includes(v.name)) // 선택된 부위만
@@ -64,28 +65,42 @@ const findhospital = async () => {
 
     console.log(locationStore.lng)
     console.log(locationStore.lat)
-  try {
-    isLoading.value = true
-    const res = await api.post(
-      `hospitals/general/symptom/`,
-      {
-        symptom: mergedSymptoms,
-        latitude: Number(locationStore.lat),
-        longitude: Number(locationStore.lng),
-      }
-    )
+  
     localStorage.setItem('symptom', JSON.stringify(mergedSymptoms))
-    localStorage.setItem('hospital_data', JSON.stringify(res.data))
     router.push({ name: 'recommenderlist' })
-  } catch (error) {
-    console.log("status", error.response?.status);
-    console.log("data", error.response?.data);
-    console.log("sent", { symptom: mergedSymptoms /*, latitude, longitude */ });
-    errorMsg.value = '아픈곳을 선택해주세요'
-  } finally {
-    isLoading.value = false
-  }
+ 
 }
+
+
+// const findhospital = async () => {
+//   const mergedSymptoms = bodyPartLabels
+//     .filter(v => symptoms.value.includes(v.name)) // 선택된 부위만
+//     .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
+
+//     console.log(locationStore.lng)
+//     console.log(locationStore.lat)
+//   try {
+//     isLoading.value = true
+//     const res = await api.post(
+//       `hospitals/general/symptom/`,
+//       {
+//         symptom: mergedSymptoms,
+//         latitude: Number(locationStore.lat),
+//         longitude: Number(locationStore.lng),
+//       }
+//     )
+//     localStorage.setItem('symptom', JSON.stringify(mergedSymptoms))
+//     localStorage.setItem('hospital_data', JSON.stringify(res.data))
+//     router.push({ name: 'recommenderlist' })
+//   } catch (error) {
+//     console.log("status", error.response?.status);
+//     console.log("data", error.response?.data);
+//     console.log("sent", { symptom: mergedSymptoms /*, latitude, longitude */ });
+//     errorMsg.value = '아픈곳을 선택해주세요'
+//   } finally {
+//     isLoading.value = false
+//   }
+// }
 
 const symptoms = ref([])
 const SymptomDescription = ref({})

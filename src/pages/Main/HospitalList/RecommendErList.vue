@@ -4,7 +4,7 @@
 
       <!-- 왼쪽: 지도 -->
       <div>
-        <GeneralFindMap />
+        <FindLocation />
       </div>
 
       <!-- 오른쪽: 정렬 버튼 + 리스트 -->
@@ -131,6 +131,7 @@ import api from "../../../components/api";
 import GeneralFindMap from "../Location/GeneralFindMap.vue";
 import { useLocationStore } from "@/stores/location";
 import SkeletonCard from "../../../components/SkeletonCard.vue";
+import FindLocation from "../Location/FindLocation.vue";
 
 const locationStore = useLocationStore();
 const selected = ref("distance");
@@ -182,6 +183,7 @@ const fetchHospitals = async () => {
   if (!lat.value || !lng.value) return;
 
   isLoading.value = true;
+  console.log(symptom)
   try {
     const res = await api.post("hospitals/general/symptom/", {
       symptom,
