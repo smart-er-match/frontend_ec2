@@ -124,11 +124,9 @@
     </div>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
 import api from "../../../components/api";
-import GeneralFindMap from "../Location/GeneralFindMap.vue";
 import { useLocationStore } from "@/stores/location";
 import SkeletonCard from "../../../components/SkeletonCard.vue";
 import FindLocation from "../Location/FindLocation.vue";
@@ -139,6 +137,7 @@ const selected = ref("distance");
 const isLoading = ref(false);
 const lat = computed(() => locationStore.lat);
 const lng = computed(() => locationStore.lng);
+// address / distance는 “표시용”으로만 두고, fetch 트리거는 최소화 권장
 const address = computed(() => locationStore.address);
 const distance = computed(() => locationStore.distance);
 
@@ -153,61 +152,98 @@ const user_data = JSON.parse(localStorage.getItem("user"));
 const symptom = JSON.parse(localStorage.getItem("symptom"));
 
 let intervalId = null;
-const lastUpdatedAt = ref(null); // Date.now() 숫자(ms)로 저장
-const nowTick = ref(Date.now()); // “n분 전” 갱신용
-
 let tickTimer = null;
 
+const lastUpdatedAt = ref(null);
+const nowTick = ref(Date.now());
 
-onMounted(() => {
-  // 5분 = 300,000ms
-  intervalId = setInterval(() => {
-    fetchHospitals();
-  }, 5 * 60 * 1000);
+/** ✅ 중복요청/응답역전 방지용 */
+let reqSeq = 0;              // 요청 번호
+let inFlightAbort = null;    // 이전 요청 취소용 AbortController
 
-  tickTimer = setInterval(() => {
-  nowTick.value = Date.now();
-}, 1000);
-});
+/** ✅ (선택) 연속 변경 디바운스 */
+let debounceTimer = null;
+const debounce = (fn, ms = 300) => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(fn, ms);
+};
 
-onUnmounted(() => {
-  if (intervalId) {
-    clearInterval(intervalId);
-  }
-
-  if (tickTimer) clearInterval(tickTimer);
-});
-
-
-const fetchHospitals = async () => {
+const fetchHospitals = async (reason = "") => {
+  // 위치 없으면 안함
   if (!lat.value || !lng.value) return;
 
+  // ✅ 요청 번호 증가
+  const myReq = ++reqSeq;
+
+  // ✅ 이전 요청 취소
+  if (inFlightAbort) {
+    inFlightAbort.abort();
+  }
+  inFlightAbort = new AbortController();
+
   isLoading.value = true;
-  console.log(symptom)
+
   try {
-    const res = await api.post("hospitals/general/symptom/", {
-      symptom,
-      latitude: lat.value,
-      longitude: lng.value,
-    });
+    // axios라면 v1.4+에서 signal 지원함 (대부분 지원)
+    const res = await api.post(
+      "hospitals/general/symptom/",
+      {
+        symptom,
+        latitude: lat.value,
+        longitude: lng.value,
+        // 필요하면 서버에서 distance 반영한다면 같이 보내도 됨:
+        // distance: distance.value,
+      },
+      { signal: inFlightAbort.signal }
+    );
+
+    // ✅ “마지막 요청”만 반영
+    if (myReq !== reqSeq) return;
 
     lastUpdatedAt.value = Date.now();
     hospital_data.value = res.data;
     localStorage.setItem("hospital_data", JSON.stringify(res.data));
+
   } catch (error) {
-    console.error(error);
+    // ✅ abort는 에러로 안 치고 조용히 무시
+    if (error?.name === "CanceledError" || error?.code === "ERR_CANCELED") return;
+    if (error?.name === "AbortError") return;
+
+    console.error("[fetchHospitals error]", error);
   } finally {
-    isLoading.value = false;
+    // ✅ 마지막 요청일 때만 로딩 끄기 (중간 요청이면 끄면 깜빡임 생김)
+    if (myReq === reqSeq) {
+      isLoading.value = false;
+    }
   }
 };
 
+
 watch(
-  () => [lat.value, lng.value, distance.value, address.value],
-  async () => {
-    fetchHospitals();
+  () => [lat.value, lng.value, distance.value],
+  () => {
+    debounce(() => fetchHospitals("latlng-change"), 250);
   },
   { immediate: true }
 );
+
+/** ✅ 5분마다 갱신: 중복요청 방지 로직이 있으니 그대로 OK */
+onMounted(() => {
+  intervalId = setInterval(() => {
+    fetchHospitals("interval");
+  }, 5 * 60 * 1000);
+
+  tickTimer = setInterval(() => {
+    nowTick.value = Date.now();
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (intervalId) clearInterval(intervalId);
+  if (tickTimer) clearInterval(tickTimer);
+  if (inFlightAbort) inFlightAbort.abort();
+  clearTimeout(debounceTimer);
+});
 
 const userClickData = async (hospitalname) => {
   try {
@@ -220,8 +256,6 @@ const userClickData = async (hospitalname) => {
     console.error(error);
   }
 };
-
-
 
 const lastUpdatedText = computed(() => {
   if (!lastUpdatedAt.value) return "아직 업데이트 없음";
@@ -238,6 +272,4 @@ const lastUpdatedText = computed(() => {
   const diffHour = Math.floor(diffMin / 60);
   return `${diffHour}시간 전`;
 });
-
-
 </script>
