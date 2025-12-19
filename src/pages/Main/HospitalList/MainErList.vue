@@ -43,34 +43,34 @@
 
         <div v-show="!isLoading">
           <div
-            v-for="value in hospitalDistance"
+            v-for="value in filteredHospitalDistance"
             :key="value.hpid"
             class="border p-3 rounded-lg shadow-sm mb-3 bg-white"
           >
-            <!-- 기본 표시(항상 노출): 이름 + 거리 + 버튼 -->
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
-
-                <p class="font-bold text-gray-900 truncate">{{ value.name }} <a
-                @click="$emit('click-hospital', value.name)"
-                :href="`https://map.naver.com/p/search/${encodeURIComponent(value.name)}?c=15.00,0,0,0,dh`"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mt-2 inline-block text-sm text-blue-600 underline hover:text-blue-800"
-              >
-                길찾기
-              </a> </p>
-
+                <p class="font-bold text-gray-900 truncate">
+                  {{ value.name }}
+                  <a
+                    @click="$emit('click-hospital', value.name)"
+                    :href="`https://map.naver.com/p/search/${encodeURIComponent(value.name)}?c=15.00,0,0,0,dh`"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="mt-2 inline-block text-sm text-blue-600 underline hover:text-blue-800"
+                  >
+                    길찾기
+                  </a>
+                </p>
 
                 <p class="text-gray-700 text-sm">거리 : {{ value.distance }}km</p>
 
                 <CircularProgress
-                label="응급실 일반 병상"
-                :current="value.hvec"
-                :total="value.hvs01"
-                :size="68"
-                :stroke="8"
-              />
+                  label="응급실 일반 병상"
+                  :current="value.hvec"
+                  :total="value.hvs01"
+                  :size="68"
+                  :stroke="8"
+                />
               </div>
 
               <button
@@ -82,7 +82,6 @@
               </button>
             </div>
 
-            <!-- 상세(눌렀을 때만) -->
             <div v-show="openId === value.hpid" class="mt-3 pt-3 border-t">
               <p class="text-gray-700 text-sm">전화번호 : {{ value.phone }}</p>
               <p class="text-gray-700 text-sm">주소 : {{ value.address }}</p>
@@ -99,8 +98,8 @@
             </div>
           </div>
 
-          <div v-if="hospitalDistance.length === 0" class="text-gray-500">
-            조회된 병원이 없습니다.
+          <div v-if="filteredHospitalDistance.length === 0" class="text-gray-500">
+            반경 {{ radiusKm }}km 이내에 조회된 병원이 없습니다.
           </div>
         </div>
       </div>
@@ -115,27 +114,25 @@
 
         <div v-show="!isLoading">
           <div
-            v-for="value in hospitalScore"
+            v-for="value in filteredHospitalScore"
             :key="value.hpid"
             class="border p-3 rounded-lg shadow-sm mb-3 bg-white"
           >
-            <!-- 기본 표시(항상 노출): 이름 + 점수(+거리 있으면 같이) + 버튼 -->
             <div class="flex items-start justify-between gap-3">
               <div class="min-w-0">
                 <p class="font-bold text-gray-900 truncate">{{ value.name }}</p>
                 <p class="text-gray-700 text-sm">AI 추천 점수: {{ value.score }}</p>
-                <!-- score 리스트에 distance도 들어온다면 보여주고, 없으면 안 보여줌 -->
                 <p v-if="value.distance != null" class="text-gray-700 text-sm">
                   거리 : {{ value.distance }}km
                 </p>
 
                 <CircularProgress
-                label="응급실 일반 병상"
-                :current="value.hvec"
-                :total="value.hvs01"
-                :size="68"
-                :stroke="8"
-              />
+                  label="응급실 일반 병상"
+                  :current="value.hvec"
+                  :total="value.hvs01"
+                  :size="68"
+                  :stroke="8"
+                />
               </div>
 
               <button
@@ -147,15 +144,14 @@
               </button>
             </div>
 
-            <!-- 상세(눌렀을 때만) -->
             <div v-show="openId === value.hpid" class="mt-3 pt-3 border-t">
               <p class="text-gray-700 text-sm">전화번호 : {{ value.phone }}</p>
               <p class="text-gray-700 text-sm">주소 : {{ value.address }}</p>
             </div>
           </div>
 
-          <div v-if="hospitalScore.length === 0" class="text-gray-500">
-            조회된 병원이 없습니다.
+          <div v-if="filteredHospitalScore.length === 0" class="text-gray-500">
+            반경 {{ radiusKm }}km 이내에 조회된 병원이 없습니다.
           </div>
         </div>
       </div>
@@ -164,12 +160,12 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed } from "vue";
+import { useLocationStore } from "@/stores/location";
 import SkeletonCard from "@/components/SkeletonCard.vue";
 import CircularProgress from "../../../components/CircularProgress.vue";
 
 const props = defineProps({
-  /** v-model: 'distance' | 'score' */
   modelValue: {
     type: String,
     default: "distance",
@@ -177,25 +173,65 @@ const props = defineProps({
   },
   isLoading: { type: Boolean, default: false },
   lastUpdatedText: { type: String, default: "아직 업데이트 없음" },
-
   hospitalDistance: { type: Array, default: () => [] },
   hospitalScore: { type: Array, default: () => [] },
 });
 
 defineEmits(["update:modelValue", "click-hospital"]);
 
+const locationStore = useLocationStore();
+
+/** ✅ Pinia 반경(km) */
+const radiusKm = computed(() => Number(locationStore.distance) || 10);
+
+/** ✅ "3.2", "3.2km", "3,2 km" 같은 값 파싱 */
+const parseKm = (x) => {
+  if (x == null) return NaN;
+  const s = String(x).trim().replace(",", ".");
+  const m = s.match(/[\d.]+/g);
+  if (!m) return NaN;
+  return parseFloat(m.join(""));
+};
+
+/** ✅ 거리순 리스트: 반경 이내만 */
+const filteredHospitalDistance = computed(() => {
+  const r = radiusKm.value;
+  return (props.hospitalDistance || []).filter((v) => {
+    const d = parseKm(v.distance);
+    if (Number.isNaN(d)) return false; // ✅ NaN이면 숨김 (필터가 확실히 보이게)
+    return d <= r;
+  });
+});
+
+/** ✅ 점수순도 distance 필드가 있다면 반경 이내만 */
+const filteredHospitalScore = computed(() => {
+  const r = radiusKm.value;
+  return (props.hospitalScore || []).filter((v) => {
+    if (v.distance == null) return true; // score에 distance 없으면 필터 불가 → 그대로 노출
+    const d = parseKm(v.distance);
+    if (Number.isNaN(d)) return false;
+    return d <= r;
+  });
+});
+
 /** ✅ 상세 펼침 상태 (한 번에 하나만) */
 const openId = ref(null);
-
 const toggle = (hpid) => {
   openId.value = openId.value === hpid ? null : hpid;
 };
 
-/** ✅ 탭 바뀌면 펼친 거 닫기 (원하면 제거 가능) */
+/** ✅ 탭 바뀌면 펼친 거 닫기 */
 watch(
   () => props.modelValue,
   () => {
     openId.value = null;
   }
 );
+
+/** ✅ 반경이 바뀌면 열린 카드 닫기(선택) */
+watch(radiusKm, () => {
+  openId.value = null;
+});
 </script>
+
+<style scoped></style>

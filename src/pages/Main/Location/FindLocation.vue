@@ -103,7 +103,9 @@ watch(stepIndex, () => {
   if (map) {
     map.setZoom(currentRadius.value.zoom, true)
   }
-})
+},
+  { immediate: true }
+)
 
 // ✅ store의 lat/lng 변경되면 지도/마커/주소 갱신
 watch(
