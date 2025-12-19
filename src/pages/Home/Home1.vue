@@ -64,21 +64,16 @@
     v-if="auth.isLoggedIn"
     class="text-center"
     >
-    <h1 class="text-2xl sm:text-3xl font-bold text-center sm:text-left">
+    <h1 class="text-2xl sm:text-3xl font-bold text-center">
       <!-- 이름 -->
       <span class="block">
         {{ auth.user.name }}님
       </span>
 
-      <!-- 모바일: 줄바꿈 -->
-      <span class="block sm:hidden mt-2 text-lg font-semibold">
+      <span class="block mt-2 text-lg font-semibold">
         로그인 하신 것을 환영합니다
       </span>
 
-      <!-- PC: 한 줄 -->
-      <span class="hidden sm:inline">
-        &nbsp;로그인 하신 것을 환영합니다
-      </span>
     </h1>
 
     <!-- <button

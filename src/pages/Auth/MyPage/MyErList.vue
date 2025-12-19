@@ -1,5 +1,7 @@
 <template>
+  <!-- ✅ 찜한 응급실이 없을 때 -->
   <div
+    v-if="favoriteList.length === 0"
     class="flex flex-col items-center justify-center
            rounded-2xl border border-gray-200 bg-gray-50
            px-6 py-16 text-center"
@@ -21,19 +23,16 @@
       </svg>
     </div>
 
-    <!-- 제목 -->
     <h1 class="mt-6 text-xl font-bold text-gray-900">
       내가 찜한 응급실
     </h1>
 
-    <!-- 설명 -->
     <p class="mt-2 text-sm text-gray-500">
       아직 찜한 응급실이 없습니다.
       <br />
       자주 가는 응급실을 찜해두면 빠르게 확인할 수 있어요.
     </p>
 
-    <!-- CTA 버튼 -->
     <button
       class="mt-8 inline-flex items-center gap-2
              rounded-xl bg-indigo-600 px-6 py-2.5
@@ -55,15 +54,56 @@
       </svg>
     </button>
   </div>
+
+  <!-- ✅ 찜한 응급실이 있을 때 -->
+  <div v-else class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <div
+      v-for="item in favoriteList"
+      :key="item.id"
+      class="rounded-xl border bg-white p-4 shadow-sm hover:shadow transition"
+    >
+      <h3 class="text-lg font-semibold text-gray-900">
+        {{ item.name }}
+      </h3>
+      <p class="text-sm text-gray-700">📞 {{ item.emergency_phone }}</p>
+      <p class="text-sm text-gray-700">📍 {{ item.address }}</p>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { useRouter } from "vue-router";
+import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
+import api from '@/components/api'
 
-const router = useRouter();
+const router = useRouter()
+
+// ✅ 찜한 응급실 리스트 (병원 객체)
+const favoriteList = ref([])
 
 const goToER = () => {
-  // 실제 네 라우트 이름에 맞게 수정
-  router.push({ name: "erlist" });
-};
+  router.push({ name: 'erlist' })
+}
+
+// onMounted(async () => {
+//   try {
+//     /**
+//      * 권장 응답 형태:
+//      * GET favorites/hospitals/
+//      * [
+//      *   {
+//      *     id: 1,
+//      *     name: "...",
+//      *     emergency_phone: "...",
+//      *     address: "..."
+//      *   }
+//      * ]
+//      */
+//     const res = await api.get('favorites/hospitals/')
+//     favoriteList.value = res.data?.data ?? res.data ?? []
+//   } catch (e) {
+//     console.warn('즐겨찾기 목록 불러오기 실패', e)
+//     favoriteList.value = []
+//   }
+// })
 </script>

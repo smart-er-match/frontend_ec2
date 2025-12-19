@@ -3,9 +3,7 @@
     <h1 class="font-bold text-3xl mb-4">전국 응급실 리스트</h1>
 
     <!-- 지역 카테고리 -->
-    <div
-      class="flex flex-wrap gap-2 mb-6 top-0 bg-white z-50 py-2"
-    >
+    <div class="flex flex-wrap gap-2 mb-6 top-0 bg-white z-50 py-2">
       <button
         v-for="region in regionList"
         :key="region"
@@ -24,29 +22,46 @@
       {{ selectedRegion === '전체' ? '전국' : selectedRegion }}
     </h2>
 
-    <!-- 카드 영역: 높이 고정 + 10개만 -->
-
+    <!-- 카드 영역 -->
     <div class="h-[900px] grid grid-cols-2 gap-3 auto-rows-max">
-
-
       <div
         v-for="item in paginatedList"
-        :key="item.id"
-        class="border rounded-lg p-4 shadow-md bg-white hover:shadow-lg transition h-40"
+        :key="item.hpid"
+        role="button"
+        tabindex="0"
+        @click="goDetail(item.hpid)"
+        @keydown.enter.prevent="goDetail(item.hpid)"
+        class="relative border rounded-lg p-4 shadow-md bg-white hover:shadow-lg transition h-40
+               cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
       >
+        <!-- ✅ 즐겨찾기 버튼 (클릭해도 상세로 안감: stop) -->
+        <button
+          class="absolute top-3 right-3 inline-flex items-center justify-center
+                 h-9 w-9 rounded-full border transition
+                 hover:bg-gray-50 active:scale-[0.98]"
+          :class="isFavorite(item.hpid)
+            ? 'bg-yellow-50 border-yellow-300 text-yellow-600'
+            : 'bg-white border-gray-200 text-gray-400'"
+          @click.stop="toggleFavorite(item)"
+          :aria-pressed="isFavorite(item.hpid)"
+          :title="isFavorite(item.hpid) ? '즐겨찾기 해제' : '즐겨찾기'"
+        >
+          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="currentColor">
+            <path
+              d="M12 17.27l5.18 3.05-1.64-5.81L20 10.24l-5.91-.5L12 4.5 9.91 9.74 4 10.24l4.46 4.27-1.64 5.81z"
+              :opacity="isFavorite(item.hpid) ? 1 : 0.25"
+            />
+          </svg>
+        </button>
+
         <h3 class="text-lg font-semibold text-gray-900 mb-1">
           {{ item.name }}
         </h3>
 
-        <p class="text-sm text-gray-700">
-          📞 {{ item.emergency_phone }}
-        </p>
-        <p class="text-sm text-gray-700">
-        📍 {{ item.address }}
-        </p>
+        <p class="text-sm text-gray-700">📞 {{ item.emergency_phone }}</p>
+        <p class="text-sm text-gray-700">📍 {{ item.address }}</p>
       </div>
 
-      <!-- 선택된 리스트가 없을 때 -->
       <p
         v-if="paginatedList.length === 0"
         class="col-span-full text-center text-gray-500 mt-8"
@@ -65,9 +80,7 @@
         이전
       </button>
 
-      <span class="text-gray-700">
-        {{ currentPage }} / {{ totalPages }}
-      </span>
+      <span class="text-gray-700">{{ currentPage }} / {{ totalPages }}</span>
 
       <button
         @click="goNextPage"
@@ -82,70 +95,81 @@
 
 <script setup>
 import { onMounted, reactive, ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../../../components/api'
 
-// { '서울특별시': [...], '경기도': [...], ... }
-const er_list = reactive({})
+const router = useRouter()
 
-const selectedRegion = ref('전체')      // 현재 선택된 지역
+const er_list = reactive({})
+const selectedRegion = ref('전체')
 const currentPage = ref(1)
 const pageSize = 10
 
-// 버튼에 쓸 지역 목록
-const regionList = computed(() => {
-  return ['전체', ...Object.keys(er_list)]
-})
+const favoriteIds = ref(new Set())
 
-// 현재 선택된 지역의 병원 리스트 (전국일 땐 flatten)
+const regionList = computed(() => ['전체', ...Object.keys(er_list)])
+
 const currentList = computed(() => {
-  if (selectedRegion.value === '전체') {
-    // 전국: 모든 지역 배열 합치기
-    return Object.values(er_list).flat()
-  }
-  // 특정 지역
+  if (selectedRegion.value === '전체') return Object.values(er_list).flat()
   return er_list[selectedRegion.value] || []
 })
 
-// 페이지네이션 적용 리스트
 const paginatedList = computed(() => {
   const list = currentList.value
   const start = (currentPage.value - 1) * pageSize
-  const end = start + pageSize
-  return list.slice(start, end)
+  return list.slice(start, start + pageSize)
 })
 
-// 총 페이지 수
 const totalPages = computed(() => {
-  const list = currentList.value
-  if (list.length === 0) return 1
-  return Math.ceil(list.length / pageSize)
+  const len = currentList.value.length
+  return len === 0 ? 1 : Math.ceil(len / pageSize)
 })
 
-// 지역 선택 시 페이지를 1페이지로 초기화
 const selectRegion = (region) => {
   selectedRegion.value = region
   currentPage.value = 1
 }
+const goPrevPage = () => (currentPage.value = Math.max(1, currentPage.value - 1))
+const goNextPage = () => (currentPage.value = Math.min(totalPages.value, currentPage.value + 1))
 
-const goPrevPage = () => {
-  currentPage.value = Math.max(1, currentPage.value - 1)
+const isFavorite = (hospitalId) => favoriteIds.value.has(hospitalId)
+
+const toggleFavorite = async (item) => {
+  const id = item.id
+  const wasFav = isFavorite(id)
+
+  const next = new Set(favoriteIds.value)
+  wasFav ? next.delete(id) : next.add(id)
+  favoriteIds.value = next
+
+  try {
+    if (wasFav) await api.delete(`favorites/hospitals/${id}/`)
+    else await api.post(`favorites/hospitals/${id}/`)
+  } catch (e) {
+    const rollback = new Set(favoriteIds.value)
+    wasFav ? rollback.add(id) : rollback.delete(id)
+    favoriteIds.value = rollback
+    console.error(e)
+  }
 }
 
-const goNextPage = () => {
-  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
+// ✅ 상세 페이지 이동 (라우트 이름/경로 둘 중 하나로 맞추면 됨)
+const goDetail = (id) => {
+  console.log('goDetail id:', id)
+  console.log('resolved:', router.resolve({ name: 'erdetail', params: { id } }))
+  // 1) name 방식 (권장): router에 { name: 'er-detail', params: { id } } 라우트가 있을 때
+  router.push({ name: 'erdetail', params: { id } })
+
+  // 2) path 방식: /er/:id 같은 경로면 아래로 바꿔도 됨
+  // router.push(`/er/${id}`)
 }
 
 onMounted(async () => {
   try {
     const res = await api.get('hospitals/list/')
-    // res.data.data 가 { '서울특별시': [...], '경기도': [...], ... } 라고 가정
     Object.assign(er_list, res.data.data)
-    console.log('응급실 데이터', res.data.data)
   } catch (e) {
     console.error(e)
   }
 })
 </script>
-
-<style scoped>
-</style>
