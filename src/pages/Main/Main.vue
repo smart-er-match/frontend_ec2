@@ -1,8 +1,12 @@
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { useRouter } from "vue-router";
+import { useLocationStore } from "@/stores/location"
+import api from "@/components/api"
 
 const router = useRouter();
+const locationStore = useLocationStore();
+
 
 // ✅ 안전하게 computed로 감싸기 (초기 null 방지)
 const user = computed(() => JSON.parse(localStorage.getItem("user") || "{}"));
@@ -15,6 +19,21 @@ const generalClick = () => {
 const staffClick = () => {
   // router.push({ name: "staffHome" })
 };
+
+onMounted(async () => {
+  if (!locationStore.lat || !locationStore.lng) return
+
+  try {
+    await api.post('/hospitals/user/location/', {
+      latitude: locationStore.lat,
+      longitude: locationStore.lng,
+      locationstext: locationStore.address,
+    })
+    
+  } catch (error) {
+    console.error('[location] failed to send', error)
+  }
+})
 </script>
 
 <template>

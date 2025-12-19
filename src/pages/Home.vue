@@ -1,9 +1,8 @@
 <template>
   <GetLocation
-  ref="getLoc"
-    @success="(p) => console.log('loc success', p)"
-  @error="(m) => console.log('loc error', m)"
-/>
+  @success="onLocSuccess"
+  ref="getLoc"/>
+
   <main
     ref="scroller"
     class="h-screen overflow-y-auto scroll-smooth snap-y snap-mandatory"
@@ -58,6 +57,7 @@ import Navbar from '../components/Navbar.vue'
 import Home1 from './Home/Home1.vue'
 import Home2 from './Home/Home2.vue'
 import Home3 from './Home/Home3.vue'
+import { useLocationStore } from '@/stores/location'
 
 const scroller = ref(null)
 const sections = ref([])
@@ -70,8 +70,7 @@ let resizeTimer = null
 const getLoc = ref(null)
 
 const askLocation = () => {
-  console.log('[Home] askLocation called, getLoc =', getLoc.value)
-getLoc.value?.requestLocation()
+  getLoc.value?.requestLocation()
 }
 
 const go = (next) => {
@@ -101,9 +100,15 @@ const onResize = () => {
   }, 100)
 }
 
+const onLocSuccess = ({ lat, lng, address }) => {
+  console.log('[Home] success event:', lat, lng, address)
+  // 여기서 병원 조회/백엔드 전송
+}
+
+
 onMounted(async () => {
-  console.log('[Home] mounted, getLoc =', getLoc.value)
   askLocation()
+
   // ✅ (A) 스크롤/섹션 초기화는 항상
   sections.value = Array.from(scroller.value?.querySelectorAll('section.page') || [])
   scroller.value?.addEventListener('wheel', onWheel, { passive: false })

@@ -63,14 +63,10 @@ const findhospital = async () => {
     .filter(v => symptoms.value.includes(v.name)) // 선택된 부위만
     .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
 
-    console.log(locationStore.lng)
-    console.log(locationStore.lat)
-  
     localStorage.setItem('symptom', JSON.stringify(mergedSymptoms))
     router.push({ name: 'recommenderlist' })
  
 }
-
 
 // const findhospital = async () => {
 //   const mergedSymptoms = bodyPartLabels

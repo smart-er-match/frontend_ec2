@@ -82,9 +82,6 @@ const radiusPresets = [
   { km: 50, zoom: 11 },
 ]
 
-const askLocation = () => {
-  getLoc.value?.requestLocation()
-}
 
 // ✅ 슬라이더 단계 index
 const stepIndex = ref(2)
@@ -108,37 +105,33 @@ watch(stepIndex, () => {
 
 // ✅ store의 lat/lng 변경되면 지도/마커/주소 갱신
 watch(
-  () => [locationStore.lat, locationStore.lng],
-  async ([lat, lng]) => {
+  () => [locationStore.lat, locationStore.lng, locationStore.address],
+  ([lat, lng, addr]) => {
     if (!lat || !lng) return
     if (!map || !marker) return
 
     myLat.value = Number(lat).toFixed(6)
     myLng.value = Number(lng).toFixed(6)
+    myAddress.value = addr || myAddress.value
 
     const pos = new window.naver.maps.LatLng(lat, lng)
     map.setCenter(pos)
     map.setZoom(currentRadius.value.zoom, true)
     marker.setPosition(pos)
-
-    await getAddressFromCoords(myLat.value, myLng.value)
-
-    // 주소가 달라졌을 때만 store 갱신(루프 방지)
-    if (locationStore.address !== myAddress.value) {
-      locationStore.setLocation({
-        lat,
-        lng,
-        address: myAddress.value,
-      })
-    }
-  },
-  { immediate: false }
+  }
 )
+
 
 onMounted(async () => {
 
   await nextTick()            // ref 연결 보장
-  getLoc.value?.requestLocation()
+  if (!locationStore.hasLocation) {
+    getLoc.value?.requestLocation()
+  }
+
+  //   console.log(locationStore.lat)
+  // console.log(locationStore.lng)
+  // console.log(locationStore.address)
 
   if (!window.naver || !window.naver.maps) {
     console.error('네이버 지도 스크립트가 로드되지 않았습니다.')
@@ -173,51 +166,9 @@ onMounted(async () => {
 
     myLat.value = Number(locationStore.lat).toFixed(6)
     myLng.value = Number(locationStore.lng).toFixed(6)
+    myAddress.value = locationStore.address
   }
 })
-
-async function getAddressFromCoords(lat, lng) {
-  const url =
-    `/naver/map-reversegeocode/v2/gc` +
-    `?request=coordsToaddr` +
-    `&coords=${lng},${lat}` +
-    `&sourcecrs=epsg:4326` +
-    `&orders=roadaddr,addr` +
-    `&output=json`
-
-  const res = await fetch(url)
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    console.error('reverse geocode 실패', res.status, text)
-    myAddress.value = '주소를 불러오지 못했습니다.'
-    return
-  }
-
-  const data = await res.json()
-  const results = data?.results || []
-
-  if (results.length === 0) {
-    console.error('reverse geocode 결과 없음', data)
-    myAddress.value = '주소를 찾을 수 없습니다.'
-    return
-  }
-
-  const road = results.find(r => r.name === 'roadaddr')
-  const jibun = results.find(r => r.name === 'addr')
-  const picked = road || jibun || results[0]
-
-  const region = picked.region
-  const land = picked.land
-
-  const base = `${region.area1.name} ${region.area2.name} ${region.area3.name}`.trim()
-  const roadPart =
-    land?.name
-      ? `${land.name} ${land.number1 || ''}${land.number2 ? '-' + land.number2 : ''}`.trim()
-      : `${land?.number1 || ''}${land?.number2 ? '-' + land.number2 : ''}`.trim()
-
-  myAddress.value = `${base} ${roadPart}`.trim()
-}
 
 const openAddressSearch = () => {
   new window.daum.Postcode({

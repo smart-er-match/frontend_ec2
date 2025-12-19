@@ -8,6 +8,7 @@ export const useLocationStore = defineStore('location', {
     address: '',
     distance: 10,
   }),
+  persist: true,
 
   getters: {
     hasLocation: (state) => state.lat !== null && state.lng !== null,
@@ -17,16 +18,11 @@ export const useLocationStore = defineStore('location', {
     setLocation({ lat, lng, address }) {
       this.lat = lat
       this.lng = lng
-      if (address !== undefined) this.address = address
-      this.loaded = true
+      this.address = address
     },
 
     setDistance(distance) {
       this.distance = distance
-    },
-
-    setAddress(address) {
-      this.address = address
     },
 
     clear() {
@@ -34,7 +30,6 @@ export const useLocationStore = defineStore('location', {
       this.lng = null
       this.address = ''
       this.distance = 10
-      this.loaded = false
     },
   },
 })

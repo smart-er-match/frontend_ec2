@@ -11,7 +11,7 @@
       <div class="min-w-0">
         <!-- 정렬 토글 -->
         <div class="flex items-center justify-between">
-  <!-- 정렬 토글 -->
+        <!-- 정렬 토글 -->
           <div class="flex justify-center lg:justify-start">
             <div class="inline-flex bg-gray-100 rounded-full p-1">
               <button
@@ -126,7 +126,7 @@
 </template>
 <script setup>
 import { ref, computed, watch, onMounted, onUnmounted } from "vue";
-import api from "../../../components/api";
+import api from "@/components/api";
 import { useLocationStore } from "@/stores/location";
 import SkeletonCard from "../../../components/SkeletonCard.vue";
 import FindLocation from "../Location/FindLocation.vue";
@@ -182,6 +182,10 @@ const fetchHospitals = async (reason = "") => {
   inFlightAbort = new AbortController();
 
   isLoading.value = true;
+
+  console.log(symptom)
+  console.log(lat.value)
+  console.log(lng.value)
 
   try {
     // axios라면 v1.4+에서 signal 지원함 (대부분 지원)
