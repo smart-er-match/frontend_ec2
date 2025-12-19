@@ -1,41 +1,3 @@
-<script setup>
-import { computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { useLocationStore } from "@/stores/location"
-import api from "@/components/api"
-
-const router = useRouter();
-const locationStore = useLocationStore();
-
-
-// ✅ 안전하게 computed로 감싸기 (초기 null 방지)
-const user = computed(() => JSON.parse(localStorage.getItem("user") || "{}"));
-const roleMessage = computed(() => (user.value.role ? "의료진" : "일반인"));
-
-const generalClick = () => {
-  router.push({ name: "generalsymptoms" });
-};
-
-const staffClick = () => {
-  // router.push({ name: "staffHome" })
-};
-
-onMounted(async () => {
-  if (!locationStore.lat || !locationStore.lng) return
-
-  try {
-    await api.post('/hospitals/user/location/', {
-      latitude: locationStore.lat,
-      longitude: locationStore.lng,
-      locationstext: locationStore.address,
-    })
-    
-  } catch (error) {
-    console.error('[location] failed to send', error)
-  }
-})
-</script>
-
 <template>
   <div class="mx-auto w-full max-w-3xl">
     <!-- 헤더 -->
@@ -173,8 +135,111 @@ onMounted(async () => {
       </button>
     </div>
 
+<!-- 빠른 액션 -->
+<div class="mt-10 space-y-4">
+  <!-- 응급실 목록 보기 -->
+  <button
+    type="button"
+    @click="erListClick"
+    class="group w-full relative overflow-hidden
+           rounded-2xl border border-gray-200 bg-white
+           p-5 text-left shadow-sm
+           transition-all duration-200
+           hover:shadow-md hover:border-indigo-200
+           active:scale-[0.99]
+           focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  >
+    <!-- 배경 효과 -->
+    <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <div class="absolute -top-24 -right-24 h-52 w-52 rounded-full bg-indigo-100 blur-2xl"></div>
+    </div>
+
+    <div class="relative flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+          <!-- list icon -->
+          <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/>
+            <path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>
+          </svg>
+        </div>
+
+        <div>
+          <p class="text-base font-bold text-gray-900">응급실 목록 보기</p>
+          <p class="text-sm text-gray-500">
+            주변 응급실을 리스트로 확인합니다.
+          </p>
+        </div>
+      </div>
+
+      <span class="text-sm font-semibold text-indigo-600">
+        열기 →
+      </span>
+    </div>
+  </button>
+
+  <!-- 119 바로 연결 -->
+  <button
+    type="button"
+    @click="call119"
+    class="group w-full relative overflow-hidden
+           rounded-2xl border border-gray-200 bg-white
+           p-5 text-left shadow-sm
+           transition-all duration-200
+           hover:shadow-md hover:border-rose-200
+           active:scale-[0.99]
+           focus:outline-none focus:ring-2 focus:ring-rose-500"
+  >
+    <!-- 배경 효과 -->
+    <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <div class="absolute -top-24 -left-24 h-52 w-52 rounded-full bg-rose-100 blur-2xl"></div>
+    </div>
+
+    <div class="relative flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+          <!-- phone icon -->
+          <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2
+                     19.8 19.8 0 0 1-8.63-3.07
+                     19.5 19.5 0 0 1-6.04-6.04
+                     19.8 19.8 0 0 1-3.07-8.63
+                     A2 2 0 0 1 2.06 0h3
+                     a2 2 0 0 1 2 1.72
+                     c.12.86.3 1.7.54 2.5
+                     a2 2 0 0 1-.45 2.11
+                     L5.91 8.09a16 16 0 0 0 6 6
+                     l1.76-1.24a2 2 0 0 1 2.11-.45
+                     c.8.24 1.64.42 2.5.54
+                     A2 2 0 0 1 22 16.92z"/>
+          </svg>
+        </div>
+
+        <div>
+          <p class="text-base font-bold text-gray-900">119 바로 연결하기</p>
+          <p class="text-sm text-gray-500">
+            긴급 상황 시 즉시 전화 연결
+          </p>
+            <p class="text-xs text-gray-500 text-center">
+          ※ 119 연결은 모바일 환경에서 전화 앱이 실행됩니다.
+        </p>
+        </div>
+      </div>
+
+      <span class="text-sm font-semibold text-rose-600">
+        전화 →
+      </span>
+    </div>
+  </button>
+
+
+</div>
+
+
     <!-- 하단 링크 -->
-    <div class="mt-10 text-center">
+    <div 
+      v-if="user.role === false"
+    class="mt-10 text-center">
       <router-link
         :to="{ name: 'license' }"
         class="inline-flex items-center justify-center gap-2 rounded-full border border-indigo-200 bg-white px-5 py-2
@@ -189,5 +254,59 @@ onMounted(async () => {
         </svg>
       </router-link>
     </div>
+    <div v-else class="mt-10">
+
+    </div>
+
   </div>
 </template>
+
+
+<script setup>
+import { computed, onMounted } from "vue";
+import { useRouter } from "vue-router";
+import { useLocationStore } from "@/stores/location"
+import api from "@/components/api"
+
+const router = useRouter();
+const locationStore = useLocationStore();
+
+const erListClick = () => {
+  // ✅ 너 프로젝트 라우트 이름에 맞게 바꿔줘
+  // 예: { name: "mainEr" } / { name: "mainerlist" } / { path: "/main/er" }
+  router.push({ name: "erlist" });
+};
+
+const call119 = () => {
+  // ✅ 모바일: 바로 전화 앱 열림
+  window.location.href = "tel:119";
+};
+
+
+// ✅ 안전하게 computed로 감싸기 (초기 null 방지)
+const user = computed(() => JSON.parse(localStorage.getItem("user") || "{}"));
+const roleMessage = computed(() => (user.value.role ? "의료진" : "일반인"));
+
+const generalClick = () => {
+  router.push({ name: "generalsymptoms" });
+};
+
+const staffClick = () => {
+  // router.push({ name: "staffHome" })
+};
+
+onMounted(async () => {
+  if (!locationStore.lat || !locationStore.lng) return
+
+  try {
+    await api.post('/hospitals/user/location/', {
+      latitude: locationStore.lat,
+      longitude: locationStore.lng,
+      locationstext: locationStore.address,
+    })
+    
+  } catch (error) {
+    console.error('[location] failed to send', error)
+  }
+})
+</script>

@@ -161,7 +161,6 @@ const auth = useAuthStore()
 // 로그인 상태에서만 "이동 허용"할 메뉴들
 const protectedNav = [
   { label: '메인', name: 'main' },
-  { label: '응급실 목록', name: 'erlist' },
 ]
 
 const isOpen = ref(false)

@@ -1,12 +1,12 @@
 
 
-
-
 <template>
   <!-- 🔥 히어로 섹션 -->
-  <section
+ <section
   class="relative h-full w-full
-         flex items-center justify-center
+         flex items-start justify-center
+         pt-5 sm:pt-24 lg:pt-0
+         lg:items-center
          overflow-hidden"
 >
   <!-- 배경 이미지 -->
@@ -23,15 +23,14 @@
 
   <!-- 🔥 중앙 콘텐츠 -->
   <div
-    class="relative z-10
-           flex flex-col lg:flex-row
-           items-center justify-center
-           gap-12
-           lg:gap-40
-           px-6
-           w-full max-w-6xl
-           text-white"
-  >
+  class="relative z-10
+         flex flex-col lg:flex-row
+         items-center justify-start lg:justify-center
+         gap-10 lg:gap-40
+         px-6
+         w-full max-w-6xl
+         text-white"
+>
     <!-- 왼쪽 문구 -->
     <div class="flex flex-col items-center lg:items-start text-center lg:text-left">
   <!-- 상단 선 -->
@@ -53,19 +52,33 @@
 </div>
 
     <!-- 오른쪽 로그인 -->
-  <div
-  class="w-full max-w-md
-         min-w-[380px]
-         shrink-0
-         bg-white/80 text-slate-800
-         rounded-xl shadow-xl p-8"
->
+    <div
+    class="w-full max-w-md
+          min-w-0 sm:min-w-[380px]
+          shrink-0
+          bg-white/85 text-slate-800
+          rounded-xl shadow-xl p-6 sm:p-8
+          mt-1 lg:mt-0"
+  >
     <div 
     v-if="auth.isLoggedIn"
     class="text-center"
     >
-     <h1 class="text-3xl font-bold">
-      {{ auth.user.name }}님 <br>로그인 하신것을 환영합니다
+    <h1 class="text-2xl sm:text-3xl font-bold text-center sm:text-left">
+      <!-- 이름 -->
+      <span class="block">
+        {{ auth.user.name }}님
+      </span>
+
+      <!-- 모바일: 줄바꿈 -->
+      <span class="block sm:hidden mt-2 text-lg font-semibold">
+        로그인 하신 것을 환영합니다
+      </span>
+
+      <!-- PC: 한 줄 -->
+      <span class="hidden sm:inline">
+        &nbsp;로그인 하신 것을 환영합니다
+      </span>
     </h1>
 
     <!-- <button
@@ -78,6 +91,30 @@
       <Login />
     </div>
 
+    <button
+      v-if="auth.isLoggedIn"
+      @click="movetoMain"
+      class="mt-6 w-full sm:w-[260px] mx-auto
+            flex items-center justify-center gap-2
+            rounded-xl bg-indigo-600 px-4 py-3
+            text-sm sm:text-base font-semibold text-white
+            shadow-md transition
+            hover:bg-indigo-500
+            active:scale-[0.98]
+            focus:outline-none focus:ring-2 focus:ring-indigo-500"
+    >
+      응급실 추천 바로가기
+      <svg
+        class="h-4 w-4"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M5 12h14" />
+        <path d="M13 5l7 7-7 7" />
+      </svg>
+    </button>
 
     </div>
   </div>
@@ -107,7 +144,6 @@ const router = useRouter()
 const movetoMain = () =>{
   router.push({name: 'main'})
 }
-
 onMounted(() => {
   intervalId = setInterval(() => {
     currentImage.value = (currentImage.value + 1) % images.length

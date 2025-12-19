@@ -28,7 +28,10 @@
     class="fixed left-6 top-1/2 -translate-y-1/2 z-[60]
            flex flex-col items-center gap-4 px-4 py-5 rounded-full
            bg-black/50 backdrop-blur shadow-lg text-white"
-  >
+  :class="indicatorVisible
+    ? 'opacity-100 pointer-events-auto'
+    : 'opacity-0 pointer-events-none md:opacity-100 md:pointer-events-auto'"
+>
     <div class="text-xs font-semibold tabular-nums opacity-90">
       {{ String(index + 1).padStart(2, '0') }}
     </div>
@@ -58,6 +61,24 @@ import Home1 from './Home/Home1.vue'
 import Home2 from './Home/Home2.vue'
 import Home3 from './Home/Home3.vue'
 import { useLocationStore } from '@/stores/location'
+
+const indicatorVisible = ref(false);
+let hideTimer = null;
+
+const isMobile = () =>
+  window.matchMedia?.("(pointer: coarse)")?.matches;
+
+// 터치 시 인디케이터 표시
+const showIndicator = () => {
+  if (!isMobile()) return;
+
+  indicatorVisible.value = true;
+  clearTimeout(hideTimer);
+
+  hideTimer = setTimeout(() => {
+    indicatorVisible.value = false;
+  }, 2500); // 2.5초 후 숨김
+};
 
 const scroller = ref(null)
 const sections = ref([])
@@ -126,12 +147,21 @@ onMounted(async () => {
     { root: scroller.value, threshold: [0.55, 0.6, 0.7] }
   )
   sections.value.forEach(sec => io.observe(sec))
+
+
+   if (!isMobile()) return;
+
+  // 화면 아무 데나 터치하면 표시
+  window.addEventListener("touchstart", showIndicator, { passive: true });
 })
 
 onBeforeUnmount(() => {
   scroller.value?.removeEventListener('wheel', onWheel)
   window.removeEventListener('resize', onResize)
   io?.disconnect()
+
+  window.removeEventListener("touchstart", showIndicator);
+  clearTimeout(hideTimer);
 })
 </script>
 

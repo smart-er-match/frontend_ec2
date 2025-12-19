@@ -4,8 +4,13 @@
   <div class="text-center">
     <div class="flex justify-center items-center gap-4">
       <!-- ✅ 반경(줌 단계) 프리셋 슬라이더 -->
-      <div class="mt-3 w-72 border rounded-lg p-3 bg-white">
-        <h3 class="font-semibold text-gray-800 mb-2">반경 설정</h3>
+      <div class="mt-3 w-72 gap-2 border rounded-lg p-3 bg-white">
+      <h3 class="mb-2 flex items-center font-semibold text-gray-800">
+        <span>반경 설정:  </span>
+        <span class="ml-2 text-sm font-medium text-gray-800">
+            {{ currentRadius.km }} km
+        </span>
+      </h3>
 
         <input
           type="range"
@@ -16,9 +21,6 @@
           class="w-full"
         />
 
-        <div class="mt-2 flex items-center justify-center text-sm text-gray-700">
-          {{ currentRadius.km }} km
-        </div>
       </div>
 
       <button
@@ -84,7 +86,7 @@ const radiusPresets = [
 
 
 // ✅ 슬라이더 단계 index
-const stepIndex = ref(2)
+const stepIndex = ref(1)
 
 // 현재 선택된 반경/줌
 const currentRadius = computed(() => radiusPresets[stepIndex.value])
@@ -132,18 +134,18 @@ onMounted(async () => {
   //   console.log(locationStore.lat)
   // console.log(locationStore.lng)
   // console.log(locationStore.address)
-
+  stepIndex.value=1;
   if (!window.naver || !window.naver.maps) {
     console.error('네이버 지도 스크립트가 로드되지 않았습니다.')
     return
   }
 
   // ✅ store distance가 있으면 stepIndex 동기화(선택)
-  const savedKm = Number(locationStore.distance)
-  if (!Number.isNaN(savedKm)) {
-    const idx = radiusPresets.findIndex(p => p.km === savedKm)
-    if (idx !== -1) stepIndex.value = idx
-  }
+  // const savedKm = Number(locationStore.distance)
+  // if (!Number.isNaN(savedKm)) {
+  //   const idx = radiusPresets.findIndex(p => p.km === savedKm)
+  //   if (idx !== -1) stepIndex.value = idx
+  // }
 
   // 초기 지도
   const startPos = new window.naver.maps.LatLng(37.3595704, 127.105399)

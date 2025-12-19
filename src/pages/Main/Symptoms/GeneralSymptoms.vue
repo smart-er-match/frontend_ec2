@@ -11,28 +11,137 @@
     <h1 class="text-3xl">증상 선택하기</h1>
   </div>
 
-  <div ref="canvasContainer" class="mt-3 three-container"></div>
-   <p class="text-xs text-center">
+  
+<div class="mt-4 flex flex-col lg:flex-row gap-6">
+  <!-- 왼쪽: 3D 캔버스 -->
+  <div class="w-full lg:w-1/2">
+    <div ref="canvasContainer" class="three-container"></div>
+    <p class="text-xs text-center mt-2">
       (증상 설명은 안적어도 무방하지만 자세한 응급실 찾기를 위해 증상 입력 바랍니다.)
     </p>
-  <div
-    v-for="value in bodyPartLabels.filter(v => symptoms.includes(v.name))"
-    :key="value.name"
-    class="mt-3 flex items-center justify-between"
-  >
-    <span class="font-semibold">
-      {{ value.label }} :
-    </span>
-    <input
-      type="text"
-      v-model="SymptomDescription[value.label]"
-      class="border border-black-500 rounded-sm ml-4 w-1/2"
-    />
+  </div>
+
+  <!-- 오른쪽: 증상 입력 -->
+  <div class="w-full lg:w-1/2">
+    <div class="mb-6">
+  <p class="mb-2 text-sm font-semibold text-gray-800">환자의 성별</p>
+
+  <div class="grid grid-cols-2 gap-3">
+    <!-- 남성 -->
+    <label
+      class="group flex items-center justify-between rounded-lg border p-3 cursor-pointer
+             transition hover:bg-gray-50"
+      :class="patientGender === 'M'
+        ? 'border-indigo-600 ring-2 ring-indigo-200 bg-indigo-50'
+        : 'border-gray-200'"
+    >
+      <div class="flex items-center gap-3">
+        <span
+          class="grid h-5 w-5 place-items-center rounded-full border"
+          :class="patientGender === 'M'
+            ? 'border-indigo-600'
+            : 'border-gray-300'"
+        >
+          <span
+            class="h-2.5 w-2.5 rounded-full"
+            :class="patientGender === 'M'
+              ? 'bg-indigo-600'
+              : 'bg-transparent'"
+          ></span>
+        </span>
+
+        <span class="text-sm font-medium text-gray-800">남성</span>
+      </div>
+
+      <input
+        type="radio"
+        value="M"
+        v-model="patientGender"
+        class="sr-only"
+      />
+    </label>
+
+    <!-- 여성 -->
+    <label
+      class="group flex items-center justify-between rounded-lg border p-3 cursor-pointer
+             transition hover:bg-gray-50"
+      :class="patientGender === 'F'
+        ? 'border-indigo-600 ring-2 ring-indigo-200 bg-indigo-50'
+        : 'border-gray-200'"
+    >
+      <div class="flex items-center gap-3">
+        <span
+          class="grid h-5 w-5 place-items-center rounded-full border"
+          :class="patientGender === 'F'
+            ? 'border-indigo-600'
+            : 'border-gray-300'"
+        >
+          <span
+            class="h-2.5 w-2.5 rounded-full"
+            :class="patientGender === 'F'
+              ? 'bg-indigo-600'
+              : 'bg-transparent'"
+          ></span>
+        </span>
+
+        <span class="text-sm font-medium text-gray-800">여성</span>
+      </div>
+
+      <input
+        type="radio"
+        value="F"
+        v-model="patientGender"
+        class="sr-only"
+      />
+    </label>
+  </div>
+</div>
+<div>
+  <p class="mb-2 text-sm font-semibold text-gray-800">환자의 연령대</p>
+
+  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+    <label
+      v-for="age in ageGroups"
+      :key="age.value"
+      class="cursor-pointer rounded-lg border px-3 py-2 text-center text-sm font-medium
+             transition hover:bg-gray-50"
+      :class="patientAgeGroup === age.value
+        ? 'border-indigo-600 ring-2 ring-indigo-200 bg-indigo-50 text-indigo-700'
+        : 'border-gray-200 text-gray-800'"
+    >
+      <input
+        type="radio"
+        :value="age.value"
+        v-model="patientAgeGroup"
+        class="sr-only"
+      />
+      {{ age.label }}
+    </label>
+  </div>
+</div>
+
+
+    <div
+      v-for="value in bodyPartLabels.filter(v => symptoms.includes(v.name))"
+      :key="value.name"
+      class="mt-3 flex items-center justify-between"
+    >
+      <span class="font-semibold">
+        {{ value.label }} :
+      </span>
+      <input
+        type="text"
+        v-model="SymptomDescription[value.label]"
+        class="border rounded-sm ml-4 w-1/2"
+      />
+    </div>
+  </div>
+
   </div>
 
   <div>
   
-    <p class="text-red-500 text-sm" v-if="errorMsg">{{ errorMsg }}</p>
+    <p class="mt-3 text-red-500 text-sm" v-if="errorMsg">{{ errorMsg }}</p>
     <button
       @click="findhospital"
       class="mt-5 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500"
@@ -47,56 +156,52 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { useRouter } from 'vue-router'
-import api from '../../../components/api'
 import LoadingSpinner from '../../../components/LoadingSpinner.vue'
+
+
+const patientGender = ref('')
+const patientAgeGroup = ref('')
+
+const ageGroups = [
+  { label: '영유아(0~5살)', value: '0~5' },
+  { label: '어린이(5~10살)', value: '5~10' },
+  { label: '청소년(10대)', value: '10~20' },
+  { label: '20대', value: '20~30' },
+  { label: '30대', value: '30~40' },
+  { label: '40대', value: '40~50' },
+  { label: '50대', value: '50~60' },
+  { label: '60대', value: '60~70' },
+  { label: '70대 이상', value: '70~120' },
+
+]
+
 
 const router = useRouter()
 const errorMsg = ref('')
 const isLoading = ref(false)
-
-import { useLocationStore } from "@/stores/location";
-const locationStore = useLocationStore();
-
 
 const findhospital = async () => {
   const mergedSymptoms = bodyPartLabels
     .filter(v => symptoms.value.includes(v.name)) // 선택된 부위만
     .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
 
-    localStorage.setItem('symptom', JSON.stringify(mergedSymptoms))
-    router.push({ name: 'recommenderlist' })
+  if (!patientGender.value || !patientAgeGroup.value) {
+  errorMsg.value = '성별과 연령대를 선택해주세요.'
+  return
+  } 
+
+  
+  if (mergedSymptoms.length === 0) {
+  errorMsg.value = '치료 부위를 선택해주세요'
+  return
+  } 
+
+  localStorage.setItem('symptom', JSON.stringify(mergedSymptoms))
+  localStorage.setItem('patient_gender', patientGender.value)
+  localStorage.setItem('patient_age', patientAgeGroup.value)
+  router.push({ name: 'recommenderlist' })
  
 }
-
-// const findhospital = async () => {
-//   const mergedSymptoms = bodyPartLabels
-//     .filter(v => symptoms.value.includes(v.name)) // 선택된 부위만
-//     .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
-
-//     console.log(locationStore.lng)
-//     console.log(locationStore.lat)
-//   try {
-//     isLoading.value = true
-//     const res = await api.post(
-//       `hospitals/general/symptom/`,
-//       {
-//         symptom: mergedSymptoms,
-//         latitude: Number(locationStore.lat),
-//         longitude: Number(locationStore.lng),
-//       }
-//     )
-//     localStorage.setItem('symptom', JSON.stringify(mergedSymptoms))
-//     localStorage.setItem('hospital_data', JSON.stringify(res.data))
-//     router.push({ name: 'recommenderlist' })
-//   } catch (error) {
-//     console.log("status", error.response?.status);
-//     console.log("data", error.response?.data);
-//     console.log("sent", { symptom: mergedSymptoms /*, latitude, longitude */ });
-//     errorMsg.value = '아픈곳을 선택해주세요'
-//   } finally {
-//     isLoading.value = false
-//   }
-// }
 
 const symptoms = ref([])
 const SymptomDescription = ref({})
@@ -387,6 +492,11 @@ const togglePart = name => {
 .three-container {
   width: 100%;
   height: 500px; /* 높이 안 주면 안 보일 수 있음 */
+
+    display: flex;
+  align-items: center;    /* 세로 중앙 */
+  justify-content: center;/* 가로 중앙 */
+
   border: 2px solid black;
 }
 </style>
