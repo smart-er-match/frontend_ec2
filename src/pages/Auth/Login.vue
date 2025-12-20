@@ -209,7 +209,7 @@ const handleLogin = async () => {
   errorMsg.value = ''
 
   try {
-    const result = await auth.login(useremail.value, password.value)
+    const result = await auth.login(useremail.value, password.value, autoLogin.value)
 
     if (result.ok) {
       // ✅ 자동 로그인 여부 저장
@@ -233,6 +233,7 @@ const handleLogin = async () => {
 }
 
 const kakaoLogin = () => {
+  localStorage.setItem('auto_login', autoLogin.value ? 'true' : 'false')
   const REST_API_KEY = import.meta.env.VITE_KAKAO_KEY
   const REDIRECT_URI = encodeURIComponent(import.meta.env.VITE_KAKAO_REDIRECT_URI)
 
@@ -246,6 +247,7 @@ const kakaoLogin = () => {
 }
 
 const naverLogin = () => {
+  localStorage.setItem('auto_login', autoLogin.value ? 'true' : 'false')
   const clientId = import.meta.env.VITE_NAVER_CLIENT_ID
   const redirectUri = encodeURIComponent(import.meta.env.VITE_NAVER_REDIRECT_URI)
 
@@ -262,6 +264,7 @@ const naverLogin = () => {
 }
 
 const googleLogin = () => {
+  localStorage.setItem('auto_login', autoLogin.value ? 'true' : 'false')
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
   const redirectUri = encodeURIComponent(import.meta.env.VITE_GOOGLE_REDIRECT_URI)
 

@@ -57,12 +57,10 @@ export const useAuthStore = defineStore('auth', {
     },
 
     // ✅ 로그인
-    async login(username, password) {
-      console.log("111")
+    async login(username, password, auto_login=false) {
       try {
-        const res = await api.post(`accounts/login/`, { username, password })
+        const res = await api.post(`accounts/login/`, { username, password, auto_login })
 
-        console.log("333")
         // ✅ 성공 판정은 "access 토큰이 있냐"로 확정
         if (res?.data?.access) {
           this.setAuth(res.data.access, res.data.refresh, res.data.user)
@@ -70,7 +68,6 @@ export const useAuthStore = defineStore('auth', {
         }
 
         // 서버가 200으로 실패를 주는 케이스 대응
-        console.log("2222")
         return {
           ok: false,
           error_type: res?.data?.error_type || 'unknown',
@@ -110,19 +107,22 @@ export const useAuthStore = defineStore('auth', {
     },
 
     async kakaoCallback(code) {
-      const res = await api.post('accounts/social/kakao/', { code })
+      const auto_login = localStorage.getItem('auto_login') === 'true'
+      const res = await api.post('accounts/social/kakao/', { code, auto_login })
       this.setAuth(res.data.access, res.data.refresh, res.data.user)
       return { ok: true }
     },
 
     async naverCallback(code, state) {
-      const res = await api.post('accounts/social/naver/', { code, state })
+      const auto_login = localStorage.getItem('auto_login') === 'true'
+      const res = await api.post('accounts/social/naver/', { code, state, auto_login })
       this.setAuth(res.data.access, res.data.refresh, res.data.user)
       return { ok: true }
     },
 
     async googleCallback(code) {
-      const res = await api.post('accounts/social/google/', { code })
+      const auto_login = localStorage.getItem('auto_login') === 'true'
+      const res = await api.post('accounts/social/google/', { code, auto_login })
       this.setAuth(res.data.access, res.data.refresh, res.data.user)
       return { ok: true }
     },
