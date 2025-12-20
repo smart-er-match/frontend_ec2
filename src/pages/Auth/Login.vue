@@ -1,117 +1,3 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth'
-
-const router = useRouter()
-
-const useremail = ref('')
-const password = ref('')
-const errorMsg = ref('')
-
-const auth = useAuthStore()
-
-// ✅ 자동 로그인 체크 상태 (로컬에 저장)
-const autoLogin = ref(localStorage.getItem('auto_login') === 'true')
-
-/**
- * ✅ 로그인 페이지 진입 시:
- * - autoLogin=true 이고
- * - 토큰/refresh로 로그인 복구 가능하면
- * => 로그인 페이지 스킵하고 main으로 이동
- */
-onMounted(async () => {
-  if (!autoLogin.value) return
-
-  // 이미 로그인 상태면 바로 스킵
-  if (auth.isAuthenticated) {
-    router.replace({ name: 'main' })
-    return
-  }
-
-  // refresh 토큰으로 자동 로그인 시도
-  try {
-    const ok = await auth.tryAutoLogin()
-    if (ok) {
-      router.replace({ name: 'main' })
-    }
-  } catch (e) {
-    // 실패하면 로그인 페이지 그대로 유지
-    console.error(e)
-  }
-})
-
-const handleLogin = async () => {
-  errorMsg.value = ''
-
-  try {
-    const result = await auth.login(useremail.value, password.value)
-
-    if (result.ok) {
-      // ✅ 자동 로그인 여부 저장
-      localStorage.setItem('auto_login', autoLogin.value ? 'true' : 'false')
-
-      router.replace({ name: 'main' })
-      return
-    }
-
-    if (result.error_type === 'undefined_email') {
-      errorMsg.value = '아이디가 없습니다.'
-    } else if (result.error_type === 'wrong_password') {
-      errorMsg.value = '비밀번호가 틀렸습니다.'
-    } else {
-      errorMsg.value = '로그인 실패'
-    }
-  } catch (err) {
-    errorMsg.value = '통신 실패'
-    console.error(err)
-  }
-}
-
-const kakaoLogin = () => {
-  const REST_API_KEY = import.meta.env.VITE_KAKAO_KEY
-  const REDIRECT_URI = encodeURIComponent(import.meta.env.VITE_KAKAO_REDIRECT_URI)
-
-  const url =
-    'https://kauth.kakao.com/oauth/authorize' +
-    `?client_id=${REST_API_KEY}` +
-    `&redirect_uri=${REDIRECT_URI}` +
-    '&response_type=code'
-
-  window.location.href = url
-}
-
-const naverLogin = () => {
-  const clientId = import.meta.env.VITE_NAVER_CLIENT_ID
-  const redirectUri = encodeURIComponent(import.meta.env.VITE_NAVER_REDIRECT_URI)
-
-  const state = Math.random().toString(36).substring(2) + Date.now().toString(36)
-
-  const url =
-    `https://nid.naver.com/oauth2.0/authorize` +
-    `?response_type=code` +
-    `&client_id=${clientId}` +
-    `&redirect_uri=${redirectUri}` +
-    `&state=${state}`
-
-  window.location.href = url
-}
-
-const googleLogin = () => {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
-  const redirectUri = encodeURIComponent(import.meta.env.VITE_GOOGLE_REDIRECT_URI)
-
-  const url =
-    'https://accounts.google.com/o/oauth2/v2/auth' +
-    `?client_id=${clientId}` +
-    `&redirect_uri=${redirectUri}` +
-    `&response_type=code` +
-    `&scope=profile email`
-
-  window.location.href = url
-}
-</script>
-
 <template>
   <div class="sm:mx-auto sm:w-full sm:max-w-sm">
     <form @submit.prevent="handleLogin" class="space-y-6">
@@ -275,5 +161,120 @@ const googleLogin = () => {
     </router-link>
   </div>
 </template>
+
+<script setup>
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const router = useRouter()
+
+const useremail = ref('')
+const password = ref('')
+const errorMsg = ref('')
+
+const auth = useAuthStore()
+
+// ✅ 자동 로그인 체크 상태 (로컬에 저장)
+const autoLogin = ref(localStorage.getItem('auto_login') === 'true')
+
+/**
+ * ✅ 로그인 페이지 진입 시:
+ * - autoLogin=true 이고
+ * - 토큰/refresh로 로그인 복구 가능하면
+ * => 로그인 페이지 스킵하고 main으로 이동
+ */
+onMounted(async () => {
+  if (!autoLogin.value) return
+
+  // 이미 로그인 상태면 바로 스킵
+  if (auth.isAuthenticated) {
+    router.replace({ name: 'main' })
+    return
+  }
+
+  // refresh 토큰으로 자동 로그인 시도
+  try {
+    const ok = await auth.tryAutoLogin()
+    if (ok) {
+      router.replace({ name: 'main' })
+    }
+  } catch (e) {
+    // 실패하면 로그인 페이지 그대로 유지
+    console.error(e)
+  }
+})
+
+const handleLogin = async () => {
+  errorMsg.value = ''
+
+  try {
+    const result = await auth.login(useremail.value, password.value)
+
+    if (result.ok) {
+      // ✅ 자동 로그인 여부 저장
+      localStorage.setItem('auto_login', autoLogin.value ? 'true' : 'false')
+
+      router.replace({ name: 'main' })
+      return
+    }
+
+    if (result.error_type === 'undefined_email') {
+      errorMsg.value = '아이디가 없습니다.'
+    } else if (result.error_type === 'wrong_password') {
+      errorMsg.value = '비밀번호가 틀렸습니다.'
+    } else {
+      errorMsg.value = '로그인 실패'
+    }
+  } catch (err) {
+    errorMsg.value = '통신 실패'
+    console.error(err)
+  }
+}
+
+const kakaoLogin = () => {
+  const REST_API_KEY = import.meta.env.VITE_KAKAO_KEY
+  const REDIRECT_URI = encodeURIComponent(import.meta.env.VITE_KAKAO_REDIRECT_URI)
+
+  const url =
+    'https://kauth.kakao.com/oauth/authorize' +
+    `?client_id=${REST_API_KEY}` +
+    `&redirect_uri=${REDIRECT_URI}` +
+    '&response_type=code'
+
+  window.location.href = url
+}
+
+const naverLogin = () => {
+  const clientId = import.meta.env.VITE_NAVER_CLIENT_ID
+  const redirectUri = encodeURIComponent(import.meta.env.VITE_NAVER_REDIRECT_URI)
+
+  const state = Math.random().toString(36).substring(2) + Date.now().toString(36)
+
+  const url =
+    `https://nid.naver.com/oauth2.0/authorize` +
+    `?response_type=code` +
+    `&client_id=${clientId}` +
+    `&redirect_uri=${redirectUri}` +
+    `&state=${state}`
+
+  window.location.href = url
+}
+
+const googleLogin = () => {
+  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID
+  const redirectUri = encodeURIComponent(import.meta.env.VITE_GOOGLE_REDIRECT_URI)
+
+  const url =
+    'https://accounts.google.com/o/oauth2/v2/auth' +
+    `?client_id=${clientId}` +
+    `&redirect_uri=${redirectUri}` +
+    `&response_type=code` +
+    `&scope=profile email`
+
+  window.location.href = url
+}
+</script>
+
 
 <style scoped></style>
