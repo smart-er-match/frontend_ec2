@@ -3,7 +3,7 @@
     <Navbar />
 
     <!-- Navbar 아래부터 시작 -->
-    <main class="max-w-5xl mx-auto px-4 py-8">
+    <main class="max-w-6xl mx-auto px-4 py-8">
       <div class="bg-white rounded-xl shadow-md p-8">
         <router-view />
       </div>

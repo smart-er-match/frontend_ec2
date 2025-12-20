@@ -21,6 +21,7 @@ import RecommendErList from '../pages/Main/HospitalList/RecommendErList.vue';
 import ERList from '../pages/Main/HospitalList/ERList.vue';
 import GoogleCallback from '../pages/Auth/Oauth/GoogleCallback.vue';
 import ErDetail from '../pages/Main/HospitalList/ErDetail.vue';
+import MedicalErList from '../pages/Main/HospitalList/MedicalErList.vue';
 
 
 
@@ -56,6 +57,7 @@ const routes = [
         { path: 'erlist', name: 'erlist', component: ERList, meta: {requiresAuth: true} },
         { path: 'mypage', name: 'mypage', component: Mypage},
         { path: 'erdetail/:id', name: 'erdetail', component: ErDetail, props: true,},
+        { path: 'medicalerlist', name: 'medicalerlist', component: MedicalErList },
       ]
     },
 
