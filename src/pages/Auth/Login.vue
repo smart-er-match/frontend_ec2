@@ -74,12 +74,24 @@
       </div>
 
       <!-- 안내 문구는 아래로 -->
+      <transition name="bubble">
       <div
         v-if="autoLogin"
-        class="mt-2 inline-block rounded-lg bg-blue-600 px-3 py-2 text-sm text-white"
+        class="relative inline-block -mt-2
+              rounded-lg bg-gray-600 px-3 py-2 text-sm text-white shadow-md"
       >
         개인정보 보호를 위해 본인 기기에서만 이용해주세요.
+
+        <!-- 말풍선 꼬리 -->
+        <span
+            class="absolute -top-[6px] left-4
+                  h-0 w-0
+                  border-l-[6px] border-r-[6px] border-b-[6px]
+                  border-l-transparent border-r-transparent
+                  border-b-gray-600"
+          ></span>
       </div>
+    </transition>
 
 
       <p v-if="errorMsg" class="text-red-500 text-sm">{{ errorMsg }}</p>
@@ -280,4 +292,23 @@ const googleLogin = () => {
 </script>
 
 
-<style scoped></style>
+<style scoped>
+
+.bubble-enter-active,
+.bubble-leave-active {
+  transition: all 0.15s ease-out;
+}
+
+.bubble-enter-from,
+.bubble-leave-to {
+  opacity: 0;
+  transform: translateY(4px) scale(0.96);
+}
+
+.bubble-enter-to,
+.bubble-leave-from {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+</style>
