@@ -8,6 +8,7 @@ const router = useRouter()
 const auth = useAuthStore()
 
 onMounted(async () => {
+  console.log("Gdgdgdg")
   const code = route.query.code
 
   if (!code) {
