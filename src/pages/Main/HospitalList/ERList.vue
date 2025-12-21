@@ -168,6 +168,7 @@ onMounted(async () => {
   try {
     const res = await api.get('hospitals/list/')
     Object.assign(er_list, res.data.data)
+    console.log(res.data.data)
   } catch (e) {
     console.error(e)
   }

@@ -16,10 +16,6 @@
         <h1 class="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
           {{ hospital?.name || '응급실 상세' }}
         </h1>
-
-        <p v-if="hospital?.address" class="mt-1 text-sm text-gray-500">
-          {{ hospital.address }}
-        </p>
       </div>
 
       <!-- 즐겨찾기 -->
@@ -136,29 +132,6 @@
 
       <!-- 오른쪽(액션/지도 자리) -->
       <div class="space-y-4">
-        <div class="rounded-2xl border bg-white p-5 shadow-sm">
-          <h2 class="text-lg font-bold text-gray-900">빠른 실행</h2>
-
-          <div class="mt-4 space-y-2">
-            <a
-              v-if="hospital?.emergency_phone"
-              class="w-full inline-flex items-center justify-center rounded-xl bg-indigo-600 px-4 py-3
-                     text-sm font-semibold text-white hover:bg-indigo-500 active:scale-[0.98] transition"
-              :href="`tel:${hospital.emergency_phone}`"
-            >
-              바로 전화
-            </a>
-
-            <button
-              class="w-full inline-flex items-center justify-center rounded-xl border px-4 py-3
-                     text-sm font-semibold text-gray-800 hover:bg-gray-50 active:scale-[0.98] transition"
-              @click="openNaverMap"
-              :disabled="!hospital?.address"
-            >
-              지도에서 보기
-            </button>
-          </div>
-        </div>
 
         <!-- 지도 컴포넌트 자리 (나중에 NaverMap 넣기) -->
         <div class="rounded-2xl border bg-gray-50 p-5 text-sm text-gray-600">
@@ -167,12 +140,16 @@
       </div>
     </div>
   </div>
+  <div>
+    <Review/>
+  </div>
 </template>
 
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/components/api'
+import Review from '../Review/Review.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -187,31 +164,80 @@ const isFavorite = ref(false)
 // 라우트 params: /er/:id
 const hospitalId = computed(() => route.params.id)
 
-const fetchDetail = async () => {
-  loading.value = true
-  error.value = ''
-  try {
-    const res = await api.get(`hospitals/${hospitalId.value}/`)
-    hospital.value = res.data?.data ?? res.data
+const MOCK_HOSPITALS = [
+  {
+    hospital_id: 1, // 프론트에서 쓰기 편하게 임시 pk 하나 두는 걸 추천
+    hpid: "A2118188",
+    name: "강철병원",
+    first_address: "서울특별시",
+    second_address: "송파구",
+    third_address: "백제고분로 252, SH타워 2~8층 (삼전동)",
+    address: "서울특별시 송파구 백제고분로 252, SH타워 2~8층 (삼전동)",
+    main_phone: "02-6287-5500",
+    emergency_phone: "02-6287-5500",
+    latitude: 37.50234558341771,
+    longitude: 127.09429683872202,
+  },
+]
 
-    // (선택) 즐겨찾기 여부 체크
-    try {
-      const favRes = await api.get('favorites/hospitals/')
-      const raw = favRes.data?.data ?? favRes.data ?? []
-      const ids = Array.isArray(raw)
-        ? raw.map(v => (typeof v === 'number' ? v : v.hospital_id)).filter(Boolean)
-        : []
-      isFavorite.value = ids.includes(Number(hospitalId.value))
-    } catch (_) {
-      // 로그인 전/없으면 무시
-      isFavorite.value = false
+
+const fetchDetail = async () => {
+  console.log('[DETAIL] route.params.id =', route.params.id, 'typeof:', typeof route.params.id)
+
+  loading.value = true
+  error.value = '' 
+   try {
+    // 1️⃣ mock 데이터에서 병원 찾기
+    const data = MOCK_HOSPITALS.find(
+      h =>
+        h.hpid === String(hospitalId.value)
+    )
+
+    if (!data) {
+      error.value = '응급실 정보를 찾지 못했습니다.'
+      hospital.value = null
+      return
     }
+
+    // 2️⃣ 화면에 뿌릴 데이터 세팅
+    hospital.value = {
+      ...data,
+      // 템플릿에서 쓰는 region 보정
+      region: `${data.first_address} ${data.second_address}`,
+    }
+
+    // 3️⃣ 즐겨찾기(localStorage)
+    const favs = JSON.parse(localStorage.getItem('fav_hospitals') || '[]')
+    isFavorite.value = favs.includes(data.hospital_id)
+
   } catch (e) {
     error.value = '응급실 정보를 불러오지 못했습니다.'
     console.error(e)
   } finally {
     loading.value = false
   }
+  // try {
+  //   const res = await api.get(`hospitals/${hospitalId.value}/`)
+  //   hospital.value = res.data?.data ?? res.data
+
+  //   // (선택) 즐겨찾기 여부 체크
+  //   try {
+  //     const favRes = await api.get('favorites/hospitals/')
+  //     const raw = favRes.data?.data ?? favRes.data ?? []
+  //     const ids = Array.isArray(raw)
+  //       ? raw.map(v => (typeof v === 'number' ? v : v.hospital_id)).filter(Boolean)
+  //       : []
+  //     isFavorite.value = ids.includes(Number(hospitalId.value))
+  //   } catch (_) {
+  //     // 로그인 전/없으면 무시
+  //     isFavorite.value = false
+  //   }
+  // } catch (e) {
+  //   error.value = '응급실 정보를 불러오지 못했습니다.'
+  //   console.error(e)
+  // } finally {
+  //   loading.value = false
+  // }
 }
 
 const toggleFavorite = async () => {

@@ -13,26 +13,44 @@
         <div
           v-for="value in filteredHospitalDistance"
           :key="value.hpid"
-          class="border p-3 rounded-lg shadow-sm mb-3 bg-white"
+          class="border bg-white rounded-xl shadow-sm mb-3 p-3 sm:p-4"
         >
-          <div class="flex items-start justify-between gap-3">
-            <div class="min-w-0">
+          <!-- ✅ 모바일: 세로 / sm 이상: 가로 -->
+          <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+            <!-- 왼쪽: 텍스트 -->
+            <div class="min-w-0 flex-1">
               <p class="font-bold text-gray-900 truncate">
                 {{ value.name }}
-                <a
-                  @click="$emit('click-hospital', value.name)"
-                  :href="`https://map.naver.com/p/search/${encodeURIComponent(value.name)}?c=15.00,0,0,0,dh`"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  class="mt-2 inline-block text-sm text-blue-600 underline hover:text-blue-800"
-                >
-                  길찾기
-                </a>
               </p>
 
-              <p class="text-gray-700 text-sm">거리 : {{ value.distance }}km</p>
+              <!-- 길찾기: 항상 노출 -->
+              <a
+                @click="$emit('click-hospital', value.name)"
+                :href="`https://map.naver.com/p/search/${encodeURIComponent(value.name)}?c=15.00,0,0,0,dh`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center mt-1 text-sm font-semibold text-blue-600 underline hover:text-blue-800"
+              >
+                길찾기
+              </a>
 
-              <!-- ✅ 병상 Progress 유지 -->
+              <div class="mt-2 space-y-1">
+                <p class="text-gray-700 text-sm">거리 : {{ value.distance }}km</p>
+                <p class="text-gray-700 text-sm">전화번호 : {{ value.phone }}</p>
+                <p class="text-gray-700 text-sm break-words">주소 : {{ value.address }}</p>
+              </div>
+
+              <button
+                type="button"
+                class="mt-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
+                @click="toggle(value.hpid)"
+              >
+                {{ openId === value.hpid ? "닫기" : "자세히 보기" }}
+              </button>
+            </div>
+
+            <!-- ✅ 오른쪽: Progress (모바일에서는 가로 꽉 / sm 이상 고정 폭) -->
+            <div class="w-full sm:w-[180px] shrink-0 flex justify-center sm:justify-end">
               <CircularProgress
                 label="응급실 일반 병상"
                 :current="value.hvec"
@@ -40,51 +58,40 @@
                 :size="68"
                 :stroke="8"
               />
-
-              <!-- ✅ 거리순에도 ai_matches 뱃지 표시 -->
-              <div class="mt-3">
-                <p class="text-sm font-semibold text-gray-900 mb-2">가용/보유 상태</p>
-
-                <div class="flex flex-wrap gap-2">
-                  <span
-                    v-for="item in aiMatchBadges(value.ai_matches)"
-                    :key="item.key"
-                    class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
-                    :class="item.type === 'capacity'
-                      ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-                      : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
-                    :title="item.key"
-                  >
-                    <span
-                      class="inline-block h-2 w-2 rounded-full"
-                      :class="item.type === 'capacity' ? 'bg-indigo-500' : 'bg-emerald-500'"
-                    />
-                    <span class="truncate max-w-[160px]">{{ item.label }}</span>
-                    <span class="font-bold whitespace-nowrap">{{ item.display }}</span>
-                  </span>
-                </div>
-
-                <div
-                  v-if="aiMatchBadges(value.ai_matches).length === 0"
-                  class="text-xs text-gray-500"
-                >
-                  표시할 가용/보유 정보가 없습니다.
-                </div>
-              </div>
             </div>
-
-            <button
-              type="button"
-              class="shrink-0 text-sm font-semibold text-indigo-600 hover:text-indigo-700"
-              @click="toggle(value.hpid)"
-            >
-              {{ openId === value.hpid ? "닫기" : "자세히 보기" }}
-            </button>
           </div>
 
+          <!-- 상세 -->
           <div v-show="openId === value.hpid" class="mt-3 pt-3 border-t">
-            <p class="text-gray-700 text-sm">전화번호 : {{ value.phone }}</p>
-            <p class="text-gray-700 text-sm">주소 : {{ value.address }}</p>
+            <div class="mt-3">
+              <p class="text-sm font-semibold text-gray-900 mb-2">가용/보유 상태</p>
+
+              <div class="flex flex-wrap gap-2">
+                <span
+                  v-for="item in aiMatchBadges(value.ai_matches)"
+                  :key="item.key"
+                  class="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold"
+                  :class="item.type === 'capacity'
+                    ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                  :title="item.key"
+                >
+                  <span
+                    class="inline-block h-2 w-2 rounded-full"
+                    :class="item.type === 'capacity' ? 'bg-indigo-500' : 'bg-emerald-500'"
+                  />
+                  <span class="truncate max-w-[160px]">{{ item.label }}</span>
+                  <span class="font-bold whitespace-nowrap">{{ item.display }}</span>
+                </span>
+              </div>
+
+              <div
+                v-if="aiMatchBadges(value.ai_matches).length === 0"
+                class="text-xs text-gray-500"
+              >
+                표시할 가용/보유 정보가 없습니다.
+              </div>
+            </div>
           </div>
         </div>
 
@@ -95,6 +102,7 @@
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref, watch, computed } from "vue";
@@ -207,7 +215,62 @@ const HOSPITAL_FIELD_DESC = {
   hv43: "화상전용 처치실",
   hv60: "외상 소생실",
   hv61: "외상 환자 진료구역",
+  hvs01: "일반 기준",
+  hvs02: "소아 기준",
+  hvs03: "응급실 음압 격리 기준",
+  hvs04: "응급실 일반 격리 기준",
+  hvs05: "응급전용 중환자실 기준",
+  hvs06: "내과 중환자실 기준",
+  hvs07: "외과 중환자실 기준",
+  hvs08: "신생아 중환자실 기준",
+  hvs09: "소아 중환자실 기준",
+  hvs10: "응급전용 소아중환자실 기준",
+  hvs11: "신경과 중환자실 기준",
+  hvs12: "신경외과 중환자실 기준",
+  hvs13: "화상 중환자실 기준",
+  hvs14: "외상 중환자실 기준",
+  hvs15: "심장내과 중환자실 기준",
+  hvs16: "흉부외과 중환자실 기준",
+  hvs17: "일반 중환자실 기준",
+  hvs18: "음압격리 중환자실 기준",
+  hvs19: "응급전용 입원실 기준",
+  hvs20: "응급전용 소아입원실 기준",
+  hvs21: "외상전용 입원실 기준",
+  hvs22: "수술실 기준",
+  hvs23: "외상전용 수술실 기준",
+  hvs24: "정신과 폐쇄병동 기준",
+  hvs25: "음압격리 입원실 기준",
+  hvs26: "분만실 기준",
+  hvs27: "CT 기준",
+  hvs28: "MRI 기준",
+  hvs29: "혈관촬영기 기준",
+  hvs30: "인공호흡기 일반 기준",
+  hvs31: "인공호흡기 조산아 기준",
+  hvs32: "인큐베이터 기준",
+  hvs33: "CRRT 기준",
+  hvs34: "ECMO 기준",
+  hvs35: "중심체온조절유도기 기준",
+  hvs36: "화상전용 처치실 기준",
+  hvs37: "고압산소치료기 기준",
+  hvs38: "일반 입원실 기준",
+  hvs46: "격리진료구역 음압격리 기준",
+  hvs47: "격리진료구역 일반격리 기준",
+  hvs48: "소아 음압격리 기준",
+  hvs49: "소아 일반격리 기준",
+  hvs50: "응급전용 중환자실 음압격리 기준",
+  hvs51: "응급전용 중환자실 일반격리 기준",
+  hvs52: "응급전용 입원실 음압격리 기준",
+  hvs53: "응급전용 입원실 일반격리 기준",
+  hvs54: "감염병 전담병상 중환자실 기준",
+  hvs55: "감염병 전담병상 중환자실 내 음압격리 기준",
+  hvs56: "감염 중증 병상 기준",
+  hvs57: "감염 준-중증 병상 기준",
+  hvs58: "감염 중등증 병상 기준",
+  hvs59: "코호트 격리 기준",
+  hvs60: "외상 소생실 기준",
+  hvs61: "외상 환자 진료구역 기준",
 };
+
 
 const filteredMatches = (ai_matches) =>
   Object.entries(ai_matches || {})
