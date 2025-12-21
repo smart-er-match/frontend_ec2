@@ -17,6 +17,13 @@ export const useAuthStore = defineStore('auth', {
   },
 
   actions: {
+
+    saveLastLoginProvider(provider) {
+      localStorage.setItem('last_login_provider', provider) 
+      localStorage.setItem('last_login_at', Date.now().toString())
+      // provider: 'email' | 'kakao' | 'naver' | 'google' | 'auto'
+    },
+
     setAuth(accessToken, refreshToken, user) {
       this.access_token = accessToken || ''
       this.refresh_token = refreshToken || ''
@@ -64,6 +71,8 @@ export const useAuthStore = defineStore('auth', {
         // ✅ 성공 판정은 "access 토큰이 있냐"로 확정
         if (res?.data?.access) {
           this.setAuth(res.data.access, res.data.refresh, res.data.user)
+          this.saveLastLoginProvider('email')  
+
           return { ok: true }
         }
 
@@ -109,21 +118,29 @@ export const useAuthStore = defineStore('auth', {
     async kakaoCallback(code) {
       const auto_login = localStorage.getItem('auto_login') === 'true'
       const res = await api.post('accounts/social/kakao/', { code, auto_login })
+      
       this.setAuth(res.data.access, res.data.refresh, res.data.user)
+      this.saveLastLoginProvider('kakao')   
+
       return { ok: true }
     },
 
     async naverCallback(code, state) {
       const auto_login = localStorage.getItem('auto_login') === 'true'
       const res = await api.post('accounts/social/naver/', { code, state, auto_login })
+      
       this.setAuth(res.data.access, res.data.refresh, res.data.user)
+      this.saveLastLoginProvider('naver')  
       return { ok: true }
     },
 
     async googleCallback(code) {
       const auto_login = localStorage.getItem('auto_login') === 'true'
       const res = await api.post('accounts/social/google/', { code, auto_login })
+      
       this.setAuth(res.data.access, res.data.refresh, res.data.user)
+      this.saveLastLoginProvider('google')
+    
       return { ok: true }
     },
   },

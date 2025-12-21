@@ -164,6 +164,10 @@
       <span class="w-full text-gray-700 text-sm font-medium">Google 로그인</span>
     </button>
 
+    <div v-if="lastLoginMessage" class="text-center text-gray-600 text-sm mt-2">
+      {{ lastLoginMessage }}
+    </div>
+
     <p class="mt-10 text-center text-sm/6 text-gray-900">회원이 아니신가요?</p>
     <router-link
       :to="{ name: 'signup' }"
@@ -289,6 +293,37 @@ const googleLogin = () => {
 
   window.location.href = url
 }
+
+const lastLoginMessage = ref('')
+
+function providerLabel(p) {
+  return ({
+    email: '이메일',
+    kakao: '카카오',
+    naver: '네이버',
+    google: '구글',
+  })[p] || ''
+}
+
+onMounted(() => {
+  const provider = localStorage.getItem('last_login_provider')
+  const at = localStorage.getItem('last_login_at')
+
+  if (!provider || !at) return
+
+  const ONE_WEEK = 7 * 24 * 60 * 60 * 1000
+  const isExpired = Date.now() - Number(at) > ONE_WEEK
+
+  if (isExpired) {
+    // ✅ 7일 지나면 기록 삭제
+    localStorage.removeItem('last_login_provider')
+    localStorage.removeItem('last_login_at')
+    return
+  }
+
+  lastLoginMessage.value = `가장 최근에 ${providerLabel(provider)}로 로그인 하였습니다.`
+})
+
 </script>
 
 
