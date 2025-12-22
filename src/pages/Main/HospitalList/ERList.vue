@@ -155,12 +155,12 @@ const toggleFavorite = async (item) => {
 
 // ✅ 상세 페이지 이동 (라우트 이름/경로 둘 중 하나로 맞추면 됨)
 const goDetail = (item) => {
-
-  router.push({ name: 'erdetail',  
-    params: { id: item.hpid },  // ID는 params로 넘기고
-    state: { hospital: item }   })
-
-
+  const plainHospital = JSON.parse(JSON.stringify(item))
+  router.push({
+    name: 'erdetail',
+    params: { id: item.hpid },
+    state: { hospital: plainHospital },
+  })
 }
 
 onMounted(async () => {

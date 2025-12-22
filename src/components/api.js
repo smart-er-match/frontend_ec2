@@ -13,7 +13,7 @@ const AUTH_EXCLUDE_PATHS = [
   'accounts/token/refresh/',
   'accounts/signup/',
   'accounts/social/', 
-  'hospitals/chatbot/',
+  // 'hospitals/chatbot/',
   // kakao/naver/google 등
 ]
 

@@ -41,8 +41,6 @@ const routes = [
         { path: 'resetpassword', name: 'resetpassword', component: ResetPassword},
         { path: 'notauthenticated', name: 'notauthenticated', component: NotAuthenticated},
         { path: 'findauth', name: 'findauth', component: FindAuth},
-        { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotAuthenticated },
-
     ]
     },
     
@@ -57,17 +55,16 @@ const routes = [
         { path: 'generalfindmap', name: 'generalfindmap', component: GeneralFindMap},
         { path: 'generalsymptoms', name: 'generalsymptoms', component: GeneralSymptoms},
         { path: 'recommenderlist', name: 'recommenderlist', component: RecommendErList},
-      
-        { path: 'erlist', name: 'erlist', component: ERList, meta: {requiresAuth: true} },
         { path: 'mypage', name: 'mypage', component: Mypage},
          {
-          path: '/erdetail/:id',
+          path: 'erdetail/:id',
           name: 'erdetail',
           component: ErDetail,
           props: (route) => ({ id: route.params.id, hospital: route.state?.hospital }) // state에서 hospital을 받기
         },
         { path: 'medicalerlist', name: 'medicalerlist', component: MedicalErList },
         { path: 'getaitoken', name: 'getaitoken', component: GetAIToken },
+        { path: 'erlist', name: 'erlist', component: ERList, meta: {requiresAuth: true} },
       ]
     },
      {
@@ -98,8 +95,8 @@ const routes = [
         path: '/auth/google/callback',
         name: 'google-callback',
         component: GoogleCallback,
-      }
-
+      },
+    { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotAuthenticated },
     ]
 
 const router = createRouter({

@@ -1,26 +1,21 @@
 <template>
-  <div class="w-full max-w-5xl mx-auto px-4 py-6">
-    <!-- 상단: 뒤로가기 + 제목 -->
-    <div class="flex items-start justify-between gap-3">
-      <div>
-        <button
-          class="inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
-          @click="router.back()"
-        >
-          <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 18l-6-6 6-6" />
-          </svg>
-          뒤로가기
-        </button>
 
-        <h1 class="mt-3 text-2xl sm:text-3xl font-bold text-gray-900">
-          {{ hospital?.name || '응급실 상세' }}
-        </h1>
-      </div>
-
-      <!-- 즐겨찾기 -->
+  <div class="w-full max-w-6xl mx-auto px-4 py-6">
+    <!-- Top bar -->
+    <div class="flex items-center justify-between gap-3">
       <button
-        class="shrink-0 inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition
+        class="inline-flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold
+               text-gray-700 hover:bg-gray-100 active:scale-[0.98]"
+        @click="router.back()"
+      >
+        <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M15 18l-6-6 6-6" />
+        </svg>
+        뒤로가기
+      </button>
+
+      <button
+        class="inline-flex items-center gap-2 rounded-xl border px-3 py-2 text-sm font-semibold transition
                hover:bg-gray-50 active:scale-[0.98]"
         :class="isFavorite
           ? 'border-yellow-300 bg-yellow-50 text-yellow-700'
@@ -37,125 +32,214 @@
       </button>
     </div>
 
-    <!-- 로딩 -->
-    <div v-if="loading" class="mt-8 rounded-2xl border bg-white p-6 text-gray-600">
+    <!-- Loading / Error -->
+    <div v-if="loading" class="mt-6 rounded-2xl border bg-white p-6 text-gray-600">
       불러오는 중...
     </div>
-
-    <!-- 에러 -->
-    <div v-else-if="error" class="mt-8 rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
+    <div v-else-if="error" class="mt-6 rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
       {{ error }}
     </div>
 
-    <!-- 본문 -->
-    <div v-else class="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-      <!-- 왼쪽(메인 정보) -->
-      <div class="lg:col-span-2 space-y-4">
-        <!-- 연락/운영 -->
-        <div class="rounded-2xl border bg-white p-5 shadow-sm">
-          <h2 class="text-lg font-bold text-gray-900">기본 정보</h2>
+    <!-- Content -->
+    <div v-else class="mt-6 space-y-5">
+      <!-- Hero card -->
+      <section class="relative overflow-hidden rounded-3xl border bg-white shadow-sm">
+        <!-- gradient -->
+        <div class="absolute inset-0 bg-gradient-to-br from-indigo-50 via-white to-sky-50" />
+        <div class="absolute -top-24 -right-24 h-56 w-56 rounded-full bg-indigo-200/40 blur-3xl" />
+        <div class="absolute -bottom-28 -left-24 h-64 w-64 rounded-full bg-sky-200/40 blur-3xl" />
 
-          <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div class="rounded-xl bg-gray-50 p-4 border">
-              <p class="text-gray-500">응급실 전화</p>
-              <p class="mt-1 font-semibold text-gray-900">
-                {{ hospital?.emergency_phone || '-' }}
-              </p>
-              <a
-                v-if="hospital?.emergency_phone"
-                class="mt-2 inline-flex text-indigo-600 hover:underline"
-                :href="`tel:${hospital.emergency_phone}`"
-              >
-                전화 걸기
-              </a>
-            </div>
+        <div class="relative p-5 sm:p-6">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center rounded-full bg-indigo-600 px-2.5 py-1 text-xs font-bold text-white">
+                  응급실
+                </span>
+                <span class="inline-flex items-center rounded-full bg-white/70 px-2.5 py-1 text-xs font-semibold text-gray-700 border">
+                  {{ hospital?.first_address || '지역 정보 없음' }}
+                </span>
+              </div>
 
-            <div class="rounded-xl bg-gray-50 p-4 border">
-              <p class="text-gray-500">지역</p>
-              <p class="mt-1 font-semibold text-gray-900">
-                {{ hospital?.region || '-' }}
-              </p>
-            </div>
+              <h1 class="mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight text-gray-900 truncate">
+                {{ hospital?.name || '응급실 상세' }}
+              </h1>
 
-            <div class="rounded-xl bg-gray-50 p-4 border sm:col-span-2">
-              <p class="text-gray-500">주소</p>
-              <p class="mt-1 font-semibold text-gray-900">
-                {{ hospital?.address || '-' }}
+              <p class="mt-2 text-sm text-gray-600">
+                {{ hospital?.second_address || '' }} {{ hospital?.third_address || '' }}
               </p>
 
-              <button
-                v-if="hospital?.address"
-                class="mt-2 inline-flex text-indigo-600 hover:underline"
-                @click="copyAddress"
-              >
-                주소 복사
-              </button>
-            </div>
-          </div>
-        </div>
+              <div class="mt-4 flex flex-wrap gap-2">
+                <a
+                  v-if="hospital?.emergency_phone"
+                  class="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold
+                         text-white shadow-sm hover:bg-indigo-700 active:scale-[0.98]"
+                  :href="`tel:${hospital.emergency_phone}`"
+                >
+                  <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2A19.8 19.8 0 0 1 3 5.18 2 2 0 0 1 5 3h3a2 2 0 0 1 2 1.72c.12.86.3 1.7.54 2.5a2 2 0 0 1-.45 2.11L9 10a16 16 0 0 0 5 5l.67-1.09a2 2 0 0 1 2.11-.45c.8.24 1.64.42 2.5.54A2 2 0 0 1 22 16.92z"/>
+                  </svg>
+                  응급실 전화
+                </a>
 
-        <!-- 가용 상태(있다면) -->
-        <div class="rounded-2xl border bg-white p-5 shadow-sm">
-          <div class="flex items-center justify-between">
-            <h2 class="text-lg font-bold text-gray-900">가용 상태</h2>
-            <span class="text-xs text-gray-500">
-              {{ hospital?.updated_at ? `업데이트: ${formatTime(hospital.updated_at)}` : '' }}
-            </span>
-          </div>
+                <button
+                  v-if="hospital?.address || (hospital?.second_address || hospital?.third_address)"
+                  class="inline-flex items-center gap-2 rounded-xl border bg-white px-4 py-2 text-sm font-semibold
+                         text-gray-800 hover:bg-gray-50 active:scale-[0.98]"
+                  @click="copyAddress"
+                >
+                  <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 9h10v10H9z" />
+                    <path d="M5 5h10v10H5z" />
+                  </svg>
+                  주소 복사
+                </button>
+              </div>
+            </div>
 
-          <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
-            <div class="rounded-xl border p-4">
-              <p class="text-gray-500">응급실 병상</p>
-              <p class="mt-1 text-lg font-bold text-gray-900">{{ hospital?.er_beds ?? '-' }}</p>
-            </div>
-            <div class="rounded-xl border p-4">
-              <p class="text-gray-500">중환자실</p>
-              <p class="mt-1 text-lg font-bold text-gray-900">{{ hospital?.icu_beds ?? '-' }}</p>
-            </div>
-            <div class="rounded-xl border p-4">
-              <p class="text-gray-500">수술실</p>
-              <p class="mt-1 text-lg font-bold text-gray-900">{{ hospital?.or_available ?? '-' }}</p>
-            </div>
-            <div class="rounded-xl border p-4">
-              <p class="text-gray-500">CT 가능</p>
-              <p class="mt-1 text-lg font-bold text-gray-900">
-                {{ hospital?.ct_available === true ? '가능' : hospital?.ct_available === false ? '불가' : '-' }}
-              </p>
+            <!-- quick stats -->
+            <div class="grid w-full sm:w-[320px] grid-cols-2 gap-3">
+              <div class="rounded-2xl border bg-white/70 p-4">
+                <p class="text-xs font-semibold text-gray-500">응급실 전화</p>
+                <p class="mt-1 text-sm font-bold text-gray-900">
+                  {{ hospital?.emergency_phone || '-' }}
+                </p>
+              </div>
+              <div class="rounded-2xl border bg-white/70 p-4">
+                <p class="text-xs font-semibold text-gray-500">대표 전화</p>
+                <p class="mt-1 text-sm font-bold text-gray-900">
+                  {{ hospital?.main_phone || '-' }}
+                </p>
+              </div>
             </div>
           </div>
 
-          <p class="mt-3 text-xs text-gray-500">
-            * 위 항목은 데이터가 있을 때만 의미가 있으며, 실제 현장 상황과 다를 수 있습니다.
-          </p>
+          <!-- description -->
+          <div class="mt-5 rounded-2xl border bg-white/70 p-4">
+            <p class="text-sm font-semibold text-gray-800">병원 소개</p>
+            <p class="mt-2 text-sm leading-relaxed text-gray-700 whitespace-pre-line">
+              {{ hospital?.description || '소개 정보가 없습니다.' }}
+            </p>
+          </div>
         </div>
-      </div>
+      </section>
 
-      <!-- 오른쪽(액션/지도 자리) -->
-      <div class="space-y-4">
+      <!-- Main grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
-        <!-- 지도 컴포넌트 자리 (나중에 NaverMap 넣기) -->
-        <div class="rounded-2xl border bg-gray-50 p-5 text-sm text-gray-600">
-          지도 영역 (추후 NaverMap/GoogleMap 컴포넌트 넣기)
+    <!-- 🔵 LEFT : 지도 (3) -->
+    <aside class="lg:col-span-3 space-y-5">
+      <section class="rounded-3xl bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-extrabold text-gray-900">위치</h3>
         </div>
-      </div>
+
+        <div class="mt-4 rounded-2xl overflow-hidden border bg-gray-50">
+          <div
+            ref="mapDiv"
+            class="w-full h-[420px] lg:h-[520px]"
+          ></div>
+        </div>
+      </section>
+    </aside>
+
+    <!-- 🟣 RIGHT : 가용 상태 (2) -->
+    <section class="lg:col-span-2 space-y-5">
+       <section class="rounded-3xl bg-white p-5 shadow-sm">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-extrabold text-gray-900">가용 상태</h3>
+        </div>
+
+      <div class="mt-4 grid grid-cols-2 gap-4">
+        <div class="rounded-2xl border bg-gray-50 p-4 flex justify-center">
+          <CircularProgress
+            label="응급실 병상"
+            :current="hospital?.er_used ?? 0"
+            :total="hospital?.er_beds ?? 0"
+            :size="80"
+          />
+        </div>
+
+        <div class="rounded-2xl border bg-gray-50 p-4 flex justify-center">
+          <CircularProgress
+            label="중환자실"
+            :current="hospital?.icu_used ?? 0"
+            :total="hospital?.icu_beds ?? 0"
+            :size="80"
+          />
+        </div>
+
+        <div class="rounded-2xl border bg-gray-50 p-4 flex justify-center">
+          <CircularProgress
+            label="수술실"
+            :current="hospital?.or_used ?? 0"
+            :total="hospital?.or_total ?? 0"
+            :size="80"
+          />
+        </div>
+
+        <div class="rounded-2xl border bg-gray-50 p-4 flex justify-center">
+          <CircularProgress
+            label="CT"
+            :current="hospital?.ct_available === true ? 0 : 1"
+            :total="1"
+            :size="80"
+          />
+          </div>
+
+        </div>
+        </section>
+      </section>
+
+    </div>
+
     </div>
   </div>
+
   <div>
-    <Review/>
+  <Review :hpid="hospital?.hpid" />
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import Review from '../Review/Review.vue'
+import { useLocationStore } from '@/stores/location'
+import CircularProgress from '../../../components/CircularProgress.vue'
 
+const locationStore = useLocationStore()
 const route = useRoute()
 const router = useRouter()
 
 const hospital = ref(null)
 const loading = ref(true)
 const error = ref('')
+let map = null
+const mapDiv = ref(null)
+let hospitalMarker = null
+let myMarker = null
+const getLoc = ref(null)
+
+const copyCoords = async () => {
+  if (!hospital.value?.latitude || !hospital.value?.longitude) return
+  try {
+    await navigator.clipboard.writeText(`${hospital.value.latitude},${hospital.value.longitude}`)
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const openExternalMap = () => {
+  const lat = hospital.value?.latitude
+  const lng = hospital.value?.longitude
+  const name = hospital.value?.name || '병원'
+  if (!lat || !lng) return
+
+  // 네이버 지도 웹 링크(간단)
+  const url = `https://map.naver.com/v5/search/${encodeURIComponent(name)}/place?c=${lng},${lat},15,0,0,0,dh`
+  window.open(url, '_blank')
+}
 
 // 즐겨찾기 상태 (상세에서만 쓰는 간단 버전)
 const isFavorite = ref(false)
@@ -230,5 +314,88 @@ const formatTime = (iso) => {
   }
 }
 
-onMounted(fetchDetail)
+onMounted(async () => {
+  const fromState = window.history.state?.hospital || route.state?.hospital
+  if (fromState) {
+    hospital.value = fromState
+  } else {
+    error.value = '병원 정보를 불러오지 못했습니다.'
+    return
+  }
+
+  loading.value = false
+  await nextTick()
+
+  if (!mapDiv.value) return
+  if (!window.naver?.maps) {
+    console.error('네이버 지도 SDK가 아직 로드되지 않았습니다.')
+    return
+  }
+
+  /** 📍 병원 위치 */
+  const hospitalPos = new window.naver.maps.LatLng(
+    hospital.value.latitude,
+    hospital.value.longitude
+  )
+
+  map = new window.naver.maps.Map(mapDiv.value, {
+    center: hospitalPos,
+    zoom: 14,
+  })
+
+  // 🔴 병원 마커 (빨간색)
+  hospitalMarker = new window.naver.maps.Marker({
+    position: hospitalPos,
+    map,
+    title: hospital.value.name,
+    icon: {
+      content: `
+        <div style="
+          width: 18px;
+          height: 18px;
+          background: #ef4444;
+          border: 3px solid white;
+          border-radius: 9999px;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        "></div>
+      `,
+      anchor: new window.naver.maps.Point(9, 9),
+    },
+  })
+
+  /** 🔵 내 위치 마커 */
+  // if (locationStore.hasLocation) {
+  //   const myPos = new window.naver.maps.LatLng(
+  //     locationStore.lat,
+  //     locationStore.lng
+  //   )
+
+  //   myMarker = new window.naver.maps.Marker({
+  //     position: myPos,
+  //     map,
+  //     title: '내 위치',
+  //     icon: {
+  //       content: `
+  //         <div style="
+  //           width: 14px;
+  //           height: 14px;
+  //           background: #2563eb;
+  //           border: 3px solid white;
+  //           border-radius: 9999px;
+  //           box-shadow: 0 0 0 6px rgba(37,99,235,0.25);
+  //         "></div>
+  //       `,
+  //       anchor: new window.naver.maps.Point(7, 7),
+  //     },
+  //   })
+
+  //   // 병원 + 내 위치가 둘 다 보이게 중앙 조정
+  //   const bounds = new window.naver.maps.LatLngBounds()
+  //   bounds.extend(hospitalPos)
+  //   bounds.extend(myPos)
+  //   map.fitBounds(bounds, { top: 60, right: 60, bottom: 60, left: 60 })
+  // }
+})
+
+
 </script>
