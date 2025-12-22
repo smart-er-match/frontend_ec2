@@ -137,47 +137,6 @@
 
 <!-- 빠른 액션 -->
 <div class="mt-10 space-y-4">
-  <!-- 응급실 목록 보기 -->
-  <button
-    type="button"
-    @click="erListClick"
-    class="group w-full relative overflow-hidden
-           rounded-2xl border border-gray-200 bg-white
-           p-5 text-left shadow-sm
-           transition-all duration-200
-           hover:shadow-md hover:border-indigo-200
-           active:scale-[0.99]
-           focus:outline-none focus:ring-2 focus:ring-indigo-500"
-  >
-    <!-- 배경 효과 -->
-    <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-      <div class="absolute -top-24 -right-24 h-52 w-52 rounded-full bg-indigo-100 blur-2xl"></div>
-    </div>
-
-    <div class="relative flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-          <!-- list icon -->
-          <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/>
-            <path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>
-          </svg>
-        </div>
-
-        <div>
-          <p class="text-base font-bold text-gray-900">응급실 목록 보기</p>
-          <p class="text-sm text-gray-500">
-            주변 응급실을 리스트로 확인합니다.
-          </p>
-        </div>
-      </div>
-
-      <span class="text-sm font-semibold text-indigo-600">
-        열기 →
-      </span>
-    </div>
-  </button>
-
   <!-- AI 챗봇 서비스 -->
 <button
   type="button"
@@ -218,6 +177,73 @@
     </span>
   </div>
 </button>
+ <Teleport to="body">
+  <!-- overlay -->
+  <div
+    v-if="isChatOpen"
+    class="fixed inset-0 z-[999] bg-black/40 backdrop-blur-[2px]"
+    @click="closeChatBot"
+  />
+
+  <!-- modal (center) -->
+  <div
+    v-if="isChatOpen"
+    class="fixed inset-0 z-[1000]
+           flex items-center justify-center
+           p-4"
+    @click.stop
+  >
+    <div
+      class="w-full max-w-3xl
+             h-[80vh] max-h-[900px]
+             rounded-2xl bg-white
+             shadow-2xl border border-gray-200
+             overflow-hidden"
+    >
+      <AIChatBot @close="closeChatBot" />
+    </div>
+  </div>
+</Teleport>
+  <!-- 응급실 목록 보기 -->
+  <button
+    type="button"
+    @click="erListClick"
+    class="group w-full relative overflow-hidden
+           rounded-2xl border border-gray-200 bg-white
+           p-5 text-left shadow-sm
+           transition-all duration-200
+           hover:shadow-md hover:border-indigo-200
+           active:scale-[0.99]
+           focus:outline-none focus:ring-2 focus:ring-indigo-500"
+  >
+    <!-- 배경 효과 -->
+    <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+      <div class="absolute -top-24 -right-24 h-52 w-52 rounded-full bg-indigo-100 blur-2xl"></div>
+    </div>
+
+    <div class="relative flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+          <!-- list icon -->
+          <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/>
+            <path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>
+          </svg>
+        </div>
+
+        <div>
+          <p class="text-base font-bold text-gray-900">응급실 목록 보기</p>
+          <p class="text-sm text-gray-500">
+            주변 응급실을 리스트로 확인합니다.
+          </p>
+        </div>
+      </div>
+
+      <span class="text-sm font-semibold text-indigo-600">
+        열기 →
+      </span>
+    </div>
+  </button>
 
 
   <!-- 119 바로 연결 -->
@@ -305,10 +331,11 @@
 
 
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref  } from "vue";
 import { useRouter } from "vue-router";
 import { useLocationStore } from "@/stores/location"
 import api from "@/components/api"
+import AIChatBot from "../AI/AIChatBot.vue";
 
 const router = useRouter();
 const locationStore = useLocationStore();
@@ -324,11 +351,14 @@ const call119 = () => {
   window.location.href = "tel:119";
 };
 
+const isChatOpen = ref(false)
 const openChatBot = () => {
-  console.log("눌렀다")
+  isChatOpen.value = true
 }
 
-
+const closeChatBot = () => {
+  isChatOpen.value = false
+}
 // ✅ 안전하게 computed로 감싸기 (초기 null 방지)
 const user = computed(() => JSON.parse(localStorage.getItem("user") || "{}"));
 const roleMessage = computed(() => (user.value.role ? "의료진" : "일반인"));

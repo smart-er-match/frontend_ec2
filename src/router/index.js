@@ -24,6 +24,7 @@ import ErDetail from '../pages/Main/HospitalList/ErDetail.vue';
 import MedicalErList from '../pages/Main/HospitalList/MedicalErList.vue';
 import GetAIToken from '../pages/AI/getAIToken.vue';
 import TokenProcess from '../pages/AI/TokenProcess.vue';
+import AIChatBot from '../pages/AI/AIChatBot.vue';
 
 
 
@@ -78,7 +79,11 @@ const routes = [
         key: route.query.key,
       }),
     },
-
+    {
+       path: '/aichatbot',
+        name: 'aichatbot',
+        component: AIChatBot ,
+    }, 
     {
         path: '/auth/kakao/callback',
         name: 'KakaoCallback',
@@ -94,6 +99,7 @@ const routes = [
         name: 'google-callback',
         component: GoogleCallback,
       }
+
     ]
 
 const router = createRouter({

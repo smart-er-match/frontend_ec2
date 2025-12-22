@@ -12,17 +12,24 @@ const AUTH_EXCLUDE_PATHS = [
   'accounts/login/',
   'accounts/token/refresh/',
   'accounts/signup/',
-  'accounts/social/', // kakao/naver/google 등
+  'accounts/social/', 
+  'hospitals/chatbot/',
+  // kakao/naver/google 등
 ]
 
 // ====== 요청 인터셉터: 매 요청마다 access 토큰 자동 첨부 ======
 api.interceptors.request.use((config) => {
-  const access = localStorage.getItem('access_token')
-  if (access) {
-    config.headers.Authorization = `Bearer ${access}`
+  const url = config?.url || ''
+  const isExcluded = AUTH_EXCLUDE_PATHS.some((p) => url.includes(p))
+
+  if (!isExcluded) {
+    const access = localStorage.getItem('access_token')
+    if (access) config.headers.Authorization = `Bearer ${access}`
   }
+
   return config
 })
+
 
 // 동시 요청 대비용
 let isRefreshing = false
@@ -42,22 +49,12 @@ api.interceptors.response.use(
   const url = originalRequest?.url || ''
 
   // 순환 참조 방지: error.config와 error.response를 JSON.stringify로 안전하게 처리
-  const safeErrorConfig = JSON.parse(JSON.stringify(error.config, (key, value) => {
-    if (value === error.config) {
-      return undefined;  // 순환 참조 방지
-    }
-    return value;
-  }));
-
-  const safeErrorResponse = JSON.parse(JSON.stringify(error.response, (key, value) => {
-    if (value === error.response) {
-      return undefined;  // 순환 참조 방지
-    }
-    return value;
-  }));
-
-  console.log('Safe Error Config:', safeErrorConfig);  // 요청 정보
-  console.log('Safe Error Response:', safeErrorResponse);  // 응답 정보
+console.log('[API ERROR]', {
+  status,
+  url,
+  method: originalRequest?.method,
+  data: error?.response?.data,
+})
 
   // ✅ 1) 인증 관련 요청은 401이어도 refresh/redirect 로직 금지
   if (AUTH_EXCLUDE_PATHS.some((p) => url.includes(p))) {

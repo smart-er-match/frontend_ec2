@@ -28,7 +28,6 @@
       <textarea required v-model="purposeDescription" placeholder="활용 목적 설명" rows="4" class="w-full mt-4 p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
     </div>
 
-
     <!-- 상세기능 정보 -->
     <div class="mb-8">
       <label for="details" class="block text-lg font-semibold text-gray-700">상업용 이용 동의</label>
@@ -42,20 +41,21 @@
     <!-- 버튼 -->
     <div class="text-center">
       <!-- 토큰 상태가 1일 때 버튼 문구 및 색상 변경 -->
-      <button 
-        @click="submitRequest" 
+       <button
+        @click="submitRequest"
         class="w-full py-3 mt-4 font-semibold rounded-md shadow-md"
-        :class="authStore.user?.token_status === 1 ? 'bg-gray-300 text-gray-600 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'"
-        :disabled="authStore.user?.token_status === 1"
+        :class="buttonClass"
+        :disabled="!isButtonEnabled"
       >
-        {{ authStore.user?.token_status === 1 ? 'AI 토큰 발급 중입니다.' : 'AI 토큰 발급 요청' }}
-      </button>
+        {{ buttonText }}
+    </button>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+console.log("Gdgdgdgdg")
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import api from '../../components/api'
 
@@ -64,8 +64,36 @@ const usePurpose = ref('web') // 활용목적 선택
 const purposeDescription = ref('') // 활용목적 설명
 const isFunctionChecked = ref(false) // 기능 선택 여부
 
-onMounted(() => {
-  authStore.updateUserInfo(); // 사용자 정보 자동 갱신
+const tokenStatus = computed(() => authStore.user?.token_status ?? 0)
+
+const buttonClass = computed(() => {
+  return isButtonEnabled.value
+    ? 'bg-blue-600 text-white hover:bg-blue-700'
+    : 'bg-gray-300 text-gray-600 cursor-not-allowed'
+})
+
+const isButtonEnabled = computed(() => {
+  return tokenStatus.value === 0 || tokenStatus.value === 2
+})
+
+const buttonText = computed(() => {
+  switch (tokenStatus.value) {
+    case 0:
+      return 'AI 토큰 발급'
+    case 1:
+      return '발급중...'
+    case 2:
+      return '재발급하기'
+    case 3:
+      return '발급 완료'
+    default:
+      return 'AI 토큰 발급'
+  }
+})
+
+
+onMounted(async () => {
+  await authStore.updateUserInfo(); // 사용자 정보 자동 갱신
 })
 
 const submitRequest = async () => {
