@@ -207,8 +207,8 @@ import { useRoute, useRouter } from 'vue-router'
 import Review from '../Review/Review.vue'
 import { useLocationStore } from '@/stores/location'
 import CircularProgress from '../../../components/CircularProgress.vue'
+import api from '../../../components/api'
 
-const locationStore = useLocationStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -218,28 +218,7 @@ const error = ref('')
 let map = null
 const mapDiv = ref(null)
 let hospitalMarker = null
-let myMarker = null
-const getLoc = ref(null)
 
-const copyCoords = async () => {
-  if (!hospital.value?.latitude || !hospital.value?.longitude) return
-  try {
-    await navigator.clipboard.writeText(`${hospital.value.latitude},${hospital.value.longitude}`)
-  } catch (e) {
-    console.error(e)
-  }
-}
-
-const openExternalMap = () => {
-  const lat = hospital.value?.latitude
-  const lng = hospital.value?.longitude
-  const name = hospital.value?.name || '병원'
-  if (!lat || !lng) return
-
-  // 네이버 지도 웹 링크(간단)
-  const url = `https://map.naver.com/v5/search/${encodeURIComponent(name)}/place?c=${lng},${lat},15,0,0,0,dh`
-  window.open(url, '_blank')
-}
 
 // 즐겨찾기 상태 (상세에서만 쓰는 간단 버전)
 const isFavorite = ref(false)
@@ -247,51 +226,28 @@ const isFavorite = ref(false)
 // 라우트 params: /er/:id
 const hospitalId = computed(() => route.params.id)
 
-// params로 넘겨받은 병원 정보 사용
-const hospitalData = computed(() => route.state?.hospital)
-
-// 병원 정보 세팅
-const fetchDetail = async () => {
-  loading.value = true
-  error.value = '' 
-
-  console.log(hospitalData)
-  try {
-    // 1️⃣ state로 받은 병원 정보 설정
-    if (hospitalData.value) {
-      hospital.value = hospitalData.value
-    } else {
-      error.value = '병원 정보를 불러오지 못했습니다.'
-    }
-
-    // 2️⃣ 즐겨찾기 여부 체크
-    const favs = JSON.parse(localStorage.getItem('fav_hospitals') || '[]')
-    isFavorite.value = favs.includes(Number(hospitalId.value))
-
-  } catch (e) {
-    error.value = '응급실 정보를 불러오지 못했습니다.'
-    console.error(e)
-  } finally {
-    loading.value = false
-  }
-}
-
 const toggleFavorite = async () => {
-  const id = Number(hospitalId.value)
-  const wasFav = isFavorite.value
-  isFavorite.value = !wasFav
+  const hpid = String(hospitalId.value) // hpid는 str
+  const prev = isFavorite.value
+
+  // ✅ 낙관적 업데이트(즉시 반영)
+  isFavorite.value = !prev
 
   try {
-    const favs = JSON.parse(localStorage.getItem('fav_hospitals') || '[]')
-    if (wasFav) {
-      const index = favs.indexOf(id)
-      if (index > -1) favs.splice(index, 1)
-    } else {
-      favs.push(id)
+    const { data } = await api.post(`/hospitals/bookmark/${hpid}/`)
+
+    if (typeof data?.is_bookmarked === 'boolean') {
+      isFavorite.value = data.is_bookmarked
     }
-    localStorage.setItem('fav_hospitals', JSON.stringify(favs))
+
+    // (선택) 토스트/알림용
+    // toast.success(data?.message ?? (isFavorite.value ? '찜 목록에 추가되었습니다.' : '찜 목록에서 삭제되었습니다.'))
   } catch (e) {
-    isFavorite.value = wasFav
+    // ✅ 실패하면 롤백
+    isFavorite.value = prev
+
+    // (선택) 401 처리 등
+    // if (e?.response?.status === 401) router.push({ name: 'login' })
     console.error(e)
   }
 }
@@ -305,14 +261,6 @@ const copyAddress = async () => {
   }
 }
 
-const formatTime = (iso) => {
-  try {
-    const d = new Date(iso)
-    return d.toLocaleString()
-  } catch {
-    return iso
-  }
-}
 
 onMounted(async () => {
   const fromState = window.history.state?.hospital || route.state?.hospital

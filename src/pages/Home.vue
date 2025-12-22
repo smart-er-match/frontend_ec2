@@ -122,8 +122,7 @@ const onResize = () => {
 }
 
 const onLocSuccess = ({ lat, lng, address }) => {
-  console.log('[Home] success event:', lat, lng, address)
-  // 여기서 병원 조회/백엔드 전송
+
 }
 
 

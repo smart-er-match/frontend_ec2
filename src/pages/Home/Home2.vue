@@ -7,6 +7,9 @@
           <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
             지역별 Top 3 응급실
           </h1>
+          <p class="mt-1 text-sm text-slate-500">
+            평균 평점 기준 (동점: 리뷰 수 → 이름)
+          </p>
         </div>
 
         <!-- 지역 선택 -->
@@ -22,12 +25,19 @@
         </div>
       </div>
 
-      <!-- 로딩/빈 상태 -->
+      <!-- 로딩/에러/빈 상태 -->
       <div
         v-if="loading"
         class="rounded-xl border border-slate-200 bg-white p-5 sm:p-8 text-slate-600 shadow-sm"
       >
         불러오는 중...
+      </div>
+
+      <div
+        v-else-if="error"
+        class="rounded-xl border border-rose-200 bg-rose-50 p-5 sm:p-8 text-rose-700 shadow-sm"
+      >
+        {{ error }}
       </div>
 
       <div
@@ -38,55 +48,62 @@
       </div>
 
       <template v-else>
-        <!-- ✅ 모바일 전용: 리스트 카드 -->
+        <!-- ✅ 모바일 전용 -->
         <div class="grid grid-cols-1 gap-3 md:hidden">
           <MobileRankCard
             :rank="1"
             :item="top3[0]"
-            :selected="top3[0]?.pk === selectedPk"
+            :selected="top3[0]?.hpid === selectedHpid"
             @select="onSelect"
           />
           <MobileRankCard
             :rank="2"
             :item="top3[1]"
-            :selected="top3[1]?.pk === selectedPk"
+            :selected="top3[1]?.hpid === selectedHpid"
             @select="onSelect"
           />
           <MobileRankCard
             :rank="3"
             :item="top3[2]"
-            :selected="top3[2]?.pk === selectedPk"
+            :selected="top3[2]?.hpid === selectedHpid"
             @select="onSelect"
           />
         </div>
 
-        <!-- ✅ 데스크탑: 기존 시상대 유지 -->
+        <!-- ✅ 데스크탑 -->
         <div class="hidden md:grid md:grid-cols-3 md:gap-6 md:items-end">
-          <PodiumCard
-            :rank="2"
-            :item="top3[1]"
-            class="md:order-1"
-            :selected="top3[1]?.pk === selectedPk"
-            @select="onSelect"
-          />
+        <PodiumCard
+          :rank="2"
+          :item="top3[1]"
+          class="md:order-1"
+          :active="top3[1]?.hpid === selectedHpid"
+          @select="onSelect(top3[1])"
+        />
 
-          <PodiumCard
-            :rank="1"
-            :item="top3[0]"
-            highlight
-            class="md:order-2"
-            :selected="top3[0]?.pk === selectedPk"
-            @select="onSelect"
-          />
+        <PodiumCard
+          :rank="1"
+          :item="top3[0]"
+          highlight
+          class="md:order-2"
+          :active="top3[0]?.hpid === selectedHpid"
+          @select="onSelect(top3[0])"
+        />
 
-          <PodiumCard
-            :rank="3"
-            :item="top3[2]"
-            class="md:order-3"
-            :selected="top3[2]?.pk === selectedPk"
-            @select="onSelect"
-          />
+        <PodiumCard
+          :rank="3"
+          :item="top3[2]"
+          class="md:order-3"
+          :active="top3[2]?.hpid === selectedHpid"
+          @select="onSelect(top3[2])"
+        />
+
         </div>
+        <div>
+          <HospitalHighlights 
+          class="mt-5"
+          :hpid="selectedHpid" :pickCount="3" />
+        </div>
+
       </template>
     </div>
   </div>
@@ -94,11 +111,14 @@
 
 <script setup>
 import { computed, onMounted, reactive, ref } from "vue";
+import api from "@/components/api";
 import PodiumCard from "./PodiumCard.vue";
-import MobileRankCard from "./MobileRankCard.vue"; // ✅ 추가
+import MobileRankCard from "./MobileRankCard.vue";
+import HospitalHighlights from "./HospitalHighlights.vue";
 
 const er_list = reactive({});
 const loading = ref(false);
+const error = ref("");
 const selectedRegion = ref("전체");
 
 const regionList = computed(() => ["전체", ...Object.keys(er_list)]);
@@ -108,35 +128,59 @@ const currentList = computed(() => {
   return er_list[selectedRegion.value] || [];
 });
 
-// pk가 "A2200008" 같은 문자열 → 숫자만 뽑아서 점수로 사용
-const getScore = (h) => {
-  if (!h?.pk) return 0;
-  const onlyNum = String(h.pk).replace(/\D/g, "");
-  return Number(onlyNum) || 0;
-};
+// ✅ 평균 평점 기준 점수 / 동점처리용 리뷰 수
+const getRating = (h) => Number(h?.average_rating ?? 0);
+const getCount = (h) => Number(h?.review_count ?? 0);
 
 const top3 = computed(() => {
-  const arr = [...currentList.value].sort((a, b) => getScore(b) - getScore(a)).slice(0, 3);
+  const arr = [...currentList.value]
+    .sort((a, b) => {
+      // 1) 평균 평점 내림차순
+      const d1 = getRating(b) - getRating(a);
+      if (d1 !== 0) return d1;
+
+      // 2) 동점이면 리뷰 수 많은 순
+      const d2 = getCount(b) - getCount(a);
+      if (d2 !== 0) return d2;
+
+      // 3) 그래도 동점이면 이름 오름차순
+      return String(a?.name ?? "").localeCompare(String(b?.name ?? ""), "ko");
+    })
+    .slice(0, 3);
+
   while (arr.length < 3) arr.push(null);
   return arr;
 });
 
 onMounted(async () => {
   loading.value = true;
+  error.value = "";
   try {
-    const res = await fetch("/LocationHospital.json");
-    const data = await res.json();
+    const res = await api.get("/hospitals/list/");
+    // 기존 너 응답 형태: res.data.data 에 지역별 묶음이 들어있던 걸로 사용
+    const data = res.data?.data ?? res.data;
+    console.log(data)
     Object.assign(er_list, data);
   } catch (e) {
     console.error(e);
+    error.value = "병원 데이터를 불러오지 못했습니다.";
   } finally {
     loading.value = false;
   }
 });
 
-const selectedPk = ref(null);
+const selectedHpid = ref(null);
 const onSelect = (item) => {
   if (!item) return;
-  selectedPk.value = item.pk;
+  selectedHpid.value = item.hpid;
 };
+
+import { watch } from "vue";
+
+watch(top3, (arr) => {
+  if (!selectedHpid.value && arr?.[0]?.hpid) {
+    selectedHpid.value = arr[0].hpid;
+  }
+}, { immediate: true });
+
 </script>

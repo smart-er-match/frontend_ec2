@@ -20,8 +20,8 @@
           class="flex items-center gap-1 px-4 py-1 rounded-full text-sm font-extrabold shadow"
           :class="medalClass"
         >
-          <span v-if="rank===1">🥇</span>
-          <span v-else-if="rank===2">🥈</span>
+          <span v-if="rank === 1">🥇</span>
+          <span v-else-if="rank === 2">🥈</span>
           <span v-else>🥉</span>
           <span>{{ rank }}</span>
         </div>
@@ -38,15 +38,39 @@
             {{ item.name }}
           </div>
 
+          <!-- ✅ 평점 박스 -->
           <div class="mt-auto w-full rounded-xl bg-slate-50 border border-slate-200 p-3">
             <div class="text-xs text-slate-500">평점</div>
-            <div class="text-sm font-bold text-slate-900">
-              {{ item.pk }}
+
+            <div class="mt-1 flex items-center justify-center gap-2">
+              <div class="text-sm font-bold text-slate-900">
+                {{ ratingText }}
+              </div>
+              <div class="text-xs text-slate-400">
+                ({{ countText }})
+              </div>
+            </div>
+
+            <!-- ✅ 별 표시 -->
+            <div class="mt-2 flex items-center justify-center gap-1">
+              <svg
+                v-for="n in 5"
+                :key="n"
+                viewBox="0 0 24 24"
+                class="h-4 w-4"
+                :class="n <= roundedRating ? 'text-amber-400' : 'text-slate-300'"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 17.27l5.18 3.05-1.64-5.81L20 10.24l-5.91-.5L12 4.5 9.91 9.74 4 10.24l4.46 4.27-1.64 5.81z"
+                />
+              </svg>
             </div>
           </div>
 
           <div class="mt-2 text-xs text-slate-500">
-            {{ item.phone }}
+            {{ item.emergency_phone || item.phone || '-' }}
           </div>
         </template>
 
@@ -65,8 +89,7 @@ const props = defineProps({
   rank: { type: Number, required: true },
   item: { type: Object, default: null },
   highlight: { type: Boolean, default: false },
-
-  // ✅ 추가: 선택 상태
+  // ✅ 선택 상태
   active: { type: Boolean, default: false },
 })
 
@@ -80,13 +103,30 @@ const medalClass = computed(() => {
 
 /**
  * ✅ “반응형”으로 빛나게:
- * - 모바일: 링 두께 조금 얇게
+ * - 모바일: 링 두께 얇게
  * - 데스크탑: 링 더 두껍게
  */
 const activeRingClass = computed(() => {
   if (props.rank === 1) return 'ring-2 sm:ring-4 ring-amber-400/70'
   if (props.rank === 2) return 'ring-2 sm:ring-4 ring-slate-400/60'
   return 'ring-2 sm:ring-4 ring-amber-700/60'
+})
+
+// ✅ 평점/리뷰수
+const rating = computed(() => {
+  const v = Number(props.item?.average_rating ?? 0)
+  return Number.isFinite(v) ? v : 0
+})
+
+const roundedRating = computed(() => {
+  // 별 채우기용: 반올림(원하면 Math.floor로 바꿔도 됨)
+  return Math.max(0, Math.min(5, Math.round(rating.value)))
+})
+
+const ratingText = computed(() => rating.value.toFixed(1))
+const countText = computed(() => {
+  const c = Number(props.item?.review_count ?? 0)
+  return Number.isFinite(c) ? c : 0
 })
 </script>
 
