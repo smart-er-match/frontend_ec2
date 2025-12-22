@@ -58,8 +58,30 @@
           </div>
 
           <div class="shrink-0 text-right">
-            <p class="text-sm font-extrabold text-slate-900">{{ rv.rating }}점</p>
-          </div>
+  <!-- ⭐ 별점 -->
+        <div class="flex items-center justify-end gap-0.5">
+          <svg
+            v-for="n in 5"
+            :key="n"
+            viewBox="0 0 24 24"
+            class="h-4 w-4"
+            :class="n <= Number(rv.rating) ? 'text-amber-400' : 'text-gray-300'"
+            fill="currentColor"
+            aria-hidden="true"
+          >
+            <path
+              d="M12 17.27l5.18 3.05-1.64-5.81L20 10.24l-5.91-.5L12 4.5
+                9.91 9.74 4 10.24l4.46 4.27-1.64 5.81z"
+            />
+          </svg>
+        </div>
+
+        <!-- 숫자 보조 -->
+        <p class="mt-1 text-xs font-semibold text-slate-600">
+          {{ rv.rating }} / 5
+        </p>
+      </div>
+
         </div>
       </article>
     </div>
