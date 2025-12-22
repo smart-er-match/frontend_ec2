@@ -119,39 +119,14 @@
     </div>
 
     <!-- 목록 -->
-    <div v-else class="mt-4 space-y-3">
-      <div v-if="reviews.length === 0" class="rounded-2xl border bg-white p-4 text-gray-600">
-        아직 리뷰가 없습니다.
-      </div>
-
-      <article
-        v-for="r in reviews"
-        :key="r.id ?? r.created_at"
-        class="rounded-2xl border bg-white p-4"
-      >
-        <div class="flex items-start justify-between gap-3">
-          <div class="min-w-0">
-            <p class="text-sm font-bold text-gray-900">
-              {{ r.user_name || r.name || '익명' }}
-              <span class="ml-2 text-xs font-semibold text-gray-500">· {{ formatDate(r.created_at) }}</span>
-            </p>
-            <p class="mt-2 text-sm text-gray-800 whitespace-pre-line">
-              {{ r.content }}
-            </p>
-          </div>
-
-          <div class="shrink-0 text-right">
-            <p class="text-sm font-extrabold text-gray-900">{{ r.rating }}점</p>
-          </div>
-        </div>
-      </article>
-    </div>
+    <ReviewList v-else :reviews="reviews" />
   </section>
 </template>
 
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import api from '@/components/api'
+import ReviewList from './ReviewList.vue'
 
 const props = defineProps({
   hpid: { type: String, required: true },
@@ -224,4 +199,17 @@ const formatDate = (iso) => {
 
 onMounted(fetchReviews)
 watch(() => props.hpid, fetchReviews)
+
+const maskEmail = (email) => {
+  if (!email || !email.includes('@')) return '익명';
+
+  const [id, domain] = email.split('@');
+
+  if (id.length <= 1) {
+    return `${id[0]}****@${domain}`;
+  }
+
+  const visible = id.slice(0, 1);
+  return `${visible}****@${domain}`;
+};
 </script>

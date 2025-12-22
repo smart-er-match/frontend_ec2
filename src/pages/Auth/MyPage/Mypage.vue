@@ -149,7 +149,11 @@
         />
       </div>
     </div>
-    <my-er-list />
+    <my-er-list 
+      :bookmarked-hospitals="form.bookmarked_hospitals ?? []" 
+       @remove-bookmark="onRemoveBookmark"
+       />
+
   </div>
 </template>
 
@@ -175,6 +179,7 @@ const form = reactive({
   email: '',
   token_status: '',
   service_key: '',
+  bookmarked_hospitals: [],
 })
 
 // computed를 사용하여 token_status에 맞는 텍스트 출력
@@ -291,6 +296,7 @@ onMounted(async () => {
   await authStore.updateUserInfo();
 
   const user = authStore.user;
+  console.log(user)
   form.name = user?.name || '';
   form.birth_date = user?.birth_date || '';
   form.phone_number = user?.phone_number || '';
@@ -301,8 +307,16 @@ onMounted(async () => {
   form.email = user?.email || '';
   form.token_status = user?.token_status || '';
   form.service_key = user?.service_key || '';
+  form.bookmarked_hospitals = user?.bookmarked_hospitals || [];
+
+  console.log(form.bookmarked_hospitals)
 })
 
+const onRemoveBookmark = (hpid) => {
+  form.bookmarked_hospitals = (form.bookmarked_hospitals ?? []).filter(
+    (h) => String(h.hpid) !== String(hpid)
+  )
+}
 
 </script>
 
