@@ -36,6 +36,26 @@ export const useAuthStore = defineStore('auth', {
       axios.defaults.headers.common['Authorization'] = `Bearer ${this.access_token}`
     },
 
+    getAuth() {
+      // localStorage에서 유저 정보 및 토큰 가져오기
+      const accessToken = localStorage.getItem('access_token')
+      const refreshToken = localStorage.getItem('refresh_token')
+      const user = JSON.parse(localStorage.getItem('user'))
+
+      // 가져온 데이터가 있다면 상태에 설정
+      if (accessToken && refreshToken && user) {
+        this.access_token = accessToken
+        this.refresh_token = refreshToken
+        this.user = user
+        axios.defaults.headers.common['Authorization'] = `Bearer ${this.access_token}`;}
+        
+       else {
+       // 데이터가 없으면 초기화
+        this.clearAuth()
+      }
+    },
+
+
     clearAuth() {
       this.access_token = ''
       this.refresh_token = ''
@@ -142,6 +162,38 @@ export const useAuthStore = defineStore('auth', {
       this.saveLastLoginProvider('google')
     
       return { ok: true }
+    },
+
+    async updateUserInfo() {
+      try {
+        // API를 통해 사용자 정보 가져오기
+        const res = await api.post('accounts/mypage/', {});
+        const user = res.data.user;
+
+        if (user) {
+          // 사용자 정보 업데이트
+          this.user = {
+            ...this.user,
+            name: user.name || '',
+            role: user.role || '',
+            birth_date: user.birth_date || '',
+            phone_number: user.phone_number || '',
+            gender: user.gender || '',
+            sign_kind: user.sign_kind || '',
+            email: user.email || '',
+            token_status: user.token_status || '',
+            service_key: user.service_key || '',
+          };
+
+          // localStorage에 저장
+          console.log(user)
+          localStorage.setItem('user', JSON.stringify(this.user));
+        } else {
+          console.log('사용자 정보가 없습니다.');
+        }
+      } catch (error) {
+        console.error('사용자 정보 갱신 실패:', error);
+      }
     },
   },
 })

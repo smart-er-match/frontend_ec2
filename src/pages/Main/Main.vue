@@ -178,6 +178,48 @@
     </div>
   </button>
 
+  <!-- AI 챗봇 서비스 -->
+<button
+  type="button"
+  @click="openChatBot"
+  class="group w-full relative overflow-hidden
+         rounded-2xl border border-gray-200 bg-white
+         p-5 text-left shadow-sm
+         transition-all duration-200
+         hover:shadow-md hover:border-indigo-200
+         active:scale-[0.99]
+         focus:outline-none focus:ring-2 focus:ring-indigo-500"
+>
+  <!-- 배경 효과 -->
+  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div class="absolute -top-24 -right-24 h-52 w-52 rounded-full bg-indigo-100 blur-2xl"></div>
+  </div>
+
+  <div class="relative flex items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+        <!-- 챗봇 아이콘 -->
+        <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 2H7a5 5 0 0 0-5 5v10a5 5 0 0 0 5 5h6a5 5 0 0 0 5-5V7a5 5 0 0 0-5-5h-2" />
+          <path d="M9 10h6m-3-3v6" />
+        </svg>
+      </div>
+
+      <div>
+        <p class="text-base font-bold text-gray-900">AI 챗봇 서비스</p>
+        <p class="text-sm text-gray-500">
+          AI 챗봇과 대화를 통해 빠르게 도움을 받으세요.
+        </p>
+      </div>
+    </div>
+
+    <span class="text-sm font-semibold text-indigo-600">
+      열기 →
+    </span>
+  </div>
+</button>
+
+
   <!-- 119 바로 연결 -->
   <button
     type="button"
@@ -281,6 +323,10 @@ const call119 = () => {
   // ✅ 모바일: 바로 전화 앱 열림
   window.location.href = "tel:119";
 };
+
+const openChatBot = () => {
+  console.log("눌렀다")
+}
 
 
 // ✅ 안전하게 computed로 감싸기 (초기 null 방지)

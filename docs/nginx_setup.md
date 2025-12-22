@@ -37,7 +37,7 @@ server {
 
     # /api → 내부 백엔드 프록시
     location /api/ {
-        proxy_pass http://172.31.16.191/;
+        proxy_pass http://172.31.20.115/;
         proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

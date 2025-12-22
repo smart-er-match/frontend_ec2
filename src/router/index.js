@@ -22,6 +22,8 @@ import ERList from '../pages/Main/HospitalList/ERList.vue';
 import GoogleCallback from '../pages/Auth/Oauth/GoogleCallback.vue';
 import ErDetail from '../pages/Main/HospitalList/ErDetail.vue';
 import MedicalErList from '../pages/Main/HospitalList/MedicalErList.vue';
+import GetAIToken from '../pages/AI/getAIToken.vue';
+import TokenProcess from '../pages/AI/TokenProcess.vue';
 
 
 
@@ -39,6 +41,7 @@ const routes = [
         { path: 'notauthenticated', name: 'notauthenticated', component: NotAuthenticated},
         { path: 'findauth', name: 'findauth', component: FindAuth},
         { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotAuthenticated },
+
     ]
     },
     
@@ -56,9 +59,24 @@ const routes = [
       
         { path: 'erlist', name: 'erlist', component: ERList, meta: {requiresAuth: true} },
         { path: 'mypage', name: 'mypage', component: Mypage},
-        { path: 'erdetail/:id', name: 'erdetail', component: ErDetail, props: true,},
+         {
+          path: '/erdetail/:id',
+          name: 'erdetail',
+          component: ErDetail,
+          props: (route) => ({ id: route.params.id, hospital: route.state?.hospital }) // state에서 hospital을 받기
+        },
         { path: 'medicalerlist', name: 'medicalerlist', component: MedicalErList },
+        { path: 'getaitoken', name: 'getaitoken', component: GetAIToken },
       ]
+    },
+     {
+      path: '/admin/token/process',
+      name: 'tokenProcess',
+      component: TokenProcess,
+      props: (route) => ({
+        mode: route.query.mode,
+        key: route.query.key,
+      }),
     },
 
     {

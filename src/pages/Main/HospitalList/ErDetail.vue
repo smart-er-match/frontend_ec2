@@ -148,7 +148,6 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import api from '@/components/api'
 import Review from '../Review/Review.vue'
 
 const route = useRoute()
@@ -164,51 +163,26 @@ const isFavorite = ref(false)
 // 라우트 params: /er/:id
 const hospitalId = computed(() => route.params.id)
 
-const MOCK_HOSPITALS = [
-  {
-    hospital_id: 1, // 프론트에서 쓰기 편하게 임시 pk 하나 두는 걸 추천
-    hpid: "A2118188",
-    name: "강철병원",
-    first_address: "서울특별시",
-    second_address: "송파구",
-    third_address: "백제고분로 252, SH타워 2~8층 (삼전동)",
-    address: "서울특별시 송파구 백제고분로 252, SH타워 2~8층 (삼전동)",
-    main_phone: "02-6287-5500",
-    emergency_phone: "02-6287-5500",
-    latitude: 37.50234558341771,
-    longitude: 127.09429683872202,
-  },
-]
+// params로 넘겨받은 병원 정보 사용
+const hospitalData = computed(() => route.state?.hospital)
 
-
+// 병원 정보 세팅
 const fetchDetail = async () => {
-  console.log('[DETAIL] route.params.id =', route.params.id, 'typeof:', typeof route.params.id)
-
   loading.value = true
   error.value = '' 
-   try {
-    // 1️⃣ mock 데이터에서 병원 찾기
-    const data = MOCK_HOSPITALS.find(
-      h =>
-        h.hpid === String(hospitalId.value)
-    )
 
-    if (!data) {
-      error.value = '응급실 정보를 찾지 못했습니다.'
-      hospital.value = null
-      return
+  console.log(hospitalData)
+  try {
+    // 1️⃣ state로 받은 병원 정보 설정
+    if (hospitalData.value) {
+      hospital.value = hospitalData.value
+    } else {
+      error.value = '병원 정보를 불러오지 못했습니다.'
     }
 
-    // 2️⃣ 화면에 뿌릴 데이터 세팅
-    hospital.value = {
-      ...data,
-      // 템플릿에서 쓰는 region 보정
-      region: `${data.first_address} ${data.second_address}`,
-    }
-
-    // 3️⃣ 즐겨찾기(localStorage)
+    // 2️⃣ 즐겨찾기 여부 체크
     const favs = JSON.parse(localStorage.getItem('fav_hospitals') || '[]')
-    isFavorite.value = favs.includes(data.hospital_id)
+    isFavorite.value = favs.includes(Number(hospitalId.value))
 
   } catch (e) {
     error.value = '응급실 정보를 불러오지 못했습니다.'
@@ -216,28 +190,6 @@ const fetchDetail = async () => {
   } finally {
     loading.value = false
   }
-  // try {
-  //   const res = await api.get(`hospitals/${hospitalId.value}/`)
-  //   hospital.value = res.data?.data ?? res.data
-
-  //   // (선택) 즐겨찾기 여부 체크
-  //   try {
-  //     const favRes = await api.get('favorites/hospitals/')
-  //     const raw = favRes.data?.data ?? favRes.data ?? []
-  //     const ids = Array.isArray(raw)
-  //       ? raw.map(v => (typeof v === 'number' ? v : v.hospital_id)).filter(Boolean)
-  //       : []
-  //     isFavorite.value = ids.includes(Number(hospitalId.value))
-  //   } catch (_) {
-  //     // 로그인 전/없으면 무시
-  //     isFavorite.value = false
-  //   }
-  // } catch (e) {
-  //   error.value = '응급실 정보를 불러오지 못했습니다.'
-  //   console.error(e)
-  // } finally {
-  //   loading.value = false
-  // }
 }
 
 const toggleFavorite = async () => {
@@ -246,8 +198,14 @@ const toggleFavorite = async () => {
   isFavorite.value = !wasFav
 
   try {
-    if (wasFav) await api.delete(`favorites/hospitals/${id}/`)
-    else await api.post(`favorites/hospitals/${id}/`)
+    const favs = JSON.parse(localStorage.getItem('fav_hospitals') || '[]')
+    if (wasFav) {
+      const index = favs.indexOf(id)
+      if (index > -1) favs.splice(index, 1)
+    } else {
+      favs.push(id)
+    }
+    localStorage.setItem('fav_hospitals', JSON.stringify(favs))
   } catch (e) {
     isFavorite.value = wasFav
     console.error(e)
@@ -261,13 +219,6 @@ const copyAddress = async () => {
   } catch (e) {
     console.error(e)
   }
-}
-
-const openNaverMap = () => {
-  if (!hospital.value?.address) return
-  // 주소 기반 검색 링크(간단)
-  const q = encodeURIComponent(hospital.value.address)
-  window.open(`https://map.naver.com/v5/search/${q}`, '_blank')
 }
 
 const formatTime = (iso) => {

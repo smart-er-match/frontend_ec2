@@ -29,7 +29,7 @@
         :key="item.hpid"
         role="button"
         tabindex="0"
-        @click="goDetail(item.hpid)"
+        @click="goDetail(item)"
         @keydown.enter.prevent="goDetail(item.hpid)"
         class="relative border rounded-lg p-4 shadow-md bg-white hover:shadow-lg transition h-40
                cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
@@ -154,14 +154,13 @@ const toggleFavorite = async (item) => {
 }
 
 // ✅ 상세 페이지 이동 (라우트 이름/경로 둘 중 하나로 맞추면 됨)
-const goDetail = (id) => {
-  console.log('goDetail id:', id)
-  console.log('resolved:', router.resolve({ name: 'erdetail', params: { id } }))
-  // 1) name 방식 (권장): router에 { name: 'er-detail', params: { id } } 라우트가 있을 때
-  router.push({ name: 'erdetail', params: { id } })
+const goDetail = (item) => {
 
-  // 2) path 방식: /er/:id 같은 경로면 아래로 바꿔도 됨
-  // router.push(`/er/${id}`)
+  router.push({ name: 'erdetail',  
+    params: { id: item.hpid },  // ID는 params로 넘기고
+    state: { hospital: item }   })
+
+
 }
 
 onMounted(async () => {
