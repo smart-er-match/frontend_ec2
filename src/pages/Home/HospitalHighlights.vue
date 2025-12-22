@@ -3,7 +3,9 @@
   <section class="rounded-2xl border bg-white p-5 shadow-sm">
     <div class="flex items-start justify-between gap-3">
       <div>
-        <h1 class="text-lg font-extrabold text-slate-900">병원별 주요 리뷰</h1>
+        <h1 class="text-lg font-extrabold text-slate-900">
+          {{ displayName }} 주요 리뷰
+        </h1>
         <p class="mt-1 text-xs text-slate-500">
           평균( {{ avgRating.toFixed(1) }} ) 이상 리뷰 중 랜덤 {{ pickCount }}개
         </p>
@@ -37,26 +39,26 @@
       </div>
 
       <article
-        v-for="r in picked"
-        :key="r.id ?? r.created_at ?? r.content"
+        v-for="rv in picked"
+        :key="rv.id ?? rv.created_at ?? rv.content"
         class="rounded-xl border p-4"
       >
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <p class="text-sm font-bold text-slate-900">
-              {{ r.user_name || r.name || '익명' }}
+              {{ rv.user_name || rv.name || '익명' }}
               <span class="ml-2 text-xs font-semibold text-slate-500">
-                · {{ formatDate(r.created_at) }}
+                · {{ formatDate(rv.created_at) }}
               </span>
             </p>
 
             <p class="mt-2 text-sm text-slate-800 whitespace-pre-line">
-              {{ r.content }}
+              {{ rv.content }}
             </p>
           </div>
 
           <div class="shrink-0 text-right">
-            <p class="text-sm font-extrabold text-slate-900">{{ r.rating }}점</p>
+            <p class="text-sm font-extrabold text-slate-900">{{ rv.rating }}점</p>
           </div>
         </div>
       </article>
@@ -69,7 +71,8 @@ import { computed, ref, watch } from 'vue'
 import api from '@/components/api'
 
 const props = defineProps({
-  hpid: { type: String, default: '' },  // 선택된 병원 hpid
+  hpid: { type: String, default: '' },
+  hospitalName: { type: String, default: '' },
   pickCount: { type: Number, default: 3 },
 })
 
@@ -77,10 +80,17 @@ const reviews = ref([])
 const picked = ref([])
 const loading = ref(false)
 const error = ref('')
+const reqSeq = ref(0)
+
+// ✅ displayName을 computed로: props만 믿고 그대로 표시 (초기화/watch 필요 없음)
+const displayName = computed(() => {
+  const name = (props.hospitalName ?? '').trim()
+  return name || '선택한 병원'
+})
 
 const avgRating = computed(() => {
   if (!reviews.value.length) return 0
-  const sum = reviews.value.reduce((acc, r) => acc + Number(r.rating || 0), 0)
+  const sum = reviews.value.reduce((acc, r) => acc + Number(r?.rating || 0), 0)
   return sum / reviews.value.length
 })
 
@@ -95,26 +105,32 @@ const shuffle = (arr) => {
 
 const pickHighlights = () => {
   const avg = avgRating.value
-  const overAvg = reviews.value.filter((r) => Number(r.rating || 0) >= avg)
+  const overAvg = reviews.value.filter((r) => Number(r?.rating || 0) >= avg)
   picked.value = shuffle(overAvg).slice(0, props.pickCount)
 }
 
 const fetchAndPick = async () => {
-  if (!props.hpid) return
+  const hpid = props.hpid
+  if (!hpid) return
+
+  const seq = ++reqSeq.value
   loading.value = true
   error.value = ''
+
   try {
-    const res = await api.get(`/hospitals/reviews/${props.hpid}/`)
-    // 배열 or {results: []} 대응
+    const res = await api.get(`/hospitals/reviews/${hpid}/`)
+    if (seq !== reqSeq.value) return
+
     reviews.value = Array.isArray(res.data) ? res.data : (res.data?.results ?? [])
     pickHighlights()
   } catch (e) {
+    if (seq !== reqSeq.value) return
     console.error(e)
     error.value = '리뷰를 불러오지 못했습니다.'
     reviews.value = []
     picked.value = []
   } finally {
-    loading.value = false
+    if (seq === reqSeq.value) loading.value = false
   }
 }
 
@@ -122,10 +138,16 @@ const formatDate = (iso) => {
   try { return new Date(iso).toLocaleString() } catch { return iso }
 }
 
-// ✅ 병원 선택이 바뀌면 자동 갱신
-watch(() => props.hpid, () => {
-  reviews.value = []
-  picked.value = []
-  if (props.hpid) fetchAndPick()
-}, { immediate: true })
+// ✅ hpid 바뀔 때만 fetch
+watch(
+  () => props.hpid,
+  (newHpid, oldHpid) => {
+    if (newHpid === oldHpid) return
+    reviews.value = []
+    picked.value = []
+    error.value = ''
+    if (newHpid) fetchAndPick()
+  },
+  { immediate: true }
+)
 </script>

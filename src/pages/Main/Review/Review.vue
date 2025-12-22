@@ -5,7 +5,7 @@
       <div>
         <h3 class="text-lg font-extrabold text-gray-900">리뷰</h3>
         <p class="mt-1 text-xs text-gray-500">
-          총 {{ reviews.length }}개 · 평균 {{ avgRating.toFixed(1) }}점
+          총 {{ safeReviews.length }}개 · 평균 {{ avgRating.toFixed(1) }}점
         </p>
       </div>
       <button
@@ -19,7 +19,6 @@
     </div>
 
     <!-- 작성 폼 -->
-<!-- 작성 폼 -->
     <div class="mt-4 rounded-2xl border bg-gray-50 p-4">
       <div class="w-full">
         <!-- ⭐ 별점 -->
@@ -31,28 +30,13 @@
               v-for="n in 5"
               :key="n"
               type="button"
-              class="
-                p-1
-                transition
-                focus:outline-none
-                focus:ring-0
-              "
-              :class="[
-                (hoverRating || form.rating) >= n
-                  ? 'text-amber-500'
-                  : 'text-gray-300'
-              ]"
+              class="p-1 transition focus:outline-none focus:ring-0"
+              :class="(hoverRating || form.rating) >= n ? 'text-amber-500' : 'text-gray-300'"
               @mouseenter="hoverRating = n"
               @mouseleave="hoverRating = 0"
               @click="setRating(n)"
             >
-              <!-- ⭐ SVG 별 (테두리 없음) -->
-              <svg
-                class="h-6 w-6"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                aria-hidden="true"
-              >
+              <svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path
                   d="M12 17.27l-5.18 3.04 1.4-5.97-4.64-4.02
                     6.1-.52L12 4.5l2.32 5.3 6.1.52-4.64 4.02
@@ -64,19 +48,17 @@
             <span class="ml-2 text-xs font-semibold text-gray-600">
               {{ form.rating }} / 5
             </span>
-        </div>
-
+          </div>
         </div>
 
         <!-- 내용 -->
-         <div class="w-full">
-        <div>
+        <div class="w-full mt-3">
           <label class="text-xs font-semibold text-gray-600">내용</label>
           <textarea
             v-model="form.content"
             rows="2"
             class="mt-1 w-full resize-none rounded-xl border bg-white px-3 py-2 text-sm
-                  focus:ring-2 focus:ring-indigo-500"
+                   focus:ring-2 focus:ring-indigo-500"
             placeholder="예) 친절합니다."
           />
           <div class="mt-1 flex items-center justify-between">
@@ -87,15 +69,12 @@
               {{ form.content.trim().length }}/200
             </p>
           </div>
-        </div>
 
-        <!-- 등록 버튼 -->
-        <div>
           <button
             type="button"
-            class="w-full rounded-xl px-4 py-2 text-sm font-semibold text-white transition
-                  bg-indigo-600 hover:bg-indigo-700
-                  disabled:bg-gray-300 disabled:text-white/70 disabled:cursor-not-allowed"
+            class="mt-3 w-full rounded-xl px-4 py-2 text-sm font-semibold text-white transition
+                   bg-indigo-600 hover:bg-indigo-700
+                   disabled:bg-gray-300 disabled:text-white/70 disabled:cursor-not-allowed"
             :disabled="posting || !canSubmit"
             @click="submitReview"
           >
@@ -103,12 +82,10 @@
             <span v-else>등록 중...</span>
           </button>
         </div>
-        </div>
       </div>
 
       <p v-if="postError" class="mt-2 text-sm text-rose-600">{{ postError }}</p>
     </div>
-
 
     <!-- 로딩/에러 -->
     <div v-if="loading" class="mt-4 rounded-2xl border bg-white p-4 text-gray-600">
@@ -119,7 +96,12 @@
     </div>
 
     <!-- 목록 -->
-    <ReviewList v-else :reviews="reviews" />
+    <ReviewList
+      :reviews="safeReviews"
+      :my-user-id="myUserId"
+      @updated="fetchReviews"
+      @deleted="onDeleted"
+    />
   </section>
 </template>
 
@@ -127,6 +109,9 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import api from '@/components/api'
 import ReviewList from './ReviewList.vue'
+import { useAuthStore } from '@/stores/auth' // ✅ 너 프로젝트 경로에 맞게
+
+const auth = useAuthStore() // ✅ auth.user 사용 가능하게
 
 const props = defineProps({
   hpid: { type: String, required: true },
@@ -149,12 +134,19 @@ const hoverRating = ref(0)
 const setRating = (n) => {
   form.rating = n
 }
+
 const canSubmit = computed(() => form.content.trim().length >= 5)
 
+/** ✅ reviews 내부에 null/undefined 섞여도 안전 */
+const safeReviews = computed(() => (Array.isArray(reviews.value) ? reviews.value : []).filter(Boolean))
+
+/** ✅ auth.user가 아직 없을 수 있으니 방어 */
+const myUserId = computed(() => String(auth?.user?.id ?? ''))
+
 const avgRating = computed(() => {
-  if (!reviews.value.length) return 0
-  const sum = reviews.value.reduce((acc, r) => acc + Number(r.rating || 0), 0)
-  return sum / reviews.value.length
+  if (!safeReviews.value.length) return 0
+  const sum = safeReviews.value.reduce((acc, r) => acc + Number(r?.rating || 0), 0)
+  return sum / safeReviews.value.length
 })
 
 const fetchReviews = async () => {
@@ -163,8 +155,8 @@ const fetchReviews = async () => {
   error.value = ''
   try {
     const res = await api.get(`/hospitals/reviews/${props.hpid}/`)
-    // 백엔드가 {results: [...]} 형태면 아래 한 줄만 바꾸면 됨:
-    reviews.value = Array.isArray(res.data) ? res.data : (res.data?.results ?? [])
+    const list = Array.isArray(res.data) ? res.data : (res.data?.results ?? [])
+    reviews.value = Array.isArray(list) ? list.filter(Boolean) : []
   } catch (e) {
     console.error(e)
     error.value = '리뷰를 불러오지 못했습니다.'
@@ -173,43 +165,44 @@ const fetchReviews = async () => {
   }
 }
 
+
 const submitReview = async () => {
   if (!canSubmit.value || posting.value) return
   posting.value = true
   postError.value = ''
+
+  console.time('review_submit_total') // ⏱ 시작
+
   try {
+    console.time('review_post')
     await api.post(`/hospitals/reviews/${props.hpid}/`, {
       content: form.content.trim(),
       rating: form.rating,
     })
+    console.timeEnd('review_post') // POST 시간
+
     form.content = ''
     form.rating = 5
+
+    console.time('review_fetch')
     await fetchReviews()
+    console.timeEnd('review_fetch') // 목록 다시 가져오는 시간
   } catch (e) {
     console.error(e)
     postError.value = '리뷰 등록에 실패했습니다.'
   } finally {
+    console.timeEnd('review_submit_total') // 전체 소요 시간
     posting.value = false
   }
 }
 
-const formatDate = (iso) => {
-  try { return new Date(iso).toLocaleString() } catch { return iso }
-}
 
+const onDeleted = (deletedId) => {
+  reviews.value = reviews.value.filter(r => String(r.id) !== String(deletedId)) // ✅ 즉시 반영
+  // 선택: 평균/개수 같은 계산이 reviews 기반이면 자동 반영됨
+  // 선택: 서버와 동기화 확실히 하려면 아래도 가능
+  // fetchReviews()
+}
 onMounted(fetchReviews)
 watch(() => props.hpid, fetchReviews)
-
-const maskEmail = (email) => {
-  if (!email || !email.includes('@')) return '익명';
-
-  const [id, domain] = email.split('@');
-
-  if (id.length <= 1) {
-    return `${id[0]}****@${domain}`;
-  }
-
-  const visible = id.slice(0, 1);
-  return `${visible}****@${domain}`;
-};
 </script>
