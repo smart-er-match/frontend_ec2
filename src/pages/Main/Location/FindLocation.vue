@@ -81,11 +81,11 @@ const myAddress = ref("");
 
 // ✅ 반경 프리셋(네이버 줌 기준)
 const radiusPresets = [
-  { km: 5, zoom: 15 },
-  { km: 10, zoom: 14 },
-  { km: 25, zoom: 13 },
-  { km: 40, zoom: 12 },
-  { km: 50, zoom: 11 },
+  { km: 5, zoom: 13 },
+  { km: 10, zoom: 11 },
+  { km: 25, zoom: 10 },
+  { km: 40, zoom: 9 },
+  { km: 50, zoom: 8 },
 ];
 
 const stepIndex = ref(1);

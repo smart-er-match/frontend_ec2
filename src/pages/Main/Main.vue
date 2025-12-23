@@ -13,7 +13,7 @@
         AI 활용 토큰이 {{ userStore.user.remaining_requests }}개 남았습니다.
       </p>
       <p v-else class="mt-2 text-sm text-gray-500">
-        의료진은 제한 없이 사용 가능합니다.
+        의료진은 AI 활용 토큰 제한 없이 사용 가능합니다.
       </p>
     </div>
 

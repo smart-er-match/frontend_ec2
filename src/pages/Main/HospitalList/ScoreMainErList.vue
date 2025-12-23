@@ -14,7 +14,7 @@
       <!-- 데이터 -->
       <div v-else>
         <div
-          v-for="value in filteredHospitalScore"
+          v-for="(value, index) in filteredHospitalScore"
           :key="value.hpid"
           class="border bg-white rounded-xl shadow-sm mb-3 p-3 sm:p-4"
         >
@@ -22,9 +22,22 @@
           <div class="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
             <!-- 왼쪽: 텍스트 -->
             <div class="min-w-0 flex-1">
-              <p class="font-bold text-gray-900 truncate">
-                {{ value.name }}
-              </p>
+               <p class="font-bold text-gray-900 truncate flex items-center gap-2">
+              <!-- TOP 3 번호 -->
+              <span
+                v-if="index < 3"
+                :class="[
+                  'inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-extrabold shrink-0',
+                  index === 0 ? 'bg-yellow-500' :
+                  index === 1 ? 'bg-gray-400' :
+                  'bg-amber-700'
+                ]"
+              >
+                {{ index + 1 }}
+              </span>
+
+              {{ value.name }}
+            </p>
 
               <!-- 길찾기: 항상 노출 -->
               <a

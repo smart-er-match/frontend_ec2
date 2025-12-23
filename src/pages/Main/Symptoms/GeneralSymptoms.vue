@@ -269,7 +269,7 @@ const bodyPartLabels = [
   { name: 'Head', label: '머리' },
 
   { name: 'Chest', label: '가슴' },
-  { name: 'UpperBack', label: '등(상부)' },
+  { name: 'UpperBack', label: '등' },
   { name: 'LowerBack', label: '허리' },
   { name: 'Abdomen', label: '복부' },
 
@@ -306,30 +306,6 @@ const handleWheel = e => {
   camera.position.z = Math.min(Math.max(camera.position.z, 1.5), 5)
 }
 
-// ✅ 포인터 다운: 드래그 시작 위치만 기록
-const handlePointerDown = e => {
-  if (!canvasContainer.value) return
-  isDragging = true
-  const rect = canvasContainer.value.getBoundingClientRect()
-  lastX = e.clientX - rect.left
-}
-
-// ✅ 포인터 무브: 이동량(deltaX)만큼 회전
-const handlePointerMove = e => {
-  if (!isDragging || !canvasContainer.value) return
-  const rect = canvasContainer.value.getBoundingClientRect()
-  const x = e.clientX - rect.left
-  const deltaX = x - lastX
-  lastX = x
-
-  const rotSpeed = 0.01
-  targetRotY += deltaX * rotSpeed
-}
-
-// ✅ 포인터 업: 드래그 종료
-const handlePointerUp = () => {
-  isDragging = false
-}
 
 onMounted(() => {
   const width = canvasContainer.value.clientWidth
@@ -371,12 +347,17 @@ onMounted(() => {
       animate()
 
       const dom = renderer.domElement
-      dom.style.touchAction = 'none' // 모바일에서 드래그 시 스크롤 방지
+      dom.style.touchAction = 'none'
 
-      dom.addEventListener('wheel', handleWheel)
+      // wheel (PC)
+      dom.addEventListener('wheel', handleWheel, { passive: true })
+
+      // pointer (모바일/PC 공통)
       dom.addEventListener('pointerdown', handlePointerDown)
-      window.addEventListener('pointermove', handlePointerMove)
-      window.addEventListener('pointerup', handlePointerUp)
+      dom.addEventListener('pointermove', handlePointerMove)
+      dom.addEventListener('pointerup', handlePointerUp)
+      dom.addEventListener('pointercancel', handlePointerUp)
+
       dom.addEventListener('click', onClickHitbox)
     },
     undefined,
@@ -400,15 +381,21 @@ onMounted(() => {
 onBeforeUnmount(() => {
   if (animationId) cancelAnimationFrame(animationId)
 
-  const dom = canvasContainer.value?.querySelector('canvas')
+  const dom = renderer?.domElement || canvasContainer.value?.querySelector('canvas')
   if (dom) {
     dom.removeEventListener('wheel', handleWheel)
     dom.removeEventListener('pointerdown', handlePointerDown)
+    dom.removeEventListener('pointermove', handlePointerMove)
+    dom.removeEventListener('pointerup', handlePointerUp)
+    dom.removeEventListener('pointercancel', handlePointerUp)
     dom.removeEventListener('click', onClickHitbox)
   }
-  window.removeEventListener('pointermove', handlePointerMove)
-  window.removeEventListener('pointerup', handlePointerUp)
+
+  // ✅ window에 더 이상 안 걸면 이 두 줄은 삭제
+  // window.removeEventListener('pointermove', handlePointerMove)
+  // window.removeEventListener('pointerup', handlePointerUp)
 })
+
 
 // 히트박스 만들기
 const makeHeatbox = () => {
@@ -486,6 +473,77 @@ const togglePart = name => {
     if (idx !== -1) symptoms.value.splice(idx, 1)
   }
 }
+
+// ====== pinch zoom state ======
+const pointers = new Map() // pointerId -> {x,y}
+let lastPinchDist = null
+
+const getDist = (a, b) => {
+  const dx = a.x - b.x
+  const dy = a.y - b.y
+  return Math.hypot(dx, dy)
+}
+
+const handlePointerDown = (e) => {
+  if (!canvasContainer.value) return
+
+  // 포인터 등록
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+  // 2손가락 시작이면 기준 거리 저장
+  if (pointers.size === 2) {
+    const [p1, p2] = [...pointers.values()]
+    lastPinchDist = getDist(p1, p2)
+    isDragging = false // 핀치 중에는 회전 끔
+    return
+  }
+
+  // 1손가락이면 기존 회전 시작
+  isDragging = true
+  const rect = canvasContainer.value.getBoundingClientRect()
+  lastX = e.clientX - rect.left
+}
+
+const handlePointerMove = (e) => {
+  if (!canvasContainer.value) return
+  if (!pointers.has(e.pointerId)) return
+
+  pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+
+  // ✅ 2손가락이면 pinch zoom
+  if (pointers.size === 2 && camera) {
+    const [p1, p2] = [...pointers.values()]
+    const dist = getDist(p1, p2)
+
+    if (lastPinchDist != null) {
+      const delta = dist - lastPinchDist
+      // delta가 +면 손가락 벌림(줌인), -면 모음(줌아웃)
+      camera.position.z -= delta * 0.005 * zoomSpeed
+      camera.position.z = Math.min(Math.max(camera.position.z, 1.5), 5)
+    }
+    lastPinchDist = dist
+    return
+  }
+
+  // ✅ 1손가락이면 기존 회전
+  if (!isDragging) return
+  const rect = canvasContainer.value.getBoundingClientRect()
+  const x = e.clientX - rect.left
+  const deltaX = x - lastX
+  lastX = x
+
+  const rotSpeed = 0.01
+  targetRotY += deltaX * rotSpeed
+}
+
+const handlePointerUp = (e) => {
+  pointers.delete(e.pointerId)
+
+  if (pointers.size < 2) lastPinchDist = null
+  if (pointers.size === 0) isDragging = false
+}
+
+
 </script>
 
 <style scoped>
