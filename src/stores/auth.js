@@ -170,6 +170,8 @@ export const useAuthStore = defineStore('auth', {
         const res = await api.post('accounts/mypage/', {});
         const user = res.data.user;
 
+        // console.log("~~~~~~~~~~~~~~~~~~")
+        // console.log(user)
         if (user) {
           // 사용자 정보 업데이트
           this.user = {
@@ -183,10 +185,10 @@ export const useAuthStore = defineStore('auth', {
             email: user.email || '',
             token_status: user.token_status || '',
             service_key: user.service_key || '',
+            bookmarked_hospitals: user.bookmarked_hospitals || [],
           };
 
           // localStorage에 저장
-          console.log(user)
           localStorage.setItem('user', JSON.stringify(this.user));
         } else {
           console.log('사용자 정보가 없습니다.');

@@ -293,10 +293,16 @@ const onClickAiToken = () => {
 const authStore = useAuthStore();
 
 onMounted(async () => {
+  getUser()
+})
+
+
+const getUser = async () => {
   await authStore.updateUserInfo();
 
   const user = authStore.user;
-  console.log(user)
+  // console.log("%%%%%%%%%%%%%%%%%%%%%")
+  // console.log(user)
   form.name = user?.name || '';
   form.birth_date = user?.birth_date || '';
   form.phone_number = user?.phone_number || '';
@@ -309,14 +315,30 @@ onMounted(async () => {
   form.service_key = user?.service_key || '';
   form.bookmarked_hospitals = user?.bookmarked_hospitals || [];
 
-  console.log(form.bookmarked_hospitals)
-})
-
-const onRemoveBookmark = (hpid) => {
-  form.bookmarked_hospitals = (form.bookmarked_hospitals ?? []).filter(
-    (h) => String(h.hpid) !== String(hpid)
-  )
 }
+
+const onRemoveBookmark = async (hpid) => {
+  try {
+    // console.log("gdgd")
+    // console.log(hpid)
+    const res = await api.delete(`hospitals/bookmark/${hpid}/`)
+
+    const { is_bookmarked } = res.data
+    console.log(is_bookmarked)
+      // 찜 해제된 경우에만 로컬에서도 제거
+
+      if (is_bookmarked === false) {
+        form.bookmarked_hospitals = (form.bookmarked_hospitals ?? []).filter(
+          (h) => String(h.hpid) !== String(hpid)
+        )
+      }
+      getUser()
+  } catch (err) {
+    console.error(err)
+    alert("찜 해제 중 오류가 발생했습니다.")
+  }
+}
+
 
 </script>
 

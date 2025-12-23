@@ -1,6 +1,7 @@
 <!-- src/pages/Main/HospitalList/Review/Review.vue -->
 <template>
-  <section class="rounded-3xl bg-white p-5 shadow-sm border">
+  <hr>
+  <section class="bg-white p-5">
     <div class="flex items-center justify-between">
       <div>
         <h3 class="text-lg font-extrabold text-gray-900">리뷰</h3>
@@ -10,27 +11,51 @@
       </div>
       <button
         type="button"
-        class="rounded-xl border px-3 py-2 text-sm font-semibold hover:bg-gray-50"
+        class="rounded-xl border px-3 py-2 text-sm font-semibold
+              hover:bg-gray-50 disabled:opacity-50
+              inline-flex items-center gap-2"
         :disabled="loading"
         @click="fetchReviews"
+        aria-label="새로고침"
       >
-        새로고침
+        <svg
+          class="h-4 w-4"
+          :class="loading ? 'animate-spin text-indigo-600' : 'text-gray-600'"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <!-- refresh-cw 아이콘 -->
+          <polyline points="23 4 23 10 17 10" />
+          <path d="M20.49 15a9 9 0 1 1 2.13-9" />
+        </svg>
+
+        <span class="sr-only">새로고침</span>
       </button>
+
     </div>
 
     <!-- 작성 폼 -->
     <div class="mt-4 rounded-2xl border bg-gray-50 p-4">
       <div class="w-full">
         <!-- ⭐ 별점 -->
-        <div class="w-full">
-          <label class="text-xs font-semibold text-gray-600">평점</label>
+       <div class="w-full flex items-center gap-3">
+          <!-- 라벨 -->
+          <label class="text-xs font-semibold text-gray-600 shrink-0">
+            평점
+          </label>
 
-          <div class="mt-1 flex items-center gap-1">
+          <!-- 별점 영역 -->
+          <div class="flex items-center gap-1">
             <button
               v-for="n in 5"
               :key="n"
               type="button"
-              class="p-1 transition focus:outline-none focus:ring-0"
+              class="transition focus:outline-none focus:ring-0"
               :class="(hoverRating || form.rating) >= n ? 'text-amber-500' : 'text-gray-300'"
               @mouseenter="hoverRating = n"
               @mouseleave="hoverRating = 0"
@@ -50,6 +75,7 @@
             </span>
           </div>
         </div>
+
 
         <!-- 내용 -->
         <div class="w-full mt-3">

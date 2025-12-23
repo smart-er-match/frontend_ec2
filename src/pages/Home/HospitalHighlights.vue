@@ -46,7 +46,8 @@
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0">
             <p class="text-sm font-bold text-slate-900">
-              {{ rv.user_name || rv.name || '익명' }}
+              <!-- ✅ 익명 대신 이메일 마스킹 표시 -->
+              {{ maskEmail(rv?.user?.email ?? rv?.email) }}
               <span class="ml-2 text-xs font-semibold text-slate-500">
                 · {{ formatDate(rv.created_at) }}
               </span>
@@ -58,30 +59,29 @@
           </div>
 
           <div class="shrink-0 text-right">
-  <!-- ⭐ 별점 -->
-        <div class="flex items-center justify-end gap-0.5">
-          <svg
-            v-for="n in 5"
-            :key="n"
-            viewBox="0 0 24 24"
-            class="h-4 w-4"
-            :class="n <= Number(rv.rating) ? 'text-amber-400' : 'text-gray-300'"
-            fill="currentColor"
-            aria-hidden="true"
-          >
-            <path
-              d="M12 17.27l5.18 3.05-1.64-5.81L20 10.24l-5.91-.5L12 4.5
-                9.91 9.74 4 10.24l4.46 4.27-1.64 5.81z"
-            />
-          </svg>
-        </div>
+            <!-- ⭐ 별점 -->
+            <div class="flex items-center justify-end gap-0.5">
+              <svg
+                v-for="n in 5"
+                :key="n"
+                viewBox="0 0 24 24"
+                class="h-4 w-4"
+                :class="n <= Number(rv.rating) ? 'text-amber-400' : 'text-gray-300'"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  d="M12 17.27l5.18 3.05-1.64-5.81L20 10.24l-5.91-.5L12 4.5
+                    9.91 9.74 4 10.24l4.46 4.27-1.64 5.81z"
+                />
+              </svg>
+            </div>
 
-        <!-- 숫자 보조 -->
-        <p class="mt-1 text-xs font-semibold text-slate-600">
-          {{ rv.rating }} / 5
-        </p>
-      </div>
-
+            <!-- 숫자 보조 -->
+            <p class="mt-1 text-xs font-semibold text-slate-600">
+              {{ rv.rating }} / 5
+            </p>
+          </div>
         </div>
       </article>
     </div>
@@ -104,7 +104,6 @@ const loading = ref(false)
 const error = ref('')
 const reqSeq = ref(0)
 
-// ✅ displayName을 computed로: props만 믿고 그대로 표시 (초기화/watch 필요 없음)
 const displayName = computed(() => {
   const name = (props.hospitalName ?? '').trim()
   return name || '선택한 병원'
@@ -115,6 +114,13 @@ const avgRating = computed(() => {
   const sum = reviews.value.reduce((acc, r) => acc + Number(r?.rating || 0), 0)
   return sum / reviews.value.length
 })
+
+const maskEmail = (email) => {
+  if (!email || !String(email).includes('@')) return '익명'
+  const [id, domain] = String(email).split('@')
+  const visible = id.slice(0, 1) || 'x'
+  return `${visible}****@${domain}`
+}
 
 const shuffle = (arr) => {
   const a = [...arr]
@@ -160,7 +166,6 @@ const formatDate = (iso) => {
   try { return new Date(iso).toLocaleString() } catch { return iso }
 }
 
-// ✅ hpid 바뀔 때만 fetch
 watch(
   () => props.hpid,
   (newHpid, oldHpid) => {

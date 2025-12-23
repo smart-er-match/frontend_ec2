@@ -115,8 +115,10 @@ import { onMounted, reactive, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../../components/api'
 import LoadingSpinner from '../../../components/LoadingSpinner.vue'
+import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 // ===== 상태 =====
 const er_list = reactive({})
@@ -167,8 +169,28 @@ watch(totalPages, (tp) => {
 
 const isFavorite = (hpid) => favoriteIds.value.has(String(hpid))
 
-// ✅ 새 스펙: POST /hospitals/bookmark/<str:hpid>/ (Toggle)
+// ===== 유저 즐겨찾기 로드 & 동기화 =====
+const syncFavoriteFromUser = () => {
+  const list = authStore.user?.bookmarked_hospitals || []
+  favoriteIds.value = new Set(list.map((h) => String(h?.hpid)))
+}
+
+const loadUserFavorites = async () => {
+  if (!authStore.isAuthenticated) {
+    favoriteIds.value = new Set()
+    return
+  }
+  await authStore.updateUserInfo()
+  syncFavoriteFromUser()
+}
+
+// ===== 즐겨찾기 토글 (서버: POST /hospitals/bookmark/<hpid>/ Toggle) =====
 const toggleFavorite = async (item) => {
+  if (!authStore.isAuthenticated) {
+    alert('로그인 후 이용 가능합니다.')
+    return
+  }
+
   const hpid = String(item.hpid)
   const wasFav = isFavorite(hpid)
 
@@ -180,11 +202,30 @@ const toggleFavorite = async (item) => {
   try {
     const { data } = await api.post(`/hospitals/bookmark/${hpid}/`)
 
-    // ✅ 서버 확정 상태로 동기화
+    // ✅ 서버 확정 상태로 Set 동기화
     if (typeof data?.is_bookmarked === 'boolean') {
       const sync = new Set(favoriteIds.value)
       data.is_bookmarked ? sync.add(hpid) : sync.delete(hpid)
       favoriteIds.value = sync
+
+      // ✅ (선택) store.user.bookmarked_hospitals도 같이 맞추기 (MyPage와 일관성)
+      const prevList = authStore.user?.bookmarked_hospitals || []
+      if (data.is_bookmarked) {
+        if (!prevList.some((h) => String(h?.hpid) === hpid)) {
+          authStore.user = {
+            ...authStore.user,
+            bookmarked_hospitals: [...prevList, item],
+          }
+          localStorage.setItem('user', JSON.stringify(authStore.user))
+        }
+      } else {
+        const filtered = prevList.filter((h) => String(h?.hpid) !== hpid)
+        authStore.user = {
+          ...authStore.user,
+          bookmarked_hospitals: filtered,
+        }
+        localStorage.setItem('user', JSON.stringify(authStore.user))
+      }
     }
   } catch (e) {
     // ✅ 실패 시 롤백
@@ -192,6 +233,7 @@ const toggleFavorite = async (item) => {
     wasFav ? rollback.add(hpid) : rollback.delete(hpid)
     favoriteIds.value = rollback
     console.error(e)
+    alert('즐겨찾기 처리 중 오류가 발생했습니다.')
   }
 }
 
@@ -230,5 +272,7 @@ const loadHospitals = async () => {
   }
 }
 
-onMounted(loadHospitals)
+onMounted(async () => {
+  await Promise.all([loadHospitals(), loadUserFavorites()])
+})
 </script>

@@ -12,69 +12,100 @@
 
     <!-- 선택 카드 -->
     <div
-      class="mt-10 grid gap-6"
-      :class="user.role === true ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'"
-    >
-      <!-- 의료진 -->
-      <button
-        v-if="user.role === true"
-        @click="staffClick"
-        class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white
-               p-6 sm:p-8 text-left shadow-sm
-               min-h-[320px] flex flex-col justify-between
-               transition-all duration-200
-               hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200
-               active:translate-y-0 active:shadow-md
-               focus:outline-none focus:ring-2 focus:ring-indigo-500"
+      class="mt-10 grid gap-6 grid-cols-1 sm:grid-cols-2"
+        >
+        <!-- AI 챗봇 서비스 -->
+
+<button
+  type="button"
+  @click="openChatBot"
+  class="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white
+         p-6 sm:p-8 text-left shadow-sm
+         min-h-[320px] flex flex-col justify-between
+         transition-all duration-200
+         hover:-translate-y-1 hover:shadow-lg hover:border-indigo-200
+         active:translate-y-0 active:shadow-md
+         focus:outline-none focus:ring-2 focus:ring-indigo-500"
+>
+  <!-- 배경 그라데이션 (오른쪽 카드 느낌) -->
+  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+    <div class="absolute -top-24 -left-24 h-52 w-52 rounded-full bg-indigo-100 blur-2xl"></div>
+    <div class="absolute -bottom-24 -right-24 h-52 w-52 rounded-full bg-sky-100 blur-2xl"></div>
+  </div>
+
+  <!-- 상단 -->
+  <div class="relative">
+    <div class="flex items-start justify-between">
+      <!-- 아이콘 -->
+      <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+        <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 2H7a5 5 0 0 0-5 5v10a5 5 0 0 0 5 5h6a5 5 0 0 0 5-5V7a5 5 0 0 0-5-5h-2" />
+          <path d="M9 10h6m-3-3v6" />
+        </svg>
+      </div>
+
+      <!-- 우측 pill -->
+      <span
+        class="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700
+               border border-gray-100"
       >
-        <!-- 배경 그라데이션 -->
-        <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-          <div class="absolute -top-24 -right-24 h-52 w-52 rounded-full bg-indigo-100 blur-2xl"></div>
-          <div class="absolute -bottom-24 -left-24 h-52 w-52 rounded-full bg-purple-100 blur-2xl"></div>
-        </div>
+        AI 도움
+        <svg
+          class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        >
+          <path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>
+        </svg>
+      </span>
+    </div>
 
-        <!-- 상단 -->
-        <div class="relative">
-          <div class="flex items-start justify-between">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-              <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M4 3v7a4 4 0 0 0 8 0V3"/>
-                <path d="M12 10a6 6 0 0 0 12 0"/>
-                <path d="M20 10v2a8 8 0 0 1-16 0v-2"/>
-                <circle cx="18" cy="10" r="2"/>
-              </svg>
-            </div>
+    <!-- 타이틀/설명 -->
+    <div class="mt-5">
+      <h2 class="text-lg font-bold text-gray-900">AI 챗봇 서비스</h2>
+      <p class="mt-1 text-sm text-gray-500">
+        AI 챗봇과 대화를 통해 빠르게 도움을 받으세요.
+      </p>
+    </div>
+  </div>
 
-            <span
-              class="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700
-                     border border-gray-100"
-            >
-              의료진 전용
-              <svg
-                class="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5"
-                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-              >
-                <path d="M5 12h14"/><path d="M13 5l7 7-7 7"/>
-              </svg>
-            </span>
-          </div>
+  <!-- 하단 -->
+  <div class="relative">
+    <div class="mt-6 h-px w-full bg-gray-100"></div>
+    <p class="mt-4 text-sm font-semibold text-gray-900">
+      시작하기 <span class="text-indigo-600">→</span>
+    </p>
+  </div>
+</button>
 
-          <div class="mt-5">
-            <h2 class="text-lg font-bold text-gray-900">의료진이에요</h2>
-            <p class="mt-1 text-sm text-gray-500">
-              의료진 전용 기능으로 빠르게 접근합니다.
-            </p>
-          </div>
-        </div>
 
-        <!-- 하단 -->
-        <div class="relative">
-          <div class="mt-6 h-px w-full bg-gray-100"></div>
-          <p class="mt-4 text-sm font-semibold text-gray-900">
-            시작하기 <span class="text-indigo-600">→</span>
-          </p>
-        </div>
-      </button>
+  <Teleport to="body">
+    <!-- overlay -->
+    <div
+      v-if="isChatOpen"
+      class="fixed inset-0 z-[999] bg-black/40 backdrop-blur-[2px]"
+      @click="closeChatBot"
+    />
+
+    <!-- modal (center) -->
+    <div
+      v-if="isChatOpen"
+      class="fixed inset-0 z-[1000]
+            flex items-center justify-center
+            p-4"
+      @click.stop
+    >
+      <div
+        class="w-full max-w-3xl
+              h-[80vh] max-h-[900px]
+              rounded-2xl bg-white
+              shadow-2xl border border-gray-200
+              overflow-hidden"
+      >
+        <AIChatBot @close="closeChatBot" />
+      </div>
+    </div>
+  </Teleport>
+
 
       <!-- 일반 회원 -->
       <button
@@ -137,73 +168,7 @@
 
 <!-- 빠른 액션 -->
 <div class="mt-10 space-y-4">
-  <!-- AI 챗봇 서비스 -->
-<button
-  type="button"
-  @click="openChatBot"
-  class="group w-full relative overflow-hidden
-         rounded-2xl border border-gray-200 bg-white
-         p-5 text-left shadow-sm
-         transition-all duration-200
-         hover:shadow-md hover:border-indigo-200
-         active:scale-[0.99]
-         focus:outline-none focus:ring-2 focus:ring-indigo-500"
->
-  <!-- 배경 효과 -->
-  <div class="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-    <div class="absolute -top-24 -right-24 h-52 w-52 rounded-full bg-indigo-100 blur-2xl"></div>
-  </div>
-
-  <div class="relative flex items-center justify-between gap-4">
-    <div class="flex items-center gap-3">
-      <div class="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-        <!-- 챗봇 아이콘 -->
-        <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M9 2H7a5 5 0 0 0-5 5v10a5 5 0 0 0 5 5h6a5 5 0 0 0 5-5V7a5 5 0 0 0-5-5h-2" />
-          <path d="M9 10h6m-3-3v6" />
-        </svg>
-      </div>
-
-      <div>
-        <p class="text-base font-bold text-gray-900">AI 챗봇 서비스</p>
-        <p class="text-sm text-gray-500">
-          AI 챗봇과 대화를 통해 빠르게 도움을 받으세요.
-        </p>
-      </div>
-    </div>
-
-    <span class="text-sm font-semibold text-indigo-600">
-      열기 →
-    </span>
-  </div>
-</button>
- <Teleport to="body">
-  <!-- overlay -->
-  <div
-    v-if="isChatOpen"
-    class="fixed inset-0 z-[999] bg-black/40 backdrop-blur-[2px]"
-    @click="closeChatBot"
-  />
-
-  <!-- modal (center) -->
-  <div
-    v-if="isChatOpen"
-    class="fixed inset-0 z-[1000]
-           flex items-center justify-center
-           p-4"
-    @click.stop
-  >
-    <div
-      class="w-full max-w-3xl
-             h-[80vh] max-h-[900px]
-             rounded-2xl bg-white
-             shadow-2xl border border-gray-200
-             overflow-hidden"
-    >
-      <AIChatBot @close="closeChatBot" />
-    </div>
-  </div>
-</Teleport>
+  
   <!-- 응급실 목록 보기 -->
   <button
     type="button"

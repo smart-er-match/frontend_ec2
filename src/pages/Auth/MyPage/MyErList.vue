@@ -166,13 +166,6 @@ const toggleFavorite = async (item) => {
   // 1️⃣ UI 즉시 반영 (리스트에서 제거)
   emit('remove-bookmark', hpid)
   favoriteIds.value.delete(hpid)
-
-  try {
-    await api.post(`hospitals/unbookmark/${hpid}/`)
-  } catch (e) {
-    console.error('즐겨찾기 해제 실패', e)
-    // ❗ UX 우선: 실패해도 리스트 복구 안 함 (원하면 복구 로직 추가 가능)
-  }
 }
 
 // 라우팅

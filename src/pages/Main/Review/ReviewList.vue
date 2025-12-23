@@ -1,21 +1,20 @@
 <!-- src/pages/Main/HospitalList/Review/ReviewList.vue -->
 <template>
   <div class="mt-4 space-y-3">
-    <div
-      v-if="reviews.length === 0"
-      class="rounded-2xl border bg-white p-4 text-gray-600"
-    >
+    <div v-if="reviews.length === 0" class="bg-white p-4 text-gray-600">
       아직 리뷰가 없습니다.
     </div>
+
+    <hr class="my-4 border-gray-200" />
 
     <article
       v-for="r in reviews"
       :key="r.id ?? r.created_at"
-      class="rounded-2xl border bg-white p-4"
+      class="space-y-2"
     >
-      <div class="flex items-start justify-between gap-3">
+      <!-- ✅ 카드 (클릭 없음) -->
+      <div class="flex items-start justify-between gap-3 bg-white p-4 hover:bg-gray-50 transition">
         <div class="min-w-0 flex-1">
-          <!-- 상단: 작성자/날짜 + (수정/삭제 버튼) -->
           <div class="flex items-start justify-between gap-3">
             <p class="text-sm font-bold text-gray-900">
               {{ maskEmail(r?.user?.email) }}
@@ -24,20 +23,20 @@
               </span>
             </p>
 
-            <!-- ✅ 본인 리뷰 + 3일 이내만 수정/삭제 버튼 -->
+            <!-- ✅ 수정/삭제 -->
             <div v-if="canEdit(r)" class="shrink-0 flex items-center gap-2">
               <button
                 type="button"
-                class="rounded-lg border px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50"
-                @click="startEdit(r)"
+                class="rounded-lg border px-2.5 py-1 text-xs font-semibold text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                @click.stop="startEdit(r)"
                 :disabled="busyId === r.id"
               >
                 수정
               </button>
               <button
                 type="button"
-                class="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100"
-                @click="confirmDelete(r)"
+                class="rounded-lg border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700 hover:bg-rose-100 disabled:opacity-50"
+                @click.stop="confirmDelete(r)"
                 :disabled="busyId === r.id"
               >
                 삭제
@@ -45,9 +44,9 @@
             </div>
           </div>
 
-          <!-- 본문: 보기/수정 모드 -->
-          <div v-if="editingId === r.id" class="mt-3 space-y-3">
-            <!-- 별점 수정 -->
+          <!-- ✅ 수정 모드 -->
+          <div v-if="editingId === r.id" class="mt-3 space-y-3" @click.stop>
+            <!-- ⭐ 별점 수정 -->
             <div class="flex items-center gap-1">
               <button
                 v-for="n in 5"
@@ -55,13 +54,13 @@
                 type="button"
                 class="p-1 transition focus:outline-none focus:ring-0"
                 :class="editForm.rating >= n ? 'text-amber-500' : 'text-gray-300'"
-                @click="editForm.rating = n"
+                @click.stop="editForm.rating = n"
               >
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                   <path
                     d="M12 17.27l-5.18 3.04 1.4-5.97-4.64-4.02
-                       6.1-.52L12 4.5l2.32 5.3 6.1.52-4.64 4.02
-                       1.4 5.97L12 17.27z"
+                      6.1-.52L12 4.5l2.32 5.3 6.1.52-4.64 4.02
+                      1.4 5.97L12 17.27z"
                   />
                 </svg>
               </button>
@@ -70,29 +69,29 @@
               </span>
             </div>
 
-            <!-- 내용 수정 -->
+            <!-- ✏️ 내용 수정 -->
             <textarea
               v-model="editForm.content"
               rows="3"
-              class="w-full resize-none rounded-xl border bg-white px-3 py-2 text-sm
-                     focus:ring-2 focus:ring-indigo-500"
+              class="w-full resize-none rounded-xl border bg-white px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
               placeholder="수정할 내용을 입력하세요"
+              @click.stop
             />
 
+            <!-- 버튼 -->
             <div class="flex items-center justify-end gap-2">
               <button
                 type="button"
                 class="rounded-xl border px-3 py-2 text-sm font-semibold hover:bg-gray-50"
-                @click="cancelEdit"
+                @click.stop="cancelEdit"
                 :disabled="busyId === r.id"
               >
                 취소
               </button>
               <button
                 type="button"
-                class="rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white
-                       hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                @click="saveEdit(r)"
+                class="rounded-xl bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                @click.stop="saveEdit(r)"
                 :disabled="busyId === r.id || !canSaveEdit"
               >
                 <span v-if="busyId !== r.id">저장</span>
@@ -105,12 +104,39 @@
             </p>
           </div>
 
+          <!-- ✅ 보기 모드 -->
           <p v-else class="mt-2 text-sm text-gray-800 whitespace-pre-line">
             {{ r.content }}
           </p>
+
+          <!-- ✅ 답글 버튼 -->
+          <div class="mt-3 flex items-center justify-between">
+            <button
+              type="button"
+              class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700"
+              @click="toggleComments(r.id)"
+            >
+              <svg
+                class="h-4 w-4 transition-transform"
+                :class="openReviewId === r.id ? 'rotate-180' : ''"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+
+              {{ openReviewId === r.id ? '답글 접기' : '답글' }}
+
+              <span class="ml-1 text-gray-400">
+                ({{ commentCounts[String(r.id)] ?? 0 }})
+              </span>
+            </button>
+          </div>
         </div>
 
-        <!-- 우측: 별 표시 (보기 모드에서만) -->
+        <!-- 우측 별점(보기 모드) -->
         <div v-if="editingId !== r.id" class="shrink-0 text-right">
           <div class="flex items-center justify-end gap-0.5">
             <svg
@@ -123,32 +149,74 @@
               aria-hidden="true"
             >
               <path
-                d="M12 17.27l5.18 3.05-1.64-5.81L20 10.24l-5.91-.5L12 4.5 9.91 9.74 4 10.24l4.46 4.27-1.64 5.81z"
+                d="M12 17.27l5.18 3.05-1.64-5.81L20 10.24l-5.91-.5
+                   L12 4.5 9.91 9.74 4 10.24l4.46 4.27-1.64 5.81z"
               />
             </svg>
           </div>
         </div>
       </div>
+
+      <!-- ✅ 답글 영역 -->
+      <div v-if="openReviewId === r.id">
+        <Comments :review-id="r.id" @count="onCommentCount" />
+      </div>
+
+      <hr class="my-4 border-gray-200" />
     </article>
   </div>
 </template>
 
 <script setup>
-import { computed, reactive, ref } from 'vue'
+import { computed, reactive, ref, watch } from 'vue'
 import api from '@/components/api'
+import Comments from '../Comments/Comments.vue'
 
 const props = defineProps({
   reviews: { type: Array, default: () => [] },
-
-  /**
-   * ✅ 로그인 유저 id (UUID 문자열)
-   * - authStore.user.id 를 그대로 넘겨줘
-   */
   myUserId: { type: String, default: '' },
 })
 
 const emit = defineEmits(['updated', 'deleted'])
 
+/** ✅ 댓글 수 캐시 */
+const commentCounts = reactive({})
+
+/** ✅ Comments.vue에서 받은 count로 덮어쓰기 */
+const onCommentCount = ({ reviewId, count }) => {
+  commentCounts[String(reviewId)] = Number(count) || 0
+}
+
+/** ✅ (클릭 없이) 초기 댓글 수 미리 채우기 */
+const fetchCommentCount = async (reviewId) => {
+  try {
+    const { data } = await api.get(`/hospitals/comments/${reviewId}/`)
+    const list = Array.isArray(data) ? data : (data?.results ?? [])
+    commentCounts[String(reviewId)] = list.length
+  } catch (e) {
+    commentCounts[String(reviewId)] = 0
+  }
+}
+
+const warmupCommentCounts = async () => {
+  const ids = (props.reviews ?? [])
+    .map((r) => r?.id)
+    .filter(Boolean)
+
+  const targets = ids.filter((id) => commentCounts[String(id)] == null)
+  if (!targets.length) return
+
+  await Promise.allSettled(targets.map((id) => fetchCommentCount(id)))
+}
+
+/** ✅ 리뷰 목록이 바뀌면 댓글 수도 미리 조회 */
+watch(
+  () => props.reviews,
+  () => warmupCommentCounts(),
+  { immediate: true, deep: true }
+)
+
+/** ====== 기존 리뷰 수정/삭제 로직 ====== */
 const editingId = ref(null)
 const busyId = ref(null)
 const rowError = reactive({})
@@ -161,11 +229,7 @@ const editForm = reactive({
 const canSaveEdit = computed(() => editForm.content.trim().length >= 1 && editForm.rating >= 1)
 
 const formatDate = (iso) => {
-  try {
-    return new Date(iso).toLocaleString()
-  } catch {
-    return iso
-  }
+  try { return new Date(iso).toLocaleString() } catch { return iso }
 }
 
 const maskEmail = (email) => {
@@ -175,7 +239,6 @@ const maskEmail = (email) => {
   return `${visible}****@${domain}`
 }
 
-// ✅ 작성 후 3일 이내인지
 const within3Days = (createdAt) => {
   try {
     const created = new Date(createdAt).getTime()
@@ -187,19 +250,12 @@ const within3Days = (createdAt) => {
   }
 }
 
-/**
- * ✅ 본인 체크 (id로)
- * - 백엔드가 r.user.id 로 내려준다고 가정
- * - 만약 필드명이 user_id / author_id면 여기만 바꾸면 됨
- */
 const isMine = (r) => {
   if (!props.myUserId) return false
   return String(r?.user?.id ?? '') === String(props.myUserId)
 }
 
-const canEdit = (r) => {
-  return isMine(r) && within3Days(r?.created_at)
-}
+const canEdit = (r) => isMine(r) && within3Days(r?.created_at)
 
 const startEdit = (r) => {
   editingId.value = r.id
@@ -208,9 +264,7 @@ const startEdit = (r) => {
   rowError[r.id] = ''
 }
 
-const cancelEdit = () => {
-  editingId.value = null
-}
+const cancelEdit = () => { editingId.value = null }
 
 const saveEdit = async (r) => {
   if (!r?.id) return
@@ -222,7 +276,6 @@ const saveEdit = async (r) => {
       content: editForm.content.trim(),
       rating: Number(editForm.rating),
     })
-
     editingId.value = null
     emit('updated')
   } catch (e) {
@@ -243,12 +296,18 @@ const confirmDelete = async (r) => {
   busyId.value = r.id
   try {
     await api.delete(`/hospitals/reviews/detail/${r.id}/`)
-    emit('deleted', r.id)   // ✅ 삭제된 id를 부모에게 전달
+    emit('deleted', r.id)
   } catch (e) {
     console.error(e)
     rowError[r.id] = '삭제에 실패했습니다. (작성 후 3일 이내만 삭제 가능)'
   } finally {
     busyId.value = null
   }
+}
+
+const openReviewId = ref(null)
+
+const toggleComments = (reviewId) => {
+  openReviewId.value = (openReviewId.value === reviewId) ? null : reviewId
 }
 </script>

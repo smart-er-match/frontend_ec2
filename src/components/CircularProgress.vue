@@ -61,6 +61,7 @@ const props = defineProps({
   total: { type: [Number, String], default: 0 },   // 전체 병상
   size: { type: Number, default: 64 },
   stroke: { type: Number, default: 8 },
+  disabled: { type: Boolean, default: false },
 });
 
 // 숫자 정규화
