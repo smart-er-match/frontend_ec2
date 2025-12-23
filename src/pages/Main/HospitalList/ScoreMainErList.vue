@@ -39,6 +39,7 @@
 
               <div class="mt-2 space-y-1">
                 <p class="text-gray-700 text-sm">AI 추천 점수: {{ value.score }}</p>
+                <p class="text-gray-700 text-sm">거리: {{ value.distance }}km</p>
                 <p class="text-gray-700 text-sm">전화번호 : {{ value.phone }}</p>
                 <p class="text-gray-700 text-sm break-words">주소 : {{ value.address }}</p>
               </div>

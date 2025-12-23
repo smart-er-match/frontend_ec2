@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-6xl mx-auto px-4 py-6">
+  <div class="w-full max-w-6xl mx-auto px-1 py-6">
     <!-- Top bar -->
     <div class="flex items-center justify-between gap-3">
       <button

@@ -13,7 +13,13 @@
       class="space-y-2"
     >
       <!-- ✅ 카드 (클릭 없음) -->
-      <div class="flex items-start justify-between gap-3 bg-white p-4 hover:bg-gray-50 transition">
+      <div
+        class="
+          flex flex-col gap-3
+          sm:flex-row sm:items-start sm:justify-between
+          bg-white p-4 hover:bg-gray-50 transition
+        "
+>
         <div class="min-w-0 flex-1">
           <div class="flex items-start justify-between gap-3">
             <p class="text-sm font-bold text-gray-900">
