@@ -170,7 +170,7 @@ watch(
 
   }
 );
-const fetchHospitals = async (reason = "") => {
+const fetchHospitals = async (reason = "", refresh=false) => {
   if (!lat.value || !lng.value) {
     console.warn("[fetchHospitals] 위치가 없어 요청을 생략합니다.", { reason });
     return;
@@ -192,6 +192,7 @@ const fetchHospitals = async (reason = "") => {
         longitude: lng.value,
         gender: patient_gender,
         age: patient_age,
+        refresh: refresh,
       },
       { signal: inFlightAbort.signal }
     );
@@ -232,7 +233,7 @@ onMounted(() => {
   hospital_data.value = null;
   lastUpdatedAt.value = null;
 
-  fetchHospitals("initial-mount");
+  fetchHospitals("initial-mount", false);
 
   tickTimer = setInterval(() => {
     nowTick.value = Date.now();
@@ -264,7 +265,7 @@ const onManualRefresh = async () => {
   if (refreshDisabled.value) return;
 
   refreshCooldown.value = true;
-  fetchHospitals("manual-refresh");
+  fetchHospitals("manual-refresh", true);
 
   // ✅ 최소 3초는 못 누르게
   setTimeout(() => {

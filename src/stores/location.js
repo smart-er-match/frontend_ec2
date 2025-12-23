@@ -8,7 +8,7 @@ export const useLocationStore = defineStore('location', {
     address: '',
     distance: 10,
   }),
-  persist: true,
+  // persist: true,
 
   getters: {
     hasLocation: (state) => state.lat !== null && state.lng !== null,

@@ -233,7 +233,7 @@ const formatDate = (iso) => {
 }
 
 const maskEmail = (email) => {
-  if (!email || !String(email).includes('@')) return '익명'
+  if (!email || !String(email).includes('@')) return '탈퇴한 회원입니다.'
   const [id, domain] = String(email).split('@')
   const visible = id.slice(0, 1) || 'x'
   return `${visible}****@${domain}`

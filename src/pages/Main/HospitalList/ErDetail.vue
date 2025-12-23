@@ -195,9 +195,6 @@
 
   </div>
 
-  <div>
-    <Review :hpid="hospital?.hpid" />
-  </div>
 </template>
 
 <script setup>

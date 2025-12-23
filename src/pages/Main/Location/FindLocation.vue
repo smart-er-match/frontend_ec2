@@ -231,6 +231,8 @@ function normalizeAddress(address) {
     .replace(/\s+/g, ' ')
     .trim()
 }
+
+defineExpose({ openAddressSearch })
 </script>
 
 <style scoped></style>

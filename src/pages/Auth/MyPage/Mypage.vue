@@ -37,7 +37,7 @@
         </div>
 
         <!-- AI 토큰 발급 신청 버튼 -->
-        <div class="mt-6 flex w-full max-w-[240px] gap-2">
+        <div class="mt-3 flex w-full max-w-[240px] gap-2">
           <button
             @click="onClickAiToken"
             class="flex-1 rounded-xl bg-indigo-600 py-2.5 text-white font-semibold hover:bg-indigo-500 transition">
@@ -45,6 +45,16 @@
           </button>
         </div>
 
+        <div class="mt-3 flex w-full max-w-[240px] gap-2">
+          <button
+            v-if="!isChangePasswordEdit && form.sign_kind === 1"
+            @click="Withdrawmembership"
+            class="flex-1 rounded-xl bg-indigo-600 py-2.5 text-white font-semibold hover:bg-indigo-500 transition">
+            회원 탈퇴
+          </button>
+        </div>
+
+          <div class="mt-3 flex w-full max-w-[240px] gap-2">
         <!-- 비밀번호 변경 -->
         <button
           v-if="!isChangePasswordEdit && form.sign_kind === 1"
@@ -52,6 +62,7 @@
           class="mt-4 w-full max-w-[240px] rounded-xl border border-indigo-200 bg-indigo-50 py-2.5 text-indigo-700 font-semibold hover:bg-indigo-100 transition">
           비밀번호 변경
         </button>
+        </div>
 
       </div>
 
@@ -339,7 +350,26 @@ const onRemoveBookmark = async (hpid) => {
   }
 }
 
+const Withdrawmembership = async () => {
+  const ok = confirm('정말 회원 탈퇴하시겠습니까?')
+  if (!ok) return
 
+  try {
+    // ✅ 회원 탈퇴 API
+    await api.delete('accounts/profile/delete/')
+
+    // ✅ authStore 정리 = 로그아웃
+    authStore.logout()   // 내부에서 clearAuth + auto_login false
+
+    alert('회원탈퇴가 완료되었습니다.')
+
+    // ✅ 홈으로 이동 (replace 권장)
+    router.replace({ name: 'home' })
+  } catch (err) {
+    console.error(err)
+    alert('회원탈퇴 중 오류가 발생했습니다.')
+  }
+}
 </script>
 
 <style scoped>

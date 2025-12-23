@@ -5,8 +5,15 @@
       <h1 class="text-3xl font-bold tracking-tight text-gray-900">
         환영합니다, <span class="text-indigo-600">{{ user.name || "사용자" }}</span> 님
       </h1>
-      <p class="mt-2 text-sm text-gray-500">
-        당신의 용도를 선택해주세요 (현재: {{ roleMessage }})
+      <p 
+      v-if="userStore.user.remaining_requests > 0"
+      class="mt-2 text-sm text-gray-500">
+        AI 활용 토큰이 {{ userStore.user.remaining_requests }}개 남았습니다.
+      </p>
+      <p
+        v-else
+        class="mt-2 text-sm text-gray-500">
+        의료진은 제한 없이 사용 가능합니다.
       </p>
     </div>
 
@@ -301,9 +308,13 @@ import { useRouter } from "vue-router";
 import { useLocationStore } from "@/stores/location"
 import api from "@/components/api"
 import AIChatBot from "../AI/AIChatBot.vue";
+import { useAuthStore } from '@/stores/auth'
+
+
 
 const router = useRouter();
 const locationStore = useLocationStore();
+const userStore = useAuthStore();
 
 const erListClick = () => {
   // ✅ 너 프로젝트 라우트 이름에 맞게 바꿔줘
@@ -326,18 +337,23 @@ const closeChatBot = () => {
 }
 // ✅ 안전하게 computed로 감싸기 (초기 null 방지)
 const user = computed(() => JSON.parse(localStorage.getItem("user") || "{}"));
+console.log(user)
 const roleMessage = computed(() => (user.value.role ? "의료진" : "일반인"));
 
 const generalClick = () => {
   router.push({ name: "generalsymptoms" });
 };
 
-const staffClick = () => {
-  // router.push({ name: "staffHome" })
-};
 
 onMounted(async () => {
   if (!locationStore.lat || !locationStore.lng) return
+
+  userStore.getAuth()
+
+  // ✅ 로그인 상태 아닐 땐 서버로 안 보냄 (선택)
+  if (!userStore.isAuthenticated) return
+
+  console.log('user:', userStore.user)
 
   try {
     await api.post('/hospitals/user/location/', {
