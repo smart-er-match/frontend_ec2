@@ -128,6 +128,8 @@ watch(
 
 onMounted(async () => {
 
+ console.log(locationStore.hasLocation)
+
   await nextTick()            // ref 연결 보장
   if (!locationStore.hasLocation) {
     getLoc.value?.requestLocation()
@@ -173,6 +175,9 @@ onMounted(async () => {
     myAddress.value = locationStore.address
   }
 })
+
+
+
 
 const openAddressSearch = () => {
   new window.daum.Postcode({

@@ -99,10 +99,27 @@ const routes = [
     { path: '/:pathMatch(.*)*', name: 'NotFound', component: NotAuthenticated },
     ]
 
-const router = createRouter({
-    history: createWebHistory(),
-    routes,
+ const router = createRouter({
+  history: createWebHistory(),
+  routes,
+
+  // ✅ 라우트 변경 시 스크롤 위치 제어
+  scrollBehavior(to, from, savedPosition) {
+    // 브라우저 뒤로가기/앞으로가기일 때는 이전 위치로
+    if (savedPosition) {
+      return savedPosition
+    }
+
+    // 그 외엔 항상 맨 위로
+    return {
+      left: 0,
+      top: 0,
+      // behavior: 'smooth',   // 부드럽게 올리고 싶으면 주석 해제
+    }
+  },
 })
+
+
 
 router.beforeEach((to) => {
   const auth = useAuthStore()

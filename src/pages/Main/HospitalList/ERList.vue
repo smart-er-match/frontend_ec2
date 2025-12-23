@@ -1,18 +1,24 @@
-<!-- src/pages/Main/HospitalList/HospitalList.vue -->
+<!-- src/pages/Main/HospitalList/ERList.vue -->
 <template>
   <!-- ✅ 최초 진입에만 전체 스피너 (캐시가 있으면 안 가림) -->
   <LoadingSpinner v-if="loading && currentList.length === 0" />
 
   <div>
-    <h1 class="font-bold text-3xl mb-4">전국 응급실 리스트</h1>
+    <!-- 제목 -->
+    <h1 class="font-bold text-2xl sm:text-3xl mb-4">
+      전국 응급실 리스트
+    </h1>
 
     <!-- ✅ 캐시/데이터 있는 상태에서 갱신 중이면 작은 안내만 -->
-    <div v-if="loading && currentList.length > 0" class="mb-3 text-xs text-gray-500">
+    <div
+      v-if="loading && currentList.length > 0"
+      class="mb-3 text-xs text-gray-500"
+    >
       갱신 중...
     </div>
 
     <!-- 지역 카테고리 -->
-    <div class="flex flex-wrap gap-2 mb-6 top-0 bg-white z-50 py-2">
+    <div class="flex flex-wrap gap-2 mb-4 sm:mb-6 top-0 bg-white z-50 py-2">
       <button
         v-for="region in regionList"
         :key="region"
@@ -32,7 +38,7 @@
     </h2>
 
     <!-- 카드 영역 -->
-    <div class="h-[900px] grid grid-cols-2 gap-3 auto-rows-max">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 auto-rows-max">
       <div
         v-for="item in paginatedList"
         :key="item.hpid"
@@ -40,8 +46,9 @@
         tabindex="0"
         @click="goDetail(item)"
         @keydown.enter.prevent="goDetail(item)"
-        class="relative border rounded-lg p-4 shadow-md bg-white hover:shadow-lg transition h-40
-               cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        class="relative flex flex-col border rounded-xl p-4 shadow-md bg-white
+               hover:shadow-lg transition cursor-pointer
+               focus:outline-none focus:ring-2 focus:ring-indigo-500"
       >
         <!-- ✅ 즐겨찾기 버튼 -->
         <button
@@ -63,18 +70,31 @@
           </svg>
         </button>
 
-        <h3 class="text-lg font-semibold text-gray-900 mb-1">
+        <!-- 병원명 -->
+        <h3 class="text-base sm:text-lg font-semibold text-gray-900 mb-1 truncate">
           {{ item.name }}
         </h3>
 
+        <!-- 평점 -->
         <p class="mt-1 text-sm text-gray-700">
-          ⭐ {{ (Number(item.average_rating) || 0).toFixed(1) }} ({{ item.review_count ?? 0 }})
+          ⭐ {{ (Number(item.average_rating) || 0).toFixed(1) }}
+          <span class="text-xs text-gray-500">
+            ({{ item.review_count ?? 0 }})
+          </span>
         </p>
 
-        <p class="text-sm text-gray-700">📞 {{ item.emergency_phone }}</p>
-        <p class="text-sm text-gray-700">📍 {{ item.address }}</p>
+        <!-- 전화번호 -->
+        <p class="mt-1 text-sm text-gray-700">
+          📞 {{ item.emergency_phone || '-' }}
+        </p>
+
+        <!-- 주소 -->
+        <p class="mt-1 text-sm text-gray-700 line-clamp-2">
+          📍 {{ item.address }}
+        </p>
       </div>
 
+      <!-- 데이터 없을 때 -->
       <p
         v-if="paginatedList.length === 0"
         class="col-span-full text-center text-gray-500 mt-8"
@@ -84,21 +104,25 @@
     </div>
 
     <!-- 페이지네이션 -->
-    <div class="flex justify-center items-center gap-4 mt-4">
+    <div class="flex justify-center items-center gap-4 mt-6">
       <button
         @click="goPrevPage"
         :disabled="currentPage === 1"
-        class="px-3 py-1 rounded border disabled:opacity-50"
+        class="px-3 py-1 rounded border text-sm
+               disabled:opacity-50 disabled:cursor-not-allowed"
       >
         이전
       </button>
 
-      <span class="text-gray-700">{{ currentPage }} / {{ totalPages }}</span>
+      <span class="text-gray-700 text-sm">
+        {{ currentPage }} / {{ totalPages }}
+      </span>
 
       <button
         @click="goNextPage"
         :disabled="currentPage === totalPages"
-        class="px-3 py-1 rounded border disabled:opacity-50"
+        class="px-3 py-1 rounded border text-sm
+               disabled:opacity-50 disabled:cursor-not-allowed"
       >
         다음
       </button>
@@ -111,7 +135,7 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref, computed, watch } from 'vue'
+import { onMounted, onBeforeUnmount, reactive, ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../../../components/api'
 import LoadingSpinner from '../../../components/LoadingSpinner.vue'
@@ -124,11 +148,24 @@ const authStore = useAuthStore()
 const er_list = reactive({})
 const selectedRegion = ref('전체')
 const currentPage = ref(1)
-const pageSize = 10
 
-// 즐겨찾기: hpid로 통일 (Set<string>)
+// ✅ 페이지 사이즈를 반응형으로: 모바일 5개, 데스크탑 10개
+const pageSize = ref(10)
+const isMobile = ref(false)
+
+const detectLayout = () => {
+  if (typeof window === 'undefined') return
+  const mobile = window.innerWidth < 768
+  isMobile.value = mobile
+  pageSize.value = mobile ? 5 : 10
+
+  // 현재 페이지가 최대 페이지 넘어가면 보정
+  if (currentPage.value > totalPages.value) {
+    currentPage.value = totalPages.value
+  }
+}
+
 const favoriteIds = ref(new Set())
-
 const loading = ref(false)
 const error = ref('')
 
@@ -144,28 +181,33 @@ const currentList = computed(() => {
 
 const paginatedList = computed(() => {
   const list = currentList.value
-  const start = (currentPage.value - 1) * pageSize
-  return list.slice(start, start + pageSize)
+  const size = pageSize.value
+  const start = (currentPage.value - 1) * size
+  return list.slice(start, start + size)
 })
 
 const totalPages = computed(() => {
   const len = currentList.value.length
-  return len === 0 ? 1 : Math.ceil(len / pageSize)
+  const size = pageSize.value || 1
+  return len === 0 ? 1 : Math.ceil(len / size)
 })
-
-// ===== 핸들러 =====
-const selectRegion = (region) => {
-  selectedRegion.value = region
-  currentPage.value = 1
-}
-
-const goPrevPage = () => (currentPage.value = Math.max(1, currentPage.value - 1))
-const goNextPage = () => (currentPage.value = Math.min(totalPages.value, currentPage.value + 1))
 
 // 페이지 수 줄어들면 현재 페이지 보정
 watch(totalPages, (tp) => {
   if (currentPage.value > tp) currentPage.value = tp
 })
+
+const selectRegion = (region) => {
+  selectedRegion.value = region
+  currentPage.value = 1
+}
+
+const goPrevPage = () => {
+  currentPage.value = Math.max(1, currentPage.value - 1)
+}
+const goNextPage = () => {
+  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
+}
 
 const isFavorite = (hpid) => favoriteIds.value.has(String(hpid))
 
@@ -184,7 +226,7 @@ const loadUserFavorites = async () => {
   syncFavoriteFromUser()
 }
 
-// ===== 즐겨찾기 토글 (서버: POST /hospitals/bookmark/<hpid>/ Toggle) =====
+// ===== 즐겨찾기 토글 =====
 const toggleFavorite = async (item) => {
   if (!authStore.isAuthenticated) {
     alert('로그인 후 이용 가능합니다.')
@@ -194,7 +236,7 @@ const toggleFavorite = async (item) => {
   const hpid = String(item.hpid)
   const wasFav = isFavorite(hpid)
 
-  // ✅ 낙관적 업데이트 (즉시 UI 반영)
+  // 낙관적 업데이트
   const next = new Set(favoriteIds.value)
   wasFav ? next.delete(hpid) : next.add(hpid)
   favoriteIds.value = next
@@ -202,13 +244,12 @@ const toggleFavorite = async (item) => {
   try {
     const { data } = await api.post(`/hospitals/bookmark/${hpid}/`)
 
-    // ✅ 서버 확정 상태로 Set 동기화
+    // 서버 결과에 맞춰 재동기화
     if (typeof data?.is_bookmarked === 'boolean') {
       const sync = new Set(favoriteIds.value)
       data.is_bookmarked ? sync.add(hpid) : sync.delete(hpid)
       favoriteIds.value = sync
 
-      // ✅ (선택) store.user.bookmarked_hospitals도 같이 맞추기 (MyPage와 일관성)
       const prevList = authStore.user?.bookmarked_hospitals || []
       if (data.is_bookmarked) {
         if (!prevList.some((h) => String(h?.hpid) === hpid)) {
@@ -228,7 +269,6 @@ const toggleFavorite = async (item) => {
       }
     }
   } catch (e) {
-    // ✅ 실패 시 롤백
     const rollback = new Set(favoriteIds.value)
     wasFav ? rollback.add(hpid) : rollback.delete(hpid)
     favoriteIds.value = rollback
@@ -248,15 +288,15 @@ const goDetail = (item) => {
 
 // ===== 데이터 로드 (캐시 + 백그라운드 갱신) =====
 const loadHospitals = async () => {
-  // 1) 캐시 먼저
   const cached = localStorage.getItem(CACHE_KEY)
   if (cached) {
     try {
       Object.assign(er_list, JSON.parse(cached))
-    } catch {}
+    } catch {
+      // 캐시 파싱 실패해도 무시
+    }
   }
 
-  // 2) 캐시 없을 때만 전체 로딩 스피너
   loading.value = Object.keys(er_list).length === 0
   error.value = ''
 
@@ -273,6 +313,26 @@ const loadHospitals = async () => {
 }
 
 onMounted(async () => {
+  detectLayout()
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', detectLayout)
+  }
+
   await Promise.all([loadHospitals(), loadUserFavorites()])
 })
+
+onBeforeUnmount(() => {
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('resize', detectLayout)
+  }
+})
 </script>
+
+<style scoped>
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+</style>

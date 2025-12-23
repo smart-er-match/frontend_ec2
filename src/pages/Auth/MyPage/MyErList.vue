@@ -1,20 +1,29 @@
 <template>
+  <!-- 제목 -->
+  <h1 class="m-6 text-xl font-bold text-gray-900">내가 찜한 응급실</h1>
+
   <!-- 찜한 응급실이 없을 때 -->
-<h1 class="m-6 text-xl font-bold text-gray-900">내가 찜한 응급실</h1>
   <div
     v-if="favoriteList.length === 0"
     class="flex flex-col items-center justify-center
            rounded-2xl border border-gray-200 bg-gray-50
            px-6 py-16 text-center"
   >
-    <div class="flex h-16 w-16 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-      <svg viewBox="0 0 24 24" class="h-8 w-8" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z"/>
-        <path d="M12 11v.01"/>
+    <div
+      class="flex h-16 w-16 items-center justify-center rounded-full
+             bg-indigo-100 text-indigo-600"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        class="h-8 w-8"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M12 21s7-4.35 7-11a7 7 0 1 0-14 0c0 6.65 7 11 7 11Z" />
+        <path d="M12 11v.01" />
       </svg>
     </div>
-
-
 
     <p class="mt-2 text-sm text-gray-500">
       아직 찜한 응급실이 없습니다.
@@ -35,7 +44,9 @@
 
   <!-- 찜한 응급실이 있을 때 -->
   <div v-else>
-    <div class="h-[900px] mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 auto-rows-max">
+    <div
+      class="h-[900px] mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3 auto-rows-max"
+    >
       <div
         v-for="item in paginatedList"
         :key="item.hpid"
@@ -43,8 +54,10 @@
         tabindex="0"
         @click="goDetail(item)"
         @keydown.enter.prevent="goDetail(item)"
-        class="relative mx-5 border rounded-lg p-4 shadow-md bg-white hover:shadow-lg transition h-40
-               cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        class="relative mx-5 border rounded-lg p-4 shadow-md bg-white
+               hover:shadow-lg transition h-40
+               cursor-pointer focus:outline-none focus:ring-2
+               focus:ring-indigo-500"
       >
         <!-- 즐겨찾기 버튼(해제) -->
         <button
@@ -95,11 +108,18 @@
           </span>
         </div>
 
-        <p class="mt-1 text-sm text-gray-700">📞 {{ item.emergency_phone }}</p>
-        <p class="text-sm text-gray-700 line-clamp-1">📍 {{ item.address }}</p>
+        <p class="mt-1 text-sm text-gray-700">
+          📞 {{ item.emergency_phone }}
+        </p>
+        <p class="text-sm text-gray-700 line-clamp-1">
+          📍 {{ item.address }}
+        </p>
       </div>
 
-      <p v-if="paginatedList.length === 0" class="col-span-full text-center text-gray-500 mt-8">
+      <p
+        v-if="paginatedList.length === 0"
+        class="col-span-full text-center text-gray-500 mt-8"
+      >
         조회된 병원이 없습니다.
       </p>
     </div>
@@ -114,7 +134,9 @@
         이전
       </button>
 
-      <span class="text-sm text-gray-700">{{ currentPage }} / {{ totalPages }}</span>
+      <span class="text-sm text-gray-700">
+        {{ currentPage }} / {{ totalPages }}
+      </span>
 
       <button
         class="px-3 py-1 rounded border disabled:opacity-50"
@@ -126,8 +148,15 @@
     </div>
   </div>
 </template>
+
 <script setup>
-import { computed, ref, watch } from 'vue'
+import {
+  computed,
+  ref,
+  watch,
+  onMounted,
+  onBeforeUnmount,
+} from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/components/api'
 
@@ -140,7 +169,9 @@ const props = defineProps({
 const emit = defineEmits(['remove-bookmark'])
 
 const favoriteList = computed(() =>
-  Array.isArray(props.bookmarkedHospitals) ? props.bookmarkedHospitals : []
+  Array.isArray(props.bookmarkedHospitals)
+    ? props.bookmarkedHospitals
+    : [],
 )
 
 // ⭐ 즐겨찾기 Set
@@ -151,19 +182,14 @@ watch(
   (list) => {
     favoriteIds.value = new Set(list.map((h) => String(h?.hpid)))
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 const isFavorite = (hpid) => favoriteIds.value.has(String(hpid))
 
-/**
- * ✅ 즐겨찾기 해제
- * POST /hospitals/unbookmark/<hpid>/
- */
+// ✅ 즐겨찾기 해제 (부모가 실제 삭제 처리)
 const toggleFavorite = async (item) => {
   const hpid = String(item.hpid)
-
-  // 1️⃣ UI 즉시 반영 (리스트에서 제거)
   emit('remove-bookmark', hpid)
   favoriteIds.value.delete(hpid)
 }
@@ -180,25 +206,49 @@ const goDetail = (item) => {
   })
 }
 
-/* ===== 페이지네이션 (기존 그대로) ===== */
+/* ===== 페이지네이션 (모바일: 5개, 그 외: 10개) ===== */
 const currentPage = ref(1)
-const pageSize = 10
+const pageSize = ref(10)
 
-watch(favoriteList, () => (currentPage.value = 1))
+const updatePageSize = () => {
+  if (window.matchMedia?.('(max-width: 640px)').matches) {
+    pageSize.value = 5 // 모바일에서 5개씩
+  } else {
+    pageSize.value = 10 // 데스크탑/태블릿은 10개씩
+  }
+}
+
+onMounted(() => {
+  updatePageSize()
+  window.addEventListener('resize', updatePageSize)
+})
+
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', updatePageSize)
+})
+
+watch(favoriteList, () => {
+  currentPage.value = 1
+})
 
 const totalPages = computed(() => {
   const len = favoriteList.value.length
-  return len === 0 ? 1 : Math.ceil(len / pageSize)
+  const size = pageSize.value || 10
+  return len === 0 ? 1 : Math.ceil(len / size)
 })
 
 const paginatedList = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return favoriteList.value.slice(start, start + pageSize)
+  const size = pageSize.value || 10
+  const start = (currentPage.value - 1) * size
+  return favoriteList.value.slice(start, start + size)
 })
 
-const goPrevPage = () => (currentPage.value = Math.max(1, currentPage.value - 1))
-const goNextPage = () =>
-  (currentPage.value = Math.min(totalPages.value, currentPage.value + 1))
+const goPrevPage = () => {
+  currentPage.value = Math.max(1, currentPage.value - 1)
+}
+const goNextPage = () => {
+  currentPage.value = Math.min(totalPages.value, currentPage.value + 1)
+}
 </script>
 
 <style scoped>
