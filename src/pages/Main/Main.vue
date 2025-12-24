@@ -7,11 +7,12 @@
         <span class="text-indigo-600">{{ user.name || "사용자" }}</span> 님
       </h1>
       <p
-        v-if="userStore.user.remaining_requests > 0"
+        v-if="userStore.user.remaining_requests >= 0"
         class="mt-2 text-sm text-gray-500"
       >
-        AI 활용 토큰이 {{ userStore.user.remaining_requests }}개 남았습니다.
+        AI 활용 토큰이 {{ userStore.user.remaining_requests }}개 남았습니다. <br/> 매일 00시 초기화됩니다.
       </p>
+      
       <p v-else class="mt-2 text-sm text-gray-500">
         의료진은 AI 활용 토큰 제한 없이 사용 가능합니다.
       </p>
@@ -426,7 +427,7 @@ const generalClick = () => {
 };
 
 onMounted(async () => {
-  userStore.getAuth();
+  userStore.updateUserInfo();
 
   if (!locationStore.lat || !locationStore.lng) return;
   if (!userStore.isAuthenticated) return;

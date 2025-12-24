@@ -3,7 +3,9 @@ import { ref, nextTick, watch, onMounted } from 'vue'
 import api from '../../components/api'
 import { useRouter } from 'vue-router'
 import { useLocationStore } from '@/stores/location'
+import { useAuthStore } from "@/stores/auth";
 
+const userStore = useAuthStore();
 const locationStore = useLocationStore()
 
 const router = useRouter();
@@ -104,10 +106,18 @@ const send = async () => {
   }
 }
 
+
 const handleAction = (action) => {
   if (action === 'VIEW_RESULT') {
     // 예: 추천 결과 페이지 이동
 
+
+    userStore.updateUserInfo()
+
+    if (userStore.user.remaining_requests === 0){
+    alert("AI 활용 토큰을 다 사용하였습니다. 다음날 다시 사도하세요.")
+    return
+  }
     router.push({name : 'recommenderlist'})
     return
   }

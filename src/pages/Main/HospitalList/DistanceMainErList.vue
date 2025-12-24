@@ -33,7 +33,9 @@
                 {{ index + 1 }}
               </span>
 
+              <span class="flex-1 truncate min-w-0">
               {{ value.name }}
+              </span>
             </p>
               <!-- 길찾기: 항상 노출 -->
               <a

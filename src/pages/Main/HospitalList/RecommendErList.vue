@@ -108,6 +108,10 @@ import { useLocationStore } from "@/stores/location";
 import FindLocation from "../Location/FindLocation.vue";
 import DistanceMainErList from "./DistanceMainErList.vue";
 import ScoreMainErList from "./ScoreMainErList.vue";
+import { useAuthStore } from "@/stores/auth";
+import router from "../../../router";
+
+const userStore = useAuthStore();
 
 const locationStore = useLocationStore();
 
@@ -255,7 +259,7 @@ watch(
     }
 
     if (newLat === oldLat && newLng === oldLng) return;
-    fetchHospitals("location-changed", false);
+    fetchHospitals("location-changed", true);
   },
   { immediate: true }
 );
@@ -265,6 +269,13 @@ onMounted(() => {
     nowTick.value = Date.now();
   }, 1000);
 
+  userStore.updateUserInfo()
+
+  if (userStore.user.remaining_requests === 0){
+    alert("AI 활용 토큰을 다 사용하였습니다. 다음날 다시 시도하세요.")
+    router.push({name: 'main'})
+    return
+  }
   // ✅ 지도 draw는 FindLocation 마운트 이후에만 등록
   watch(
     top3HospitalsForMap,

@@ -186,6 +186,7 @@ export const useAuthStore = defineStore('auth', {
             token_status: user.token_status || '',
             service_key: user.service_key || '',
             bookmarked_hospitals: user.bookmarked_hospitals || [],
+            remaining_requests: user.remaining_requests,
           };
 
           // localStorage에 저장

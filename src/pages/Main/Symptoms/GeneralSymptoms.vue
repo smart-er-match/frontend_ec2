@@ -143,7 +143,8 @@
   
     <p class="mt-3 text-red-500 text-sm" v-if="errorMsg">{{ errorMsg }}</p>
     <button
-      @click="findhospital"
+     type="button" 
+       @click="findhospital"
       class="mt-5 flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500"
     >
       병원 찾기
@@ -157,6 +158,9 @@ import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { useRouter } from 'vue-router'
 import LoadingSpinner from '../../../components/LoadingSpinner.vue'
+import { useAuthStore } from "@/stores/auth";
+
+const userStore = useAuthStore();
 
 
 const patientGender = ref('')
@@ -180,7 +184,15 @@ const router = useRouter()
 const errorMsg = ref('')
 const isLoading = ref(false)
 
-const findhospital = async () => {
+const findhospital = () => {
+
+  userStore.updateUserInfo()
+
+  if (userStore.user.remaining_requests === 0){
+    alert("AI 활용 토큰을 다 사용하였습니다. 다음날 다시 시도하세요.")
+    return
+  }
+
   const mergedSymptoms = bodyPartLabels
     .filter(v => symptoms.value.includes(v.name)) // 선택된 부위만
     .map(v => `${v.label} ${SymptomDescription.value[v.label] || ''}`)
