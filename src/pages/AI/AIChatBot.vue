@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick, watch, onMounted } from 'vue'
+import { ref, nextTick, watch, onMounted, onUnmounted  } from 'vue'
 import api from '../../components/api'
 import { useRouter } from 'vue-router'
 import { useLocationStore } from '@/stores/location'
@@ -123,7 +123,7 @@ const handleAction = (action) => {
   }
 
   if (action === 'CLOSE_CHAT') {
-    emit('close')
+    closeChat()
     return
   }
 
@@ -182,8 +182,6 @@ const openAddressSearch = () => {
 }
 
 
-console.log('위치 있음?', locationStore.hasLocation)
-
 const onKeydown = (e) => {
   // Enter 전송, Shift+Enter 줄바꿈
   if (e.key === 'Enter' && !e.shiftKey) {
@@ -217,6 +215,29 @@ function normalizeAddress(address) {
   return { lat: Number(location.y), lng: Number(location.x) }
 }
 
+const closeChat = () => {
+  emit('close', { sessionId: sessionId.value })
+}
+
+
+const endSession = async () => {
+  const id = sessionId.value
+  if (!id) return
+
+  try {
+    await api.post('hospitals/chatbot/', {
+      chatbot_finished: id,
+    })
+    console.log('챗봇 세션 종료:', id)
+  } catch (e) {
+    console.error('챗봇 세션 종료 실패:', e)
+  }
+}
+
+onUnmounted(() => {
+  endSession()
+})
+
 </script>
 
 <template>
@@ -239,7 +260,7 @@ function normalizeAddress(address) {
         type="button"
         class="rounded-lg p-2 text-gray-600 hover:bg-gray-100 hover:text-gray-800
                focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        @click="emit('close')"
+        @click="closeChat"
         aria-label="닫기"
       >
         ✕

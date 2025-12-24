@@ -45,7 +45,7 @@
         @click="submitRequest"
         class="w-full py-3 mt-4 font-semibold rounded-md shadow-md"
         :class="buttonClass"
-        :disabled="!isButtonEnabled"
+      :disabled="!isButtonEnabled"
       >
         {{ buttonText }}
     </button>
@@ -55,7 +55,7 @@
 
 <script setup>
 console.log("Gdgdgdgdg")
-import { ref, reactive, onMounted, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import api from '../../components/api'
 
@@ -66,14 +66,16 @@ const isFunctionChecked = ref(false) // 기능 선택 여부
 
 const tokenStatus = computed(() => authStore.user?.token_status ?? 0)
 
+console.log(tokenStatus.value)
+
+const isButtonEnabled = computed(() => {
+  return tokenStatus.value === 0 || tokenStatus.value === 2
+})
+
 const buttonClass = computed(() => {
   return isButtonEnabled.value
     ? 'bg-blue-600 text-white hover:bg-blue-700'
     : 'bg-gray-300 text-gray-600 cursor-not-allowed'
-})
-
-const isButtonEnabled = computed(() => {
-  return tokenStatus.value === 0 || tokenStatus.value === 2
 })
 
 const buttonText = computed(() => {
@@ -95,6 +97,7 @@ const buttonText = computed(() => {
 onMounted(async () => {
   await authStore.updateUserInfo(); // 사용자 정보 자동 갱신
 })
+
 
 const submitRequest = async () => {
   try {

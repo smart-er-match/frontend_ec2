@@ -183,7 +183,7 @@ export const useAuthStore = defineStore('auth', {
             gender: user.gender || '',
             sign_kind: user.sign_kind || '',
             email: user.email || '',
-            token_status: user.token_status || '',
+            token_status: user.token_status,
             service_key: user.service_key || '',
             bookmarked_hospitals: user.bookmarked_hospitals || [],
             remaining_requests: user.remaining_requests,

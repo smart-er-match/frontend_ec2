@@ -259,6 +259,7 @@ const today = new Date().toISOString().split('T')[0]
               inputmode="numeric"
               pattern="[0-9]*"
               autocomplete="tel" 
+              maxlength="11"
               required
               class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               placeholder=" - 빼고 숫자만 입력하세요"

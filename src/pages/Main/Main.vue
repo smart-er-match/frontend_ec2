@@ -411,8 +411,20 @@ const openChatBot = () => {
   lockScroll();
 };
 
-const closeChatBot = () => {
+const closeChatBot = async (payload) => {
   isChatOpen.value = false;
+
+  if (payload.sessionId){
+  try {
+    const res = await api.post(`hospitals/chatbot/`, {
+      chatbot_finished: payload.sessinId
+
+    })}catch (e){
+      console.error(e)
+    }
+
+
+  }
   unlockScroll();
 };
 
