@@ -1,8 +1,8 @@
 <script setup>
-import { ref } from 'vue';
-import { API_BASE_URL } from '../../config';
-import axios from 'axios';
-import { useRouter } from 'vue-router';
+import { ref } from 'vue'
+import { API_BASE_URL } from '../../config'
+import axios from 'axios'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 
@@ -11,152 +11,144 @@ const email = ref('')
 const password = ref('')
 const password2 = ref('')
 const errorMsg = ref('')
-const successMsg = ref('') 
-const gender = ref('M') 
-const phonenumber = ref('') 
+const successMsg = ref('')
+const gender = ref('M')
+const phonenumber = ref('')
 const birth_date = ref('')
+
 const emailCheckMsg = ref('')
-const emailCheckStatus = ref(null)  
+const emailCheckStatus = ref(null)
 const passwordError = ref('')
 const password2Error = ref('')
+
 const agree1 = ref(false)
 const agree2 = ref(false)
 const agree3 = ref(false)
-const agreeAll = ref(false);
+const agreeAll = ref(false)
 
 const toggleAll = () => {
-  agree1.value = agreeAll.value;
-  agree2.value = agreeAll.value;
-  agree3.value = agreeAll.value;
-};
-
+  agree1.value = agreeAll.value
+  agree2.value = agreeAll.value
+  agree3.value = agreeAll.value
+}
 const syncAgreeAll = () => {
-  agreeAll.value = agree1.value && agree2.value && agree3.value;
-};
-
+  agreeAll.value = agree1.value && agree2.value && agree3.value
+}
 
 const checkEmail = async () => {
-  try{
+  try {
     const res = await axios.get(`${API_BASE_URL}accounts/signup/uu/`, {
-        params: {                     
-        username: email.value,
-      },
+      params: { username: email.value },
     })
-    if(res.data.bool_uu == true){
+    if (res.data.bool_uu == true) {
       emailCheckStatus.value = true
       emailCheckMsg.value = '사용 가능한 이메일입니다.'
-    }else{
+    } else {
       emailCheckStatus.value = false
       emailCheckMsg.value = '중복된 이메일입니다.'
     }
-    }catch (err){
-      console.error(err)
-      emailCheckStatus.value = null
-      emailCheckMsg.value = '검사 중 오류 발생'
-    }
+  } catch (err) {
+    console.error(err)
+    emailCheckStatus.value = null
+    emailCheckMsg.value = '검사 중 오류 발생'
+  }
 }
 
 const handleSignup = async () => {
-
-  if(emailCheckStatus.value === true &&
-  passwordError.value === '' &&
-  password2Error.value === ''){
+  if (
+    emailCheckStatus.value === true &&
+    passwordError.value === '' &&
+    password2Error.value === ''
+  ) {
     try {
-    await axios.post(`${API_BASE_URL}accounts/signup/`,{
-      username: email.value,
-      password: password.value,
-      name: name.value,
-      phone_number: phonenumber.value,
-      birth_date: birth_date.value,
-      gender: gender.value,
-      email: email.value
-    })
-    router.push('/')
-  }catch (err){
-    errorMsg.value = '회원가입 실패'
-    console.error(err)
-  }
-  }else{
+      await axios.post(`${API_BASE_URL}accounts/signup/`, {
+        username: email.value,
+        password: password.value,
+        name: name.value,
+        phone_number: phonenumber.value,
+        birth_date: birth_date.value,
+        gender: gender.value,
+        email: email.value,
+      })
+      router.push('/')
+    } catch (err) {
+      errorMsg.value = '회원가입 실패'
+      console.error(err)
+    }
+  } else {
     errorMsg.value = '뭐가 제대로 안돼있어요'
   }
-
 }
 
 const password1End = () => {
   const pw = password.value
-  passwordError.value = ""
+  passwordError.value = ''
 
   const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(pw)
   const hasNumber = /\d/.test(pw)
   const hasLetter = /[a-zA-Z]/.test(pw)
 
-  if (pw.length < 8) {
-    passwordError.value = "8자리 이상으로 만드세요"
-  } else if (!hasLetter) {
-    passwordError.value = "알파벳을 포함해야 합니다"
-  } else if (!hasNumber) {
-    passwordError.value = "숫자를 포함해야 합니다"
-  } else if (!hasSpecial) {
-    passwordError.value = "특수문자를 포함해야 합니다"
-  }
+  if (pw.length < 8) passwordError.value = '8자리 이상으로 만드세요'
+  else if (!hasLetter) passwordError.value = '알파벳을 포함해야 합니다'
+  else if (!hasNumber) passwordError.value = '숫자를 포함해야 합니다'
+  else if (!hasSpecial) passwordError.value = '특수문자를 포함해야 합니다'
 }
 
-const password2End = () =>{
-  password2Error.value = ""
-  if(password.value !== password2.value){
-    password2Error.value = "비번이 안맞습니다."
-  }
+const password2End = () => {
+  password2Error.value = ''
+  if (password.value !== password2.value) password2Error.value = '비번이 안맞습니다.'
 }
+
 const today = new Date().toISOString().split('T')[0]
 </script>
 
 <template>
-  <div>
-    <h2 class="text-center text-2xl font-bold tracking-tight text-gray-900 mb-8">
+  <div class="w-full">
+    <h2 class="text-center text-2xl font-extrabold tracking-tight text-gray-900 mb-6 sm:mb-8">
       회원가입
     </h2>
 
-    <form @submit.prevent="handleSignup" class="space-y-6">
-  
+    <form @submit.prevent="handleSignup" class="space-y-5 sm:space-y-6">
       <!-- 이메일 -->
       <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
           이메일
-      </label>
+        </label>
 
-      <div class="flex gap-2">
-          <!-- 이메일 입력 -->
+        <!-- ✅ 모바일: 세로 / sm+: 가로 -->
+        <div class="flex flex-col sm:flex-row gap-2">
           <input
-          v-model="email"
-          type="email"
-          autocomplete="email"
-          required
-          class="flex-1 rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          placeholder="example@email.com"
+            v-model="email"
+            type="email"
+            autocomplete="email"
+            required
+            class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900
+                   placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder="example@email.com"
           />
 
-          <!-- 중복확인 버튼 -->
           <button
-          type="button"
-          @click="checkEmail"
-          class="rounded-md bg-blue-600 px-3 py-2 text-sm font-semibold text-white hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
+            type="button"
+            @click="checkEmail"
+            class="h-11 w-full sm:w-auto sm:px-4 rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white
+                   hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
           >
-          중복확인
+            중복확인
           </button>
-      </div>
-      <div
-        class="mx-2"
-        v-if="emailCheckStatus !== null" 
-        :class="emailCheckStatus ? 'text-green-500' : 'text-red-500', 'text-xs mt-1'  "
-      >
-        {{ emailCheckMsg }}
+        </div>
+
+        <p
+          v-if="emailCheckStatus !== null"
+          class="mt-1.5 text-xs"
+          :class="emailCheckStatus ? 'text-green-600' : 'text-red-500'"
+        >
+          {{ emailCheckMsg }}
+        </p>
       </div>
 
-      </div>
-      
-
+      <!-- 비밀번호 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
           비밀번호
         </label>
         <input
@@ -164,20 +156,20 @@ const today = new Date().toISOString().split('T')[0]
           @blur="password1End"
           type="password"
           autocomplete="new-password"
-          name="new-password" 
+          name="new-password"
           required
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="h-11 block w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900
+                 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="알파벳+숫자+특수문자로 8자리 이상 입력하세요"
         />
-      <div v-if="passwordError" class="mx-2 text-red-500 text-xs mt-1">
-        {{ passwordError }}
-      </div>
-
+        <p v-if="passwordError" class="mt-1.5 text-xs text-red-500">
+          {{ passwordError }}
+        </p>
       </div>
 
       <!-- 비밀번호 확인 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
           비밀번호 확인
         </label>
         <input
@@ -185,22 +177,20 @@ const today = new Date().toISOString().split('T')[0]
           @blur="password2End"
           type="password"
           autocomplete="new-password"
-          name="confirm-password" 
+          name="confirm-password"
           required
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="h-11 block w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900
+                 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="비밀번호를 다시 입력하세요"
         />
-      <div v-if="password2Error" class="mx-2  text-red-500 text-xs mt-1">
-        {{ password2Error }}
+        <p v-if="password2Error" class="mt-1.5 text-xs text-red-500">
+          {{ password2Error }}
+        </p>
       </div>
-      </div>
-        
 
-
-
-
+      <!-- 이름 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
           이름
         </label>
         <input
@@ -208,130 +198,152 @@ const today = new Date().toISOString().split('T')[0]
           type="text"
           autocomplete="name"
           required
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          class="h-11 block w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900
+                 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           placeholder="이름을 입력하세요"
         />
       </div>
 
+      <!-- 성별 -->
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
           성별
         </label>
 
-        <!-- 성별 선택 라디오 -->
-        <div class="flex gap-4 mb-2">
-          <label class="flex items-center gap-1">
-            <input type="radio" value="M" v-model="gender" />
-            남
+        <!-- ✅ 터치 영역 크게 -->
+        <div class="flex gap-4">
+          <label class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+            <input class="size-4" type="radio" value="M" v-model="gender" />
+            <span class="text-sm font-medium text-gray-800">남</span>
           </label>
 
-          <label class="flex items-center gap-1">
-            <input type="radio" value="F" v-model="gender" />
-            여
+          <label class="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-2">
+            <input class="size-4" type="radio" value="F" v-model="gender" />
+            <span class="text-sm font-medium text-gray-800">여</span>
           </label>
-
-      
-          </div>
         </div>
+      </div>
 
-
+      <!-- 생년월일 -->
       <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
           생년월일
-      </label>
-      <input
+        </label>
+         <input
           v-model="birth_date"
           type="date"
           :max="today"
           autocomplete="bday"
           required
-          class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
+          class="appearance-none h-11 block w-full rounded-lg border border-gray-300 bg-white px-3
+                text-sm text-gray-900 leading-5
+                focus:outline-none focus:ring-2 focus:ring-indigo-500"
+        />
+
       </div>
-      
+
+
+      <!-- 전화번호 -->
       <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">
+        <label class="block text-sm font-semibold text-gray-700 mb-1.5">
           전화번호
-          </label>
-          <input
-              v-model="phonenumber"
-              type="tel"
-              inputmode="numeric"
-              pattern="[0-9]*"
-              autocomplete="tel" 
-              maxlength="11"
-              required
-              class="block w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              placeholder=" - 빼고 숫자만 입력하세요"
-          />
+        </label>
+        <input
+          v-model="phonenumber"
+          type="tel"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="tel"
+          maxlength="11"
+          required
+          class="h-11 block w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900
+                 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          placeholder="- 빼고 숫자만 입력하세요"
+        />
       </div>
 
+      <!-- 약관 -->
+      <div class="rounded-xl border border-gray-200 bg-gray-50 p-4">
+        <label class="flex items-center gap-2 font-semibold text-gray-900">
+          <input type="checkbox" class="size-4" v-model="agreeAll" @change="toggleAll" />
+          <span class="text-sm">전체 동의</span>
+        </label>
 
-     <div class="border-t pt-4 mt-4">
-        <div class="flex items-center mb-3">
-          <input type="checkbox" class="mr-2" v-model="agreeAll" @change="toggleAll"/>
-          <span>전체 동의</span>
-        </div>
-
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center">
-            <input type="checkbox" v-model="agree1" class="mr-2" @change="syncAgreeAll"/>
-            <span class="text-sm">개인정보 이용 동의</span>
+        <div class="mt-3 space-y-2">
+          <div class="flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" class="size-4" v-model="agree1" @change="syncAgreeAll" />
+              <span class="text-sm text-gray-800">개인정보 이용 동의</span>
+            </label>
+            <button type="button" class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500">
+              보기
+            </button>
           </div>
-          <button class="text-blue-500 text-xs">보기</button>
-        </div>
 
-        <div class="flex items-center justify-between mb-2">
-          <div class="flex items-center">
-            <input type="checkbox" v-model="agree2" class="mr-2" @change="syncAgreeAll"/>
-            <span class="text-sm">제3자 정보 제공 동의</span>
+          <div class="flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" class="size-4" v-model="agree2" @change="syncAgreeAll" />
+              <span class="text-sm text-gray-800">제3자 정보 제공 동의</span>
+            </label>
+            <button type="button" class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500">
+              보기
+            </button>
           </div>
-          <button class="text-blue-500 text-xs">보기</button>
-        </div>
 
-        <div class="flex items-center justify-between mb-4">
-          <div class="flex items-center">
-            <input type="checkbox" v-model="agree3" class="mr-2" @change="syncAgreeAll"/>
-            <span class="text-sm">고유식별정보처리 동의</span>
+          <div class="flex items-center justify-between gap-3">
+            <label class="flex items-center gap-2">
+              <input type="checkbox" class="size-4" v-model="agree3" @change="syncAgreeAll" />
+              <span class="text-sm text-gray-800">고유식별정보처리 동의</span>
+            </label>
+            <button type="button" class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500">
+              보기
+            </button>
           </div>
-          <button class="text-blue-500 text-xs">보기</button>
         </div>
       </div>
 
-      <!-- 에러 / 성공 메시지 -->
+      <!-- 에러/성공 -->
       <div v-if="errorMsg || successMsg" class="text-sm">
-        <p v-if="errorMsg" class="text-red-500">
-          {{ errorMsg }}
-        </p>
-        <p v-if="successMsg" class="text-green-600">
-          {{ successMsg }}
-        </p>
+        <p v-if="errorMsg" class="text-red-500">{{ errorMsg }}</p>
+        <p v-if="successMsg" class="text-green-600">{{ successMsg }}</p>
       </div>
 
-      <!-- 버튼 -->
-      <div>
-        <button
-          type="submit"
-          class="w-full flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-600"
-        >
-          회원가입 하기
-        </button>
-      </div>
+      <!-- 제출 버튼 -->
+      <button
+        type="submit"
+        class="h-12 w-full rounded-lg bg-indigo-600 px-4 text-base font-semibold text-white
+               shadow-sm hover:bg-indigo-500 focus-visible:outline-none focus-visible:ring-2
+               focus-visible:ring-offset-2 focus-visible:ring-indigo-600"
+      >
+        회원가입 하기
+      </button>
     </form>
 
-    <!-- 로그인 링크 -->
     <p class="mt-6 text-center text-xs text-gray-500">
       이미 회원이신가요?
-      <router-link
-        to="/"
-        class="font-semibold text-indigo-600 hover:text-indigo-500"
-      >
+      <router-link to="/" class="font-semibold text-indigo-600 hover:text-indigo-500">
         로그인 하러가기
       </router-link>
     </p>
-    </div>
+  </div>
 </template>
 
 <style scoped>
+
+/* iOS Safari에서 date input 기본 UI가 글씨/정렬을 깨는 경우가 있어 강제로 통일 */
+input[type="date"] {
+  -webkit-appearance: none;
+  appearance: none;
+  font-size: 0.875rem;   /* text-sm */
+  line-height: 1.25rem;  /* leading-5 */
+  padding-top: 0.5rem;   /* py-2 느낌 */
+  padding-bottom: 0.5rem;
+}
+
+/* iOS에서 달력 아이콘/내부 버튼이 레이아웃 밀면 숨김(필요시) */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0.8;
+}
+
 
 </style>

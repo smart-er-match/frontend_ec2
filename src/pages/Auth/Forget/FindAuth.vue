@@ -1,128 +1,153 @@
 <template>
-  <div class="max-w-xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-lg">
-    <h1 class="text-2xl font-bold mb-6 text-center text-gray-900">
-      계정 찾기
-    </h1>
-    <!-- 이메일(아이디) 찾기 -->
-    <section class="space-y-4 text-gray-700 border-b pb-6">
+    <div class="mx-auto w-full max-w-xl">
+      <div class="bg-white shadow-sm border border-slate-200 rounded-2xl sm:rounded-3xl p-5 sm:p-8">
+        <h1 class="text-xl sm:text-2xl font-extrabold mb-6 text-center text-gray-900">
+          계정 찾기
+        </h1>
 
-    <h2 class="text-xl font-semibold">이메일 찾기</h2>
-    <p class="text-sm text-gray-500">
-        가입 시 입력한 이름과 생년월일로 <br> 이메일을 찾아드려요.
-    </p>
+        <!-- 이메일(아이디) 찾기 -->
+        <section class="space-y-4 text-gray-700 border-b border-slate-200 pb-6">
+          <div class="space-y-1">
+            <h2 class="text-lg sm:text-xl font-bold">이메일 찾기</h2>
+            <p class="text-sm text-gray-500 leading-relaxed">
+              가입 시 입력한 이름과 생년월일로<br class="sm:hidden" />
+              이메일을 찾아드려요.
+            </p>
+          </div>
 
-    <form @submit.prevent="onFindEmail" class="space-y-4">
+          <form @submit.prevent="onFindEmail" class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold mb-1.5 text-gray-700">이름</label>
+              <input
+                v-model="findEmailForm.name"
+                type="text"
+                required
+                autocomplete="name"
+                class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="이름을 입력하세요"
+              />
+            </div>
 
-        <div>
-        <label class="block text-sm font-medium mb-1">이름</label>
-        <input
-            v-model="findEmailForm.name"
-            type="text"
-            required
-            class="w-full border rounded-md px-3 py-2 text-gray-900"
-            placeholder="이름을 입력하세요"
-        />
-        </div>
+            <div>
+              <label class="block text-sm font-semibold mb-1.5 text-gray-700">생년월일</label>
+              <input
+                v-model="findEmailForm.birth_date"
+                type="date"
+                required
+                autocomplete="bday"
+               class="appearance-none h-11 block w-full rounded-lg border border-gray-300 bg-white px-3
+                      text-sm text-gray-900 leading-5
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
+            </div>
+    
 
-        <div>
-        <label class="block text-sm font-medium mb-1">생년월일</label>
-        <input
-            v-model="findEmailForm.birth_date"
-            type="date"
-            required
-            class="w-full border rounded-md px-3 py-2 text-gray-900"
-        />
-        </div>
+            <button
+              type="submit"
+              class="h-12 w-full rounded-lg bg-indigo-600 text-white text-base font-semibold
+                     hover:bg-indigo-500 active:scale-[0.99] transition
+                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-600"
+            >
+              아이디 찾기
+            </button>
+          </form>
 
-        <button
-        type="submit"
-        class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-md
-                hover:bg-indigo-500 transition"
-        >
-        아이디 찾기
-        </button>
+          <!-- 결과 출력 -->
+          <p v-if="foundEmail" class="rounded-lg bg-green-50 border border-green-200 p-3 text-center text-green-700 font-semibold text-sm">
+            찾은 이메일: {{ foundEmail }}
+          </p>
+        </section>
 
-    </form>
+        <!-- 비밀번호 찾기 -->
+        <section class="space-y-4 text-gray-700 mt-6">
+          <div class="space-y-1">
+            <h2 class="text-lg sm:text-xl font-bold">비밀번호 찾기</h2>
+            <p class="text-sm text-gray-500 leading-relaxed">
+              이메일과 생년월일을 입력 후, 인증번호 확인을 완료하면<br class="sm:hidden" />
+              비밀번호를 변경할 수 있습니다.
+            </p>
+          </div>
 
-    <!-- 결과 출력 -->
-    <p v-if="foundEmail" class="mt-3 text-center text-green-600 font-semibold">
-        찾은 이메일: {{ foundEmail }}
-    </p>
-    </section>
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-semibold mb-1.5 text-gray-700">이메일</label>
+              <input
+                v-model="findPasswordForm.email"
+                type="email"
+                autocomplete="email"
+                class="h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900
+                       focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                placeholder="example@domain.com"
+              />
+            </div>
 
+            <div>
+              <label class="block text-sm font-semibold mb-1.5 text-gray-700">생년월일</label>
+              <input
+                v-model="findPasswordForm.birth_date"
+                type="date"
+                autocomplete="bday"
+                 class="appearance-none h-11 block w-full rounded-lg border border-gray-300 bg-white px-3
+                      text-sm text-gray-900 leading-5
+                      focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
 
-    <!-- 비밀번호 찾기 -->
-    <section class="space-y-4 text-gray-700 mt-6">
-      <h2 class="text-xl font-semibold">비밀번호 찾기</h2>
-      <p class="text-sm text-gray-500">
-        이메일과 생년월일을 입력 후, 인증번호 확인을 완료하면 <br>비밀번호를 변경할 수 있습니다.
-      </p>
+            </div>
 
-      <div>
-        <label class="block text-sm font-medium mb-1">이메일</label>
-        <input
-          v-model="findPasswordForm.email"
-          type="email"
-          class="w-full border rounded-md px-3 py-2 text-gray-900"
-          placeholder="example@domain.com"
-        />
+            <!-- 인증번호 전송 + 입력 -->
+            <div class="space-y-2">
+              <!-- ✅ 모바일: 세로 / sm+: 가로 -->
+              <div class="flex flex-col sm:flex-row gap-2">
+                <input
+                  v-model="findPasswordForm.code"
+                  type="text"
+                  inputmode="numeric"
+                  class="h-11 w-full sm:flex-1 rounded-lg border border-gray-300 bg-white px-3 text-sm text-gray-900
+                         focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder="인증번호를 입력하세요"
+                />
+                <button
+                  type="button"
+                  @click="onSendCode"
+                  class="h-11 w-full sm:w-auto sm:px-4 rounded-lg border border-indigo-600 text-sm font-semibold
+                         text-indigo-600 hover:bg-indigo-50 active:scale-[0.99] transition"
+                >
+                  인증번호 전송
+                </button>
+              </div>
+
+              <button
+                type="button"
+                @click="onVerifyCode"
+                class="h-12 w-full rounded-lg bg-indigo-600 text-white text-base font-semibold
+                       hover:bg-indigo-500 active:scale-[0.99] transition"
+              >
+                인증번호 확인
+              </button>
+
+              <p v-if="timer > 0" class="text-red-500 font-semibold text-sm">
+                남은 시간: {{ timerText }}
+              </p>
+
+              <p v-if="isVerified" class="rounded-lg bg-green-50 border border-green-200 p-3 text-center text-green-700 font-semibold text-sm">
+                인증이 완료되었습니다.
+              </p>
+            </div>
+
+            <!-- 인증 완료 후 비밀번호 변경 폼 -->
+            <div v-if="isVerified" class="mt-2 border-t border-slate-200 pt-4">
+              <ResetPassword
+                @submit-password="handlePasswordSubmit"
+                @cancel-password="onPasswordCancel"
+              />
+            </div>
+          </div>
+        </section>
       </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1">생년월일</label>
-        <input
-          v-model="findPasswordForm.birth_date"
-          type="date"
-          class="w-full border rounded-md px-3 py-2 text-gray-900"
-        />
-      </div>
-
-      <!-- 인증번호 전송 + 입력 -->
-      <div class="space-y-2">
-        <div class="flex gap-2">
-          <input
-            v-model="findPasswordForm.code"
-            type="text"
-            class="flex-1 border rounded-md px-3 py-2 text-gray-900"
-            placeholder="인증번호를 입력하세요"
-          />
-          <button
-            type="button"
-            @click="onSendCode"
-            class="whitespace-nowrap px-3 py-2 border rounded-md text-sm font-semibold
-                   text-indigo-600 border-indigo-600 hover:bg-indigo-50"
-          >
-            인증번호 전송
-          </button>
-        </div>
-
-        <button
-          type="button"
-          @click="onVerifyCode"
-          class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-md
-                 hover:bg-indigo-500 transition"
-        >
-          인증번호 확인
-        </button>
-        <p v-if="timer > 0" class="text-red-500 font-semibold text-sm">
-        남은 시간: {{ timerText }}
-        </p>
-
-        <p v-if="isVerified" class="mt-3 text-center text-green-600 font-semibold">
-            인증이 완료되었습니다.
-        </p>
-      </div>
-
-      <!-- 인증 완료 후 비밀번호 변경 폼 노출 -->
-      <div v-if="isVerified" class="mt-4 border-t pt-4">
-        <ResetPassword
-          @submit-password="handlePasswordSubmit"
-          @cancel-password="onPasswordCancel"
-        />
-      </div>
-    </section>
-  </div>
+    </div>
 </template>
+
 
 <script setup>
 import { reactive, ref, watch } from 'vue'
