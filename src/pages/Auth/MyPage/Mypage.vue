@@ -1,7 +1,6 @@
 <template>
-  <div class="min-h-screen bg-slate-100">
     <div
-      class="mx-auto mt-6 w-full
+      class="mx-auto mt-6 w-full min-h-screen
              max-w-3xl md:max-w-5xl
              bg-white shadow-sm rounded-2xl border border-slate-200
              px-4 py-6 sm:px-8 sm:py-8"
@@ -214,7 +213,6 @@
         />
       </div>
     </div>
-  </div>
 </template>
 
 <script setup>

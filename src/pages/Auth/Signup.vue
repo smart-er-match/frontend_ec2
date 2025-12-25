@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { API_BASE_URL } from '../../config'
 import axios from 'axios'
 import { useRouter } from 'vue-router'
@@ -36,11 +36,19 @@ const syncAgreeAll = () => {
 }
 
 const checkEmail = async () => {
+  // ✅ 이메일 비어있을 때
+  if (!email.value.trim()) {
+    emailCheckStatus.value = false
+    emailCheckMsg.value = '이메일을 입력하세요'
+    return
+  }
+
   try {
     const res = await axios.get(`${API_BASE_URL}accounts/signup/uu/`, {
       params: { username: email.value },
     })
-    if (res.data.bool_uu == true) {
+
+    if (res.data.bool_uu === true) {
       emailCheckStatus.value = true
       emailCheckMsg.value = '사용 가능한 이메일입니다.'
     } else {
@@ -49,8 +57,8 @@ const checkEmail = async () => {
     }
   } catch (err) {
     console.error(err)
-    emailCheckStatus.value = null
-    emailCheckMsg.value = '검사 중 오류 발생'
+    emailCheckStatus.value = false
+    emailCheckMsg.value = '검사 중 오류가 발생했습니다.'
   }
 }
 
@@ -100,6 +108,84 @@ const password2End = () => {
 }
 
 const today = new Date().toISOString().split('T')[0]
+// ===== 약관 보기 모달 =====
+const modalOpen = ref(false)
+const modalType = ref(null) // 'agree1' | 'agree2' | 'agree3'
+
+const PRIVACY_TEXT = `[개인정보 수집 및 이용 동의]
+
+수집 항목: 이메일, 비밀번호
+수집 목적: 회원가입 및 서비스 제공
+보유 기간: 회원 탈퇴 시까지
+
+동의를 거부할 권리가 있으나,
+동의하지 않을 경우 회원가입이 제한될 수 있습니다.
+`
+
+const THIRD_TEXT = `[제3자 정보 제공 동의]
+
+제공받는 자: (주)카카오, Google LLC, 네이버(주)
+제공 목적: 소셜 로그인 연동
+제공 항목: 이메일
+보유 기간: 제공 목적 달성 시까지
+`
+
+const UNIQUE_TEXT = `[고유식별정보처리 동의]
+
+본 서비스는 주민등록번호, 여권번호, 운전면허번호 등
+고유식별정보를 수집·처리하지 않습니다.
+`
+
+const openModal = (type) => {
+  modalType.value = type
+  modalOpen.value = true
+  // 배경 스크롤 잠금
+  document.documentElement.style.overflow = 'hidden'
+  document.body.style.overflow = 'hidden'
+}
+
+const closeModal = () => {
+  modalOpen.value = false
+  modalType.value = null
+  // 스크롤 잠금 해제
+  document.documentElement.style.overflow = ''
+  document.body.style.overflow = ''
+}
+
+const modalTitle = computed(() => {
+  if (modalType.value === 'agree1') return '개인정보 수집 및 이용 동의'
+  if (modalType.value === 'agree2') return '제3자 정보 제공 동의'
+  if (modalType.value === 'agree3') return '고유식별정보처리 동의'
+  return ''
+})
+
+const modalBody = computed(() => {
+  if (modalType.value === 'agree1') return PRIVACY_TEXT
+  if (modalType.value === 'agree2') return THIRD_TEXT
+  if (modalType.value === 'agree3') return UNIQUE_TEXT
+  return ''
+})
+
+const agreeFromModal = () => {
+  if (modalType.value === 'agree1') agree1.value = true
+  if (modalType.value === 'agree2') agree2.value = true
+  if (modalType.value === 'agree3') agree3.value = true
+  syncAgreeAll()
+  closeModal()
+}
+
+const onKeydown = (e) => {
+  if (e.key === 'Escape' && modalOpen.value) closeModal()
+}
+
+onMounted(() => window.addEventListener('keydown', onKeydown))
+onBeforeUnmount(() => {
+  window.removeEventListener('keydown', onKeydown)
+  document.documentElement.style.overflow = ''
+  document.body.style.overflow = ''
+})
+
+
 </script>
 
 <template>
@@ -127,14 +213,25 @@ const today = new Date().toISOString().split('T')[0]
             placeholder="example@email.com"
           />
 
-          <button
-            type="button"
-            @click="checkEmail"
-            class="h-11 w-full sm:w-auto sm:px-4 rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white
-                   hover:bg-blue-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
-          >
-            중복확인
-          </button>
+         <button
+        type="button"
+        @click="checkEmail"
+        :disabled="emailCheckStatus === true"
+        class="h-11 w-full sm:w-auto sm:px-4 rounded-lg px-3
+                min-w-[96px] sm:min-w-[112px]
+              text-xs font-semibold
+              transition
+              focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2
+              disabled:cursor-not-allowed
+              disabled:bg-gray-300
+              disabled:text-gray-500"
+        :class="emailCheckStatus === true
+          ? 'bg-gray-300'
+          : 'bg-blue-600 text-white hover:bg-blue-500 focus-visible:ring-blue-600'"
+      >
+        {{ emailCheckStatus === true ? '확인완료' : '중복확인' }}
+      </button>
+
         </div>
 
         <p
@@ -275,9 +372,13 @@ const today = new Date().toISOString().split('T')[0]
               <input type="checkbox" class="size-4" v-model="agree1" @change="syncAgreeAll" />
               <span class="text-sm text-gray-800">개인정보 이용 동의</span>
             </label>
-            <button type="button" class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500">
-              보기
-            </button>
+            <button
+            type="button"
+            class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500"
+            @click="openModal('agree1')"
+          >
+            보기
+          </button>
           </div>
 
           <div class="flex items-center justify-between gap-3">
@@ -285,9 +386,13 @@ const today = new Date().toISOString().split('T')[0]
               <input type="checkbox" class="size-4" v-model="agree2" @change="syncAgreeAll" />
               <span class="text-sm text-gray-800">제3자 정보 제공 동의</span>
             </label>
-            <button type="button" class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500">
-              보기
-            </button>
+            <button
+          type="button"
+          class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500"
+          @click="openModal('agree2')"
+        >
+          보기
+        </button>
           </div>
 
           <div class="flex items-center justify-between gap-3">
@@ -295,9 +400,13 @@ const today = new Date().toISOString().split('T')[0]
               <input type="checkbox" class="size-4" v-model="agree3" @change="syncAgreeAll" />
               <span class="text-sm text-gray-800">고유식별정보처리 동의</span>
             </label>
-            <button type="button" class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500">
-              보기
-            </button>
+            <button
+            type="button"
+            class="px-2 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-500"
+            @click="openModal('agree3')"
+          >
+            보기
+          </button>
           </div>
         </div>
       </div>
@@ -318,6 +427,56 @@ const today = new Date().toISOString().split('T')[0]
         회원가입 하기
       </button>
     </form>
+
+    <!-- 약관 보기 모달 -->
+<teleport to="body">
+  <div v-if="modalOpen" class="fixed inset-0 z-[200]">
+    <div class="absolute inset-0 bg-black/60" @click="closeModal"></div>
+
+    <div class="absolute inset-0 flex items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-2xl bg-white shadow-xl border overflow-hidden">
+        <!-- header -->
+        <div class="flex items-center justify-between px-5 py-4 border-b">
+          <h3 class="text-base font-extrabold text-gray-900">{{ modalTitle }}</h3>
+          <button
+            type="button"
+            class="h-9 w-9 rounded-lg hover:bg-gray-100 grid place-items-center"
+            @click="closeModal"
+            aria-label="닫기"
+          >
+            <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M6 6l12 12M18 6L6 18" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- body -->
+        <div class="max-h-[70vh] overflow-y-auto px-5 py-4">
+          <pre class="whitespace-pre-wrap text-sm leading-relaxed text-gray-700 font-sans">{{ modalBody }}</pre>
+        </div>
+
+        <!-- footer -->
+        <div class="px-5 py-4 border-t flex justify-end gap-2">
+          <button
+            type="button"
+            class="h-10 px-4 rounded-xl border font-semibold text-sm hover:bg-gray-50"
+            @click="closeModal"
+          >
+            닫기
+          </button>
+          <button
+            type="button"
+            class="h-10 px-4 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-500"
+            @click="agreeFromModal"
+          >
+            동의하기
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</teleport>
+
 
     <p class="mt-6 text-center text-xs text-gray-500">
       이미 회원이신가요?

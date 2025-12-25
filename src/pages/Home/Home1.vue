@@ -1,10 +1,11 @@
 <template>
   <!-- 🔥 히어로 섹션 -->
   <section
-    class="relative h-full w-full
+    class="relative w-full
+           min-h-[calc(100dvh-4rem)]
            flex items-start sm:items-center justify-center
-           overflow-hidden
-           pt-3 sm:pt-0"
+           overflow-x-hidden overflow-y-auto
+           pt-3 sm:pt-0 pb-6"
   >
     <!-- 배경 이미지 -->
     <transition name="fade" mode="out-in">
@@ -22,59 +23,65 @@
     <div
       class="relative z-10
              flex flex-col lg:flex-row
-             items-start sm:items-center
+             items-center
              justify-start sm:justify-between
              gap-4 sm:gap-8 lg:gap-16
              px-4 sm:px-6
              w-full max-w-6xl
              text-white"
     >
-      <!-- 왼쪽: 제목 (모바일은 제목만, PC는 서브텍스트 포함) -->
-      <div class="w-full lg:w-auto">
-        <!-- 제목 -->
-        <h1
-          class="text-xl sm:text-3xl lg:text-5xl
-                 font-extrabold
-                 tracking-tight
-                 mb-1.5 sm:mb-3"
-        >
-          Smart 응급실 추천 서비스
-        </h1>
+      <!-- 왼쪽: 제목 (모바일 중앙 / PC 좌측) -->
+   <div
+      class="w-full lg:w-auto text-center lg:text-left
+            relative
+            before:hidden lg:before:block
+            after:hidden lg:after:block
+            before:absolute before:-top-4 before:left-0
+            after:absolute after:-bottom-4 after:left-0
+            before:h-px after:h-px
+            before:w-16 after:w-16
+            before:bg-white/70 after:bg-white/70"
+    >
+      <h1
+        class="text-xl sm:text-3xl lg:text-5xl
+              font-extrabold tracking-tight
+              mb-1.5 sm:mb-3"
+      >
+        Smart 응급실 추천 서비스
+      </h1>
 
-        <!-- 서브 타이틀: 모바일에서는 숨김 -->
-        <p class="hidden sm:block text-lg lg:text-2xl font-medium opacity-90">
-          응급 상황에서 빠르고 정확하게 응급실을 찾아보세요
-        </p>
-      </div>
+      <p class="hidden sm:block text-lg lg:text-2xl font-medium opacity-90">
+        응급 상황에서 빠르고 정확하게 응급실을 찾아보세요
+      </p>
+    </div>
 
-      <!-- 오른쪽: 로그인 카드 -->
+
+      <!-- 오른쪽: 로그인 카드 (모바일 중앙 / PC 우측) -->
       <div
         class="w-full max-w-sm sm:max-w-md
-               min-w-0
-               shrink-0
+               min-w-0 shrink-0
                bg-white/88 text-slate-800
                rounded-xl shadow-xl
                p-3.5 sm:p-5 lg:p-7
-               mt-2 sm:mt-0"
+               mt-2 sm:mt-0
+               mx-auto lg:mx-0"
       >
         <!-- 로그인 상태 -->
         <div v-if="auth.isLoggedIn" class="text-center">
           <h1 class="text-base sm:text-2xl font-bold">
-            <span class="block">
-              {{ auth.user.name }}님
-            </span>
+            <span class="block">{{ auth.user.name }}님</span>
             <span class="block mt-1.5 text-xs sm:text-base font-semibold">
               로그인 하신 것을 환영합니다
             </span>
           </h1>
         </div>
 
-        <!-- 미로그인: 로그인 폼 -->
+        <!-- 미로그인 -->
         <div v-else>
           <Login />
         </div>
 
-        <!-- CTA 버튼 (로그인 상태일 때만) -->
+        <!-- CTA -->
         <button
           v-if="auth.isLoggedIn"
           @click="movetoMain"
@@ -104,6 +111,7 @@
     </div>
   </section>
 </template>
+
 
 <script setup>
 import Login from '../../pages/Auth/Login.vue'
